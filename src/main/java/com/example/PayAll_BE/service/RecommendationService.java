@@ -2,23 +2,27 @@ package com.example.PayAll_BE.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.example.PayAll_BE.dto.CardRecommendationResultDto;
+import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.repository.CardBenefitsRepository;
-import com.example.PayAll_BE.repository.TransactionRepository;
+import com.example.PayAll_BE.repository.PaymentRepository;
 
 @Service
 public class RecommendationService {
 
-	private final TransactionRepository transactionRepository;
+	private final PaymentRepository paymentRepository;
 	private final CardBenefitsRepository cardBenefitsRepository;
 
-	public RecommendationService(TransactionRepository transactionRepository,
+	public RecommendationService(PaymentRepository paymentRepository,
 		CardBenefitsRepository cardBenefitsRepository) {
-		this.transactionRepository = transactionRepository;
+		this.paymentRepository = paymentRepository;
 		this.cardBenefitsRepository = cardBenefitsRepository;
 	}
 
@@ -27,17 +31,17 @@ public class RecommendationService {
 	 * @param userId 사용자 ID
 	 * @return 카드 추천 결과 리스트
 	 */
-	public List<CardRecommendationResult> getCardRecommendations(Long userId) {
+	public List<CardRecommendationResultDto> getCardRecommendations(Long userId) {
 		// 1. 사용자 소비 데이터 조회
-		List<Transaction> transactions = transactionRepository.findByUserId(userId);
+		List<Payment> transactions = paymentRepository.findByUserId(userId);
 
 		// 2. 카테고리별로 가장 소비가 많은 가맹점 찾기
 		Map<String, String> topMerchantsByCategory = transactions.stream()
 			.collect(Collectors.groupingBy(
-				Transaction::getCategory,
+				Payment::getCategory,
 				Collectors.collectingAndThen(
-					Collectors.maxBy(Comparator.comparing(Transaction::getAmount)),
-					optional -> optional.map(Transaction::getMerchantName).orElse(null)
+					Collectors.maxBy(Comparator.comparing(Payment::getAmount)),
+					optional -> optional.map(Payment::getMerchantName).orElse(null)
 				)
 			));
 

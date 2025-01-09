@@ -1,4 +1,8 @@
 package com.example.PayAll_BE.repository;
 
-public interface CardBenefitsRepository {
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CardBenefitsRepository extends JpaRepository<CardBenefits, Long> {
+	CardBenefits findTopByMerchantNameOrderByBenefitValueDesc(String merchantName);
 }
