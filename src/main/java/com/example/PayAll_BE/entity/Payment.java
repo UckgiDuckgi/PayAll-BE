@@ -28,6 +28,8 @@ public class Payment {
 	@Enumerated(EnumType.STRING)
 	private Category category;
 
+	private String paymentPlace;
+
 	//Todo @ManyToOne
 	//@JoinColumn(name = "account_id")
 	private String account;

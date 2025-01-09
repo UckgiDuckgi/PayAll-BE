@@ -4,5 +4,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CardBenefitsRepository extends JpaRepository<CardBenefits, Long> {
-	CardBenefits findTopByMerchantNameOrderByBenefitValueDesc(String merchantName);
+	CardBenefits findTopByStoreNameOrderByBenefitValueDesc(String merchantName);
 }

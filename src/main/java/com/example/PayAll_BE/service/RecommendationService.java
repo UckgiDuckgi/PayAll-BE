@@ -33,40 +33,40 @@ public class RecommendationService {
 	 */
 	public List<CardRecommendationResultDto> getCardRecommendations(Long userId) {
 		// 1. 사용자 소비 데이터 조회
-		List<Payment> transactions = paymentRepository.findByUserId(userId);
+		List<Payment> payments = paymentRepository.findByUserId(userId);
 
 		// 2. 카테고리별로 가장 소비가 많은 가맹점 찾기
-		Map<String, String> topMerchantsByCategory = transactions.stream()
+		Map<Payment.Category, String> topStoresByCategory = payments.stream()
 			.collect(Collectors.groupingBy(
-				Payment::getCategory,
+				Payment::getCategory, // 카테고리별 그룹화
 				Collectors.collectingAndThen(
-					Collectors.maxBy(Comparator.comparing(Payment::getAmount)),
-					optional -> optional.map(Payment::getMerchantName).orElse(null)
+					Collectors.maxBy(Comparator.comparing(Payment::getPrice)), // 소비 금액이 가장 높은 가맹점 찾기
+					optional -> optional.map(Payment::getPaymentPlace).orElse(null) // 가맹점 이름 반환
 				)
 			));
 
-		List<CardRecommendationResult> recommendations = new ArrayList<>();
+		List<CardRecommendationResultDto> recommendations = new ArrayList<>();
 
 		// 3. 각 가맹점에 대해 혜택 폭이 가장 큰 카드 찾기 및 할인 금액 계산
-		for (Map.Entry<String, String> entry : topMerchantsByCategory.entrySet()) {
-			String category = entry.getKey();
-			String merchantName = entry.getValue();
+		for (Map.Entry<Payment.Category, String> entry : topStoresByCategory.entrySet()) {
+			Payment.Category category = entry.getKey(); // 카테고리
+			String paymentPlace = entry.getValue(); // 소비 금액 1등 가맹점
 
 			// 카드 혜택 조회
-			CardBenefits bestCard = cardBenefitsRepository.findTopByMerchantNameOrderByBenefitValueDesc(merchantName);
+			CardBenefits bestCard = cardBenefitsRepository.findTopByStoreNameOrderByBenefitValueDesc(paymentPlace);
 
 			if (bestCard != null) {
-				// 저번 소비 데이터에서 해당 가맹점의 소비 금액
-				BigDecimal merchantTotalAmount = transactions.stream()
-					.filter(t -> t.getMerchantName().equals(merchantName))
-					.map(Transaction::getAmount)
-					.reduce(BigDecimal.ZERO, BigDecimal::add);
+				// 해당 가맹점의 총 소비 금액 계산
+				BigDecimal totalSpentAtPlace = payments.stream()
+					.filter(payment -> payment.getPaymentPlace().equals(paymentPlace)) // 해당 가맹점 필터
+					.map(Payment::getPrice) // 소비 금액 추출
+					.reduce(BigDecimal.ZERO, BigDecimal::add); // 총합 계산
 
 				// 할인 금액 계산
-				BigDecimal discountAmount = merchantTotalAmount.multiply(bestCard.getBenefitValue().divide(new BigDecimal(100)));
+				BigDecimal discountAmount = totalSpentAtPlace.multiply(bestCard.getBenefitValue().divide(new BigDecimal(100)));
 
 				// 추천 결과 저장
-				recommendations.add(new CardRecommendationResult(bestCard.getCardName(), merchantName, discountAmount));
+				recommendations.add(new CardRecommendationResultDto(bestCard.getCardName(), paymentPlace, discountAmount));
 			}
 		}
 
