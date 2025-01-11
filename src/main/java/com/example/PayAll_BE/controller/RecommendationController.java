@@ -33,3 +33,4 @@ public class RecommendationController {
 		List<CardRecommendationResultDto> recommendations = recommendationService.getCardRecommendations(userId);
 		return ResponseEntity.ok(recommendations);
 	}
+}

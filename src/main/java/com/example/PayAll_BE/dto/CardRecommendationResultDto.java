@@ -4,6 +4,6 @@ import java.math.BigDecimal;
 
 public class CardRecommendationResultDto {
 		private String cardName;
-		private String merchantName;
+		private String paymentPlace;
 		private BigDecimal discountAmount;
 }
