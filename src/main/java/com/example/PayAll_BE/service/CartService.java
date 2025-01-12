@@ -73,4 +73,31 @@ public class CartService {
 		return carts.stream().map(CartMapper::toDto).toList();
 
 	}
+
+	public void deleteCart(Long cartId, Long userId) {
+		Cart cart = cartRepository.findById(cartId)
+			.orElseThrow(() -> new EntityNotFoundException("해당 장바구니 항목을 찾을 수 없습니다."));
+
+		if (!cart.getUser().getId().equals(userId)) {
+			throw new RuntimeException("장바구니를 삭제할 수 없습니다.");  // Todo. 예외처리 수정 필요
+		}
+
+		cartRepository.delete(cart);
+	}
+
+	public void deleteCarts(List<Long> cartIds, Long userId) {
+
+		List<Cart> carts = cartRepository.findAllById(cartIds);
+
+		carts.forEach(
+			cart -> {
+				if (!cart.getUser().getId().equals(userId)) {
+					throw new RuntimeException("장바구니를 삭제할 수 없습니다.");  // Todo. 예외처리 수정 필요
+				}
+			}
+		);
+
+		cartRepository.deleteAllById(cartIds);
+	}
+
 }
