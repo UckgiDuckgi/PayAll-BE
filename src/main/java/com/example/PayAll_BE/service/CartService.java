@@ -1,5 +1,7 @@
 package com.example.PayAll_BE.service;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -38,13 +40,13 @@ public class CartService {
 			throw new RuntimeException("product not found");
 		}
 		ProductDto productDto = response.getBody();
-		System.out.println("productDto = " + productDto);
 
 		// 장바구니에 같은 상품 있으면 수량 +1
-		Cart existingCart = cartRepository.findByProductId(cartRequestDto.getProductId());
+		Cart existingCart = cartRepository.findByUserIdAndProductId(cartRequestDto.getUserId(),
+			cartRequestDto.getProductId());
 		if (existingCart != null) {
 			existingCart.setQuantity(existingCart.getQuantity() + 1);
-			return CartMapper.toDto(cartRepository.save(existingCart), productDto);
+			return CartMapper.toDto(cartRepository.save(existingCart));
 		}
 
 		Cart cart = Cart.builder()
@@ -55,9 +57,20 @@ public class CartService {
 			.quantity(1)
 			.link(productDto.getShopUrl())
 			.image(productDto.getShopImage())
+			.storeName(productDto.getShopName())
 			.build();
 
-		return CartMapper.toDto(cartRepository.save(cart), productDto);
+		return CartMapper.toDto(cartRepository.save(cart));
+
+	}
+
+	public List<CartResponseDto> getCarts(Long userId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new EntityNotFoundException("user not found"));
+
+		List<Cart> carts = cartRepository.findAllByUserId(userId);
+
+		return carts.stream().map(CartMapper::toDto).toList();
 
 	}
 }

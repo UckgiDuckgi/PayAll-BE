@@ -16,6 +16,7 @@ public class CartResponseDto {
 	private String productImage;
 	private Long price;
 	private int quantity;
-	private String store;
+	private String storeName;
 	private String link;
+	private Long totalPrice;
 }

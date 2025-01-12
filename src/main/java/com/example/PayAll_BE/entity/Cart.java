@@ -39,6 +39,9 @@ public class Cart {
 	@Column(nullable = false)
 	private int quantity;
 
+	@Column(nullable = false)
+	private String storeName;
+
 	@Column(nullable = false, columnDefinition = "TEXT")
 	private String link;
 
