@@ -1,4 +1,4 @@
-package com.example.PayAll_BE.dto;
+package com.example.PayAll_BE.dto.Cart;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

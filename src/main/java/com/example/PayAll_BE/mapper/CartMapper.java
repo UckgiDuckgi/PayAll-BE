@@ -1,6 +1,6 @@
 package com.example.PayAll_BE.mapper;
 
-import com.example.PayAll_BE.dto.CartResponseDto;
+import com.example.PayAll_BE.dto.Cart.CartResponseDto;
 import com.example.PayAll_BE.entity.Cart;
 
 public class CartMapper {

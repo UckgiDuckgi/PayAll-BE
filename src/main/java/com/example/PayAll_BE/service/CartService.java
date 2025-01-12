@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.example.PayAll_BE.dto.CartRequestDto;
-import com.example.PayAll_BE.dto.CartResponseDto;
+import com.example.PayAll_BE.dto.Cart.CartRequestDto;
+import com.example.PayAll_BE.dto.Cart.CartResponseDto;
 import com.example.PayAll_BE.dto.ProductDto;
 import com.example.PayAll_BE.entity.Cart;
 import com.example.PayAll_BE.entity.User;
@@ -71,6 +71,23 @@ public class CartService {
 		List<Cart> carts = cartRepository.findAllByUserId(userId);
 
 		return carts.stream().map(CartMapper::toDto).toList();
+
+	}
+
+	public void updateQuantity(Long cartId, int quantity, Long userId) {
+		if (quantity < 1) {
+			throw new IllegalArgumentException("수량은 1 이상이어야 합니다.");  //Todo. bad Request로 수정
+		}
+
+		Cart cart = cartRepository.findById(cartId)
+			.orElseThrow(() -> new EntityNotFoundException("해당 장바구니 항목을 찾을 수 없습니다."));
+
+		if (!cart.getUser().getId().equals(userId)) {
+			throw new RuntimeException("장바구니 수량을 수정할 수 없습니다.");  // Todo. 예외처리 수정 필요
+		}
+
+		cart.setQuantity(quantity);
+		cartRepository.save(cart);
 
 	}
 
