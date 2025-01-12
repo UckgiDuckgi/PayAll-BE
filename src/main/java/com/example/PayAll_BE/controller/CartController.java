@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.Cart.CartRequestDto;
-import com.example.PayAll_BE.dto.Cart.CartResponseDto;
 import com.example.PayAll_BE.dto.Cart.UpdateQuantityRequestDto;
 import com.example.PayAll_BE.service.CartService;
 
@@ -28,13 +27,14 @@ public class CartController {
 	private final CartService cartService;
 
 	@PostMapping
-	public ResponseEntity<CartResponseDto> addCart(@RequestBody CartRequestDto cartRequestDto) {
-		return ResponseEntity.ok(cartService.addCart(cartRequestDto));
+	public ResponseEntity<ApiResult> addCart(@RequestBody CartRequestDto cartRequestDto) {
+		return ResponseEntity.ok(new ApiResult(200, "OK", "장바구니 내역 조회 성공", cartService.addCart(cartRequestDto)));
 	}
 
 	@GetMapping
-	public ResponseEntity<List<CartResponseDto>> getCarts(@RequestParam Long userId) {  // todo) @RequestParam 제거 필요
-		return ResponseEntity.ok(cartService.getCarts(userId));
+	public ResponseEntity<ApiResult> getCarts(@RequestParam Long userId) {  // todo) @RequestParam 제거 필요
+		return ResponseEntity.ok(new ApiResult(200, "OK", "장바구니 내역 조회 성공", cartService.getCarts(userId)));
+
 	}
 
 	@PatchMapping("/{cartId}")
