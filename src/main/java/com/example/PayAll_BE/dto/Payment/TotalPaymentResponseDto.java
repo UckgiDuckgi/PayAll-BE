@@ -1,4 +1,4 @@
-package com.example.PayAll_BE.dto.Account;
+package com.example.PayAll_BE.dto.Payment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class AccountListResponseDto {
-	private String userName;
-	private List<AccountResponseDto> accountList;
+public class TotalPaymentResponseDto {
 	private Long totalBalance;
+	private Long monthPaymentPrice;
+	private List<DayPaymentResponseDto> paymentList;
 }
