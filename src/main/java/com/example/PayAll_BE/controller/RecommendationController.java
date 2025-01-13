@@ -21,15 +21,11 @@ public class RecommendationController {
 
 	private final RecommendationService recommendationService;
 
-	/**
-	 * 사용자별 카드 추천 API
-	 * @param userId 사용자 ID
-	 * @return 추천 카드 및 예상 할인 결과
-	 */
 	@GetMapping("/cards")
-	public ResponseEntity<?> recommendCards(@RequestParam Long userId) {
-		// 서비스 로직 호출
-		List<CardRecommendationResultDto> recommendations = recommendationService.getCardRecommendations(userId);
-		return ResponseEntity.ok(new ApiResult(200,"OK","추천 성공", recommendations));
+	public ResponseEntity<?> recommendCards(@RequestParam Long accountId) {
+		// // 서비스 로직 호출
+		// List<CardRecommendationResultDto> recommendations = recommendationService.getCardRecommendations(accountId);
+		// return ResponseEntity.ok(new ApiResult(200,"OK","추천 성공", recommendations));
+		return null;
 	}
 }

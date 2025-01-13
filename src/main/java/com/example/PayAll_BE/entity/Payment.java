@@ -9,6 +9,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 @Entity
@@ -30,9 +32,9 @@ public class Payment {
 
 	private String paymentPlace;
 
-	//Todo @ManyToOne
-	//@JoinColumn(name = "account_id")
-	private String account;
+	@ManyToOne
+	@JoinColumn(name = "account_id")
+	private Account account;
 
 	//todo @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
 	//private List<PaymentDetail> paymentDetails;
