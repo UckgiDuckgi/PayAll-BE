@@ -1,24 +1,32 @@
 package com.example.PayAll_BE.entity;
 
-import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
 import java.time.LocalDateTime;
 
 import com.example.PayAll_BE.entity.enums.Category;
 import com.example.PayAll_BE.entity.enums.PaymentType;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @Entity
-@Getter
+@Data
 @Table(name = "Payment")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-@ToString
 public class Payment {
 
 	@Id
@@ -48,7 +56,8 @@ public class Payment {
 	private Category category;
 
 	@Builder
-	public Payment(Account account, String paymentPlace, Long price, LocalDateTime paymentTime, PaymentType paymentType, Category category) {
+	public Payment(Account account, String paymentPlace, Long price, LocalDateTime paymentTime, PaymentType paymentType,
+		Category category) {
 		this.account = account;
 		this.paymentPlace = paymentPlace;
 		this.price = price;
