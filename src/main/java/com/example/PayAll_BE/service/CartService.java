@@ -11,6 +11,9 @@ import com.example.PayAll_BE.dto.Cart.CartResponseDto;
 import com.example.PayAll_BE.dto.ProductDto;
 import com.example.PayAll_BE.entity.Cart;
 import com.example.PayAll_BE.entity.User;
+import com.example.PayAll_BE.exception.BadRequestException;
+import com.example.PayAll_BE.exception.ForbiddenException;
+import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.mapper.CartMapper;
 import com.example.PayAll_BE.repository.CartRepository;
 import com.example.PayAll_BE.repository.UserRepository;
@@ -30,14 +33,14 @@ public class CartService {
 	public CartResponseDto addCart(CartRequestDto cartRequestDto) {
 
 		User user = userRepository.findById(cartRequestDto.getUserId())
-			.orElseThrow(() -> new EntityNotFoundException("user not found"));
+			.orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다."));
 
 		// 상품 정보 조회
 		ResponseEntity<ProductDto> response = restTemplate.getForEntity(
 			productApiUrl + cartRequestDto.getProductId().toString(),
 			ProductDto.class);
 		if (response.getBody() == null) {
-			throw new RuntimeException("product not found");
+			throw new NotFoundException("상품 id가 없습니다.");
 		}
 		ProductDto productDto = response.getBody();
 
@@ -66,7 +69,7 @@ public class CartService {
 
 	public List<CartResponseDto> getCarts(Long userId) {
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new EntityNotFoundException("user not found"));
+			.orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다."));
 
 		List<Cart> carts = cartRepository.findAllByUserId(userId);
 
@@ -76,14 +79,14 @@ public class CartService {
 
 	public void updateQuantity(Long cartId, int quantity, Long userId) {
 		if (quantity < 1) {
-			throw new IllegalArgumentException("수량은 1 이상이어야 합니다.");  //Todo. bad Request로 수정
+			throw new BadRequestException("수량은 1 이상이어야 합니다.");
 		}
 
 		Cart cart = cartRepository.findById(cartId)
-			.orElseThrow(() -> new EntityNotFoundException("해당 장바구니 항목을 찾을 수 없습니다."));
+			.orElseThrow(() -> new NotFoundException("해당 장바구니 항목을 찾을 수 없습니다."));
 
 		if (!cart.getUser().getId().equals(userId)) {
-			throw new RuntimeException("장바구니 수량을 수정할 수 없습니다.");  // Todo. 예외처리 수정 필요
+			throw new ForbiddenException("장바구니 수량을 수정할 수 없습니다.");
 		}
 
 		cart.setQuantity(quantity);
@@ -92,11 +95,12 @@ public class CartService {
 	}
 
 	public void deleteCart(Long cartId, Long userId) {
+
 		Cart cart = cartRepository.findById(cartId)
 			.orElseThrow(() -> new EntityNotFoundException("해당 장바구니 항목을 찾을 수 없습니다."));
 
 		if (!cart.getUser().getId().equals(userId)) {
-			throw new RuntimeException("장바구니를 삭제할 수 없습니다.");  // Todo. 예외처리 수정 필요
+			throw new ForbiddenException("장바구니를 삭제할 수 없습니다.");
 		}
 
 		cartRepository.delete(cart);
@@ -109,7 +113,7 @@ public class CartService {
 		carts.forEach(
 			cart -> {
 				if (!cart.getUser().getId().equals(userId)) {
-					throw new RuntimeException("장바구니를 삭제할 수 없습니다.");  // Todo. 예외처리 수정 필요
+					throw new ForbiddenException("장바구니를 삭제할 수 없습니다.");
 				}
 			}
 		);
