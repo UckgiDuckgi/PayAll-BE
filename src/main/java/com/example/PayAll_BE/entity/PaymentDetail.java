@@ -40,13 +40,13 @@ public class PaymentDetail {
 	private Long price;
 
 	@Column(nullable = false)
-	private Integer amount;
+	private int quantity;
 
 	@Builder
-	public PaymentDetail(Payment payment, String name, Long price, Integer amount) {
+	public PaymentDetail(Payment payment, String name, Long price, int quantity) {
 		this.payment = payment;
 		this.name = name;
 		this.price = price;
-		this.amount = amount;
+		this.quantity = quantity;
 	}
 }
