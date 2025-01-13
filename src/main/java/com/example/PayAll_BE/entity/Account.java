@@ -1,34 +1,46 @@
 package com.example.PayAll_BE.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
-@Table(name = "account")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Table(name = "Account")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 public class Account {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column
-	private Long accountId;
+	@Column(name = "account_id")
+	private Long id;
 
-	@Column(nullable = false)
-	private Integer userId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
-	@Column(nullable = false, length = 100)
+	@Column(length = 50, nullable = false)
 	private String bankName;
 
-	@Column(nullable = false, length = 100)
+	@Column(length = 50, nullable = false)
 	private String accountName;
 
-	@Column(nullable = false, length = 50, unique = true)
+	@Column(length = 30, unique = true, nullable = false)
 	private String accountNumber;
 
 	@Column(nullable = false)
 	private Long balance;
+
+	@Builder
+	public Account(User user, String bankName, String accountName, String accountNumber, Long balance) {
+		this.user = user;
+		this.bankName = bankName;
+		this.accountName = accountName;
+		this.accountNumber = accountNumber;
+		this.balance = balance;
+	}
 }

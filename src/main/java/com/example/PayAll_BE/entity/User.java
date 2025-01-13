@@ -5,31 +5,28 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "user")
 @Data
 public class User {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "user_id")
-	private Long userId; // Primary Key
+	private Long id;
 
-	@Column(name = "name", nullable = false, length = 100)
+	@Column(nullable = false)
 	private String name;
 
-	@Column(name = "auth_id", nullable = false, unique = true)
+	@Column(nullable = false)
 	private String authId;
 
-	@Column(name = "password", nullable = false)
+	@Column(nullable = false)
 	private String password;
 
-	@Column(name = "phone", length = 20)
 	private String phone;
-
-	@Column(name = "address", length = 255)
 	private String address;
+
+	// @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	// private List<Cart> carts = new ArrayList<>();
+
 }

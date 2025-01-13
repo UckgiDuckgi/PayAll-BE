@@ -1,49 +1,59 @@
 package com.example.PayAll_BE.entity;
 
-import java.math.BigInteger;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.Data;
+import com.example.PayAll_BE.entity.enums.Category;
+import com.example.PayAll_BE.entity.enums.PaymentType;
 
 @Entity
-@Data
+@Getter
+@Table(name = "Payment")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PUBLIC)
+@ToString
 public class Payment {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long paymentId;
+	@Column(name = "payment_id")
+	private Long id;
 
-	private BigInteger price;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "account_id", nullable = false)
+	private Account account;
 
+	@Column(length = 300, nullable = false)
+	private String paymentPlace;
+
+	@Column(nullable = false)
+	private Long price;
+
+	@Column(nullable = false)
 	private LocalDateTime paymentTime;
 
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private PaymentType paymentType;
 
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Category category;
 
-	private String paymentPlace;
-
-	@ManyToOne
-	@JoinColumn(name = "account_id")
-	private Account account;
-
-	//todo @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
-	//private List<PaymentDetail> paymentDetails;
-
-	public enum PaymentType {
-		CREDIT, DEBIT, CASH
-	}
-
-	public enum Category {
-		FOOD, TRANSPORT, ENTERTAINMENT, OTHER
+	@Builder
+	public Payment(Account account, String paymentPlace, Long price, LocalDateTime paymentTime, PaymentType paymentType, Category category) {
+		this.account = account;
+		this.paymentPlace = paymentPlace;
+		this.price = price;
+		this.paymentTime = paymentTime;
+		this.paymentType = paymentType;
+		this.category = category;
 	}
 }

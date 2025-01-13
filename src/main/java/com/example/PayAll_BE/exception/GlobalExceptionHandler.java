@@ -10,7 +10,6 @@ import com.example.PayAll_BE.dto.ApiResult;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	//test
 	@ExceptionHandler(NotFoundException.class)
 	public ResponseEntity<?> handleNotFoundException(NotFoundException e) {
 		// return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
@@ -20,7 +19,8 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(UnauthorizedException.class)
 	public ResponseEntity<?> handleUnauthorizedException(UnauthorizedException e) {
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResult(401, "UNAUTHORIZED", e.getMessage(), null));
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+			.body(new ApiResult(401, "UNAUTHORIZED", e.getMessage(), null));
 	}
 
 	@ExceptionHandler(ForbiddenException.class)
@@ -41,7 +41,8 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<?> handleAllExceptions(Exception e) {
-		return ResponseEntity.internalServerError().body(new ApiResult(500, "INTERNAL_SERVER_ERROR", e.getMessage(), null));
+		return ResponseEntity.internalServerError()
+			.body(new ApiResult(500, "INTERNAL_SERVER_ERROR", e.getMessage(), null));
 	}
 
 }
