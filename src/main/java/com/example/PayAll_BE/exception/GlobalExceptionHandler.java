@@ -10,6 +10,7 @@ import com.example.PayAll_BE.dto.ApiResult;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+	//test
 	@ExceptionHandler(NotFoundException.class)
 	public ResponseEntity<?> handleNotFoundException(NotFoundException e) {
 		// return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
