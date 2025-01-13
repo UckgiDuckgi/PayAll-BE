@@ -1,6 +1,8 @@
-package com.example.PayAll_BE.dto;
+package com.example.PayAll_BE.mydata.dto;
 
 import java.util.List;
+
+import com.example.PayAll_BE.dto.AccountDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AccountResponseDto {
+public class AccountListResponseDto {
 	private String rspCode; // 응답 코드
 	private String rspMsg;  // 응답 메시지
 	private String searchTimestamp; // 검색 타임스탬프
