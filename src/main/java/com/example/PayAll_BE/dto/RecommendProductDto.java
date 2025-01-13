@@ -1,0 +1,16 @@
+package com.example.PayAll_BE.dto;
+
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class RecommendProductDto {
+	private Long productId;
+	private String productName;
+	private String productImage;
+	private Long price;
+	private String storeName;
+	private Double discountRate;
+
+}

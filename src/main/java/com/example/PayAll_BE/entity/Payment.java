@@ -1,10 +1,13 @@
 package com.example.PayAll_BE.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.PayAll_BE.entity.enums.Category;
 import com.example.PayAll_BE.entity.enums.PaymentType;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,6 +18,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -54,6 +58,9 @@ public class Payment {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Category category;
+
+	@OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<PaymentDetail> paymentDetails = new ArrayList<>();
 
 	@Builder
 	public Payment(Account account, String paymentPlace, Long price, LocalDateTime paymentTime, PaymentType paymentType,

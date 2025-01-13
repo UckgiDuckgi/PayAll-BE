@@ -10,4 +10,5 @@ import com.example.PayAll_BE.entity.PaymentDetail;
 @Repository
 public interface PaymentDetailRepository extends JpaRepository<PaymentDetail, Long> {
 	List<PaymentDetail> findByPaymentId(Long paymentId);
+
 }
