@@ -41,4 +41,17 @@ public class LimitService {
 			.limitDate(savedLimit.getLimitDate())
 			.build();
 	}
+
+	public LimitResponseDto getLimit(Long userId) {
+		// 가장 최근 소비 목표 조회
+		Limit limit = limitRepository.findTopByUser_IdOrderByLimitDateDesc(userId)
+			.orElseThrow(() -> new IllegalArgumentException("소비 목표가 존재하지 않습니다."));
+
+		return LimitResponseDto.builder()
+			.limitId(limit.getLimitId())
+			.userId(limit.getUser().getId())
+			.limitPrice(limit.getLimitPrice())
+			.limitDate(limit.getLimitDate())
+			.build();
+	}
 }
