@@ -1,4 +1,4 @@
-package com.example.PayAll_BE.dto.PaymentDetail;
+package com.example.PayAll_BE.dto.Payment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,13 +6,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PaymentDetailDto {
-	private String productName;        // 상품명
-	private Long price;                // 상품 가격
-	private Long lowestPrice;          // 최저가
-	private String lowestPricePlace;   // 최저가 쇼핑몰
-	private String link;               // 구매 링크
+	private Long paymentDetailId;
+	private String productName;
+	private Long price;
+	private int quantity;
+	private String lowestPricePlace;  // 최저가 쇼핑몰 이름
+	private Long lowestPrice;         // 최저가 금액
+	private String link;              // 최저가 상품 링크
 }

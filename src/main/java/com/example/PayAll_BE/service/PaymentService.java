@@ -10,9 +10,18 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.dto.Payment.DayPaymentResponseDto;
+import com.example.PayAll_BE.dto.Payment.PaymentDetailDto;
 import com.example.PayAll_BE.dto.Payment.PaymentDetailResponseDto;
+import com.example.PayAll_BE.dto.Payment.PaymentResponseDto;
 import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
+import com.example.PayAll_BE.dto.ProductDto;
 import com.example.PayAll_BE.entity.Payment;
+import com.example.PayAll_BE.entity.PaymentDetail;
+import com.example.PayAll_BE.exception.NotFoundException;
+import com.example.PayAll_BE.mapper.PaymentDetailMapper;
+import com.example.PayAll_BE.mapper.PaymentMapper;
+import com.example.PayAll_BE.product.ProductApiClient;
+import com.example.PayAll_BE.repository.PaymentDetailRepository;
 import com.example.PayAll_BE.repository.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class PaymentService {
 
 	private final PaymentRepository paymentRepository;
+	private final PaymentDetailRepository paymentDetailRepository;
+	private final ProductApiClient productApiClient;
 
 	public TotalPaymentResponseDto getPayments(Long userId) {
 		List<Payment> payments = paymentRepository.findAllByUserId(userId);
@@ -75,5 +86,18 @@ public class PaymentService {
 			.monthPaymentPrice(totalPaymentPrice)
 			.paymentList(dayPaymentList)
 			.build();
+	}
+
+	public PaymentResponseDto getPaymentById(Long paymentId) {
+		Payment payment = paymentRepository.findById(paymentId)
+			.orElseThrow(() -> new NotFoundException("결제 내역을 찾을 수 없습니다."));
+
+		List<PaymentDetail> paymentDetails = paymentDetailRepository.findByPaymentId(paymentId);
+		List<PaymentDetailDto> paymentDetailDtos = paymentDetails.stream().map(paymentDetail -> {
+			ProductDto productDto = productApiClient.fetchProduct(String.valueOf(paymentDetail.getProductId()));
+			return PaymentDetailMapper.toDto(paymentDetail, productDto);
+		}).collect(Collectors.toList());
+
+		return PaymentMapper.toPaymentDto(payment, paymentDetailDtos);
 	}
 }

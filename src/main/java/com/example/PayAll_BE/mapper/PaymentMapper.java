@@ -1,13 +1,12 @@
 package com.example.PayAll_BE.mapper;
 
 import com.example.PayAll_BE.dto.Payment.DayPaymentResponseDto;
+import com.example.PayAll_BE.dto.Payment.PaymentDetailDto;
 import com.example.PayAll_BE.dto.Payment.PaymentDetailResponseDto;
 import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
-import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailDto;
-import com.example.PayAll_BE.dto.PaymentDetail.PaymentResponseDto;
+import com.example.PayAll_BE.dto.Payment.PaymentResponseDto;
 import com.example.PayAll_BE.entity.Payment;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,7 +37,7 @@ public class PaymentMapper {
 			.sum();
 
 		return DayPaymentResponseDto.builder()
-			.paymentDate(paymentDate)  // LocalDateTime 설정
+			.paymentDate(paymentDate)
 			.dayPaymentPrice(dayPaymentPrice)
 			.paymentDetail(paymentDetails)
 			.build();
@@ -53,28 +52,16 @@ public class PaymentMapper {
 			.build();
 	}
 
-	public static PaymentResponseDto toPaymentResponseDto(Payment payment) {
-		List<PaymentDetailDto> paymentDetails = payment.getPaymentDetails().stream()
-			.map(detail -> PaymentDetailDto.builder()
-				.productName(detail.getName())
-				.price(detail.getPrice())
-				.lowestPrice(detail.getLowestPrice())
-				.lowestPricePlace(detail.getLowestPricePlace())
-				.link(detail.getLink())
-				.build())
-			.collect(Collectors.toList());
-
+	public static PaymentResponseDto toPaymentDto(Payment payment, List<PaymentDetailDto> details) {
 		return PaymentResponseDto.builder()
-			.bankName(payment.getAccount().getBankName())
-			.accountName(payment.getAccount().getAccountName())
-			.accountNumber(payment.getAccount().getAccountNumber())
-			.balance(payment.getAccount().getBalance())
-			.paymentPrice(payment.getPrice())
+			.paymentPlace(payment.getPaymentPlace())
 			.category(payment.getCategory().name())
 			.paymentType(payment.getPaymentType().name())
 			.paymentTime(payment.getPaymentTime())
-			.paymentPlace(payment.getPaymentPlace())
-			.paymentDetail(paymentDetails)
+			.bankName(payment.getAccount().getBankName())
+			.accountName(payment.getAccount().getAccountName())
+			.paymentPrice(payment.getPrice())
+			.paymentDetailList(details)
 			.build();
 	}
 }
