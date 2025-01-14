@@ -19,4 +19,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		"WHERE p.account.id IN (SELECT a.id FROM Account a WHERE a.user.id = :userId) " +
 		"ORDER BY p.paymentTime DESC")
 	List<Payment> findRecentPaymentsByUserId(@Param("userId") Long userId, Pageable pageable);
+
+	// List<Payment> findByAccountId(Long accountId);
+
 }
