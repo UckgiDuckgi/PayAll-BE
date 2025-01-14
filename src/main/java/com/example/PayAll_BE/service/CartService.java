@@ -12,6 +12,7 @@ import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.exception.BadRequestException;
 import com.example.PayAll_BE.exception.ForbiddenException;
 import com.example.PayAll_BE.exception.NotFoundException;
+import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.mapper.CartMapper;
 import com.example.PayAll_BE.product.ProductApiClient;
 import com.example.PayAll_BE.repository.CartRepository;
@@ -27,15 +28,15 @@ public class CartService {
 	private final ProductApiClient productApiClient;
 	private final UserRepository userRepository;
 
-	public CartResponseDto addCart(CartRequestDto cartRequestDto) {
+	public CartResponseDto addCart(String authId, CartRequestDto cartRequestDto) {
 
-		User user = userRepository.findById(cartRequestDto.getUserId())
-			.orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다."));
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
 
 		ProductDto productDto = productApiClient.fetchProduct(String.valueOf(cartRequestDto.getProductId()));
 
 		// 장바구니에 같은 상품 있으면 수량 +1
-		Cart existingCart = cartRepository.findByUserIdAndProductId(cartRequestDto.getUserId(),
+		Cart existingCart = cartRepository.findByUserIdAndProductId(user.getId(),
 			cartRequestDto.getProductId());
 		if (existingCart != null) {
 			existingCart.setQuantity(existingCart.getQuantity() + 1);
@@ -57,17 +58,20 @@ public class CartService {
 
 	}
 
-	public List<CartResponseDto> getCarts(Long userId) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다."));
+	public List<CartResponseDto> getCarts(String authId) {
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
 
-		List<Cart> carts = cartRepository.findAllByUserId(userId);
+		List<Cart> carts = cartRepository.findAllByUserId(user.getId());
 
 		return carts.stream().map(CartMapper::toDto).toList();
 
 	}
 
-	public void updateQuantity(Long cartId, int quantity, Long userId) {
+	public void updateQuantity(Long cartId, int quantity, String authId) {
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
+
 		if (quantity < 1) {
 			throw new BadRequestException("수량은 1 이상이어야 합니다.");
 		}
@@ -75,7 +79,7 @@ public class CartService {
 		Cart cart = cartRepository.findById(cartId)
 			.orElseThrow(() -> new NotFoundException("해당 장바구니 항목을 찾을 수 없습니다."));
 
-		if (!cart.getUser().getId().equals(userId)) {
+		if (!cart.getUser().getId().equals(user.getId())) {
 			throw new ForbiddenException("장바구니 수량을 수정할 수 없습니다.");
 		}
 
@@ -84,25 +88,29 @@ public class CartService {
 
 	}
 
-	public void deleteCart(Long cartId, Long userId) {
+	public void deleteCart(Long cartId, String authId) {
 
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
 		Cart cart = cartRepository.findById(cartId)
 			.orElseThrow(() -> new EntityNotFoundException("해당 장바구니 항목을 찾을 수 없습니다."));
 
-		if (!cart.getUser().getId().equals(userId)) {
+		if (!cart.getUser().getId().equals(user.getId())) {
 			throw new ForbiddenException("장바구니를 삭제할 수 없습니다.");
 		}
 
 		cartRepository.delete(cart);
 	}
 
-	public void deleteCarts(List<Long> cartIds, Long userId) {
+	public void deleteCarts(List<Long> cartIds, String authId) {
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
 
 		List<Cart> carts = cartRepository.findAllById(cartIds);
 
 		carts.forEach(
 			cart -> {
-				if (!cart.getUser().getId().equals(userId)) {
+				if (!cart.getUser().getId().equals(user.getId())) {
 					throw new ForbiddenException("장바구니를 삭제할 수 없습니다.");
 				}
 			}

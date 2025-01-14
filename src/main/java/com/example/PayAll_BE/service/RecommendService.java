@@ -10,8 +10,11 @@ import org.springframework.stereotype.Service;
 import com.example.PayAll_BE.dto.ProductDto;
 import com.example.PayAll_BE.dto.RecommendProductDto;
 import com.example.PayAll_BE.entity.PaymentDetail;
+import com.example.PayAll_BE.entity.User;
+import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.product.ProductApiClient;
 import com.example.PayAll_BE.repository.PaymentDetailRepository;
+import com.example.PayAll_BE.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,19 +25,21 @@ import lombok.extern.slf4j.Slf4j;
 public class RecommendService {
 	private final PaymentDetailRepository paymentDetailRepository;
 	private final ProductApiClient productApiClient;
+	private final UserRepository userRepository;
 
-	public List<RecommendProductDto> getRecommendProducts(Long userId) {
-		System.out.println("userId = " + userId);
+	public List<RecommendProductDto> getRecommendProducts(String authId) {
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
 		// 최근 결제 내역 조회
 		int size = 10;
-		List<PaymentDetail> recentPayments = paymentDetailRepository.findRecentPaymentsByUserId(userId,
+		List<PaymentDetail> recentPayments = paymentDetailRepository.findRecentPaymentsByUserId(user.getId(),
 			PageRequest.of(0, size));
 
 		log.info("Found {} recent payments", recentPayments.size());
 
 		// 최근 지출 내역 없음
 		if (recentPayments.isEmpty()) {
-			log.warn("No payment details found for userId: {}", userId);
+			log.warn("No payment details found for userId: {}", user.getId());
 			return Collections.emptyList();
 		}
 
