@@ -32,9 +32,6 @@ public class PaymentDetail {
 	private Payment payment;
 
 	@Column(nullable = false)
-	private Long productId;
-
-	@Column(nullable = false)
 	private String name;
 
 	@Column(nullable = false)

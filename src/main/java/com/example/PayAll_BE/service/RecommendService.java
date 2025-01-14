@@ -45,7 +45,8 @@ public class RecommendService {
 	}
 
 	private RecommendProductDto getProductFromRedis(PaymentDetail paymentDetail) {
-		Long productId = paymentDetail.getProductId();
+		// todo. 수정 필요
+		Long productId = 1L;
 		// 상품 정보 조회
 		ResponseEntity<ProductDto> response = restTemplate.getForEntity(
 			productApiUrl + productId.toString(),
