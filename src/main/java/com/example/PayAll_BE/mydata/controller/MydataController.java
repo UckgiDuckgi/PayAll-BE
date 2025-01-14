@@ -32,26 +32,22 @@ public class MydataController {
 
 	@GetMapping("/load")
 	public ResponseEntity<AccountListResponseDto> loadMydataAccountList() {
-		// base URL과 endpoint
 		String url = server1BaseUrl + "api/accounts";
 
-		// 헤더 설정
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", "Bearer my-test-token"); // 토큰 설정
+		headers.set("Authorization", "Bearer my-test-token");
 		headers.set("x-api-tran-id", "12345");
 		headers.set("x-api-type", "REGULAR");
 		headers.set("org_code", "98765");
 
-		// limit 쿼리 파라미터 추가
 		UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
 			.queryParam("next_page", 1)
-			.queryParam("limit", 3); // limit 값 설정
+			.queryParam("limit", 3);
 
-		// HttpEntity 생성
 		HttpEntity<Void> entity = new HttpEntity<>(headers);
 
 		ResponseEntity<AccountListResponseDto> response = restTemplate.exchange(
-			uriBuilder.toUriString(), // 최종 URL
+			uriBuilder.toUriString(),
 			HttpMethod.GET,
 			entity,
 			AccountListResponseDto.class
@@ -64,13 +60,11 @@ public class MydataController {
 	public ResponseEntity<AccountResponseDto> getAccountBasicInfo(
 		@RequestBody AccountRequestDto requestDto) {
 
-		// 외부 API URL
 		String url = server1BaseUrl + "api"
 			+ "/accounts/basic";
 
-		// 요청 헤더 설정
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", "Bearer my-test-token"); // 토큰 설정
+		headers.set("Authorization", "Bearer my-test-token");
 		headers.set("x-api-tran-id", "12345");
 		headers.set("x-api-type", "REGULAR");
 
@@ -92,7 +86,7 @@ public class MydataController {
 		String url = server1BaseUrl + "/api/accounts/transactions";
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", "Bearer my-test-token"); // 적절한 토큰 설정
+		headers.set("Authorization", "Bearer my-test-token");
 		headers.set("x-api-tran-id", "12345");
 		headers.set("x-api-type", "REGULAR");
 
