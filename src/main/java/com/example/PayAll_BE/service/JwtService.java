@@ -1,5 +1,6 @@
 package com.example.PayAll_BE.service;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.security.Key;
 import java.util.Collections;
@@ -50,5 +51,16 @@ public class JwtService {
     }
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+    public String extractAuthId(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+            .setSigningKey(getSigningKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
     }
 }

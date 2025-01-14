@@ -16,6 +16,7 @@ import com.example.PayAll_BE.dto.AuthRequestDto;
 import com.example.PayAll_BE.dto.RegisterRequestDto;
 import com.example.PayAll_BE.exception.BadRequestException;
 import com.example.PayAll_BE.service.AuthService;
+import com.example.PayAll_BE.service.JwtService;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/cert")
 public class AuthController {
 	private final AuthService authService;
+	private final JwtService jwtService;
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody AuthRequestDto request) {
@@ -40,5 +42,12 @@ public class AuthController {
 
 		ApiResult response = authService.register(request);
 		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/test")
+	public String test(@RequestHeader("Authorization") String token){
+		String userId = jwtService.extractAuthId(token.replace("Bearer ", ""));
+		System.out.println("userId = " + userId);
+		return userId;
 	}
 }
