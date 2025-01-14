@@ -31,8 +31,8 @@ public class PaymentDetail {
 	@JoinColumn(name = "payment_id", nullable = false)
 	private Payment payment;
 
-	@Column(nullable = false, name = "product_id")
-	private String productId;
+	@Column(name = "product_id")
+	private Long productId;
 
 	@Column(nullable = false, name = "product_name")
 	private String productName;
