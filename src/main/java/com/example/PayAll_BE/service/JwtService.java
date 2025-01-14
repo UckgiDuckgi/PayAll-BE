@@ -63,4 +63,23 @@ public class JwtService {
             .parseClaimsJws(token)
             .getBody();
     }
+
+    public boolean isValidToken(String token) {
+        try {
+            // todo 블랙리스트 체크
+            //if (redisService.isBlacklisted(token)) {
+            //    return false;
+            //}
+
+            // JWT 유효성 검증
+            Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token.replace("Bearer ", ""));
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
