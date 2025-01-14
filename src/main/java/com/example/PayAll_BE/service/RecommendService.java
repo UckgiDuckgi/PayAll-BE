@@ -46,10 +46,10 @@ public class RecommendService {
 
 	private RecommendProductDto getProductFromRedis(PaymentDetail paymentDetail) {
 		// todo. 수정 필요
-		Long productId = 1L;
+		Long productId = 11L;
 		// 상품 정보 조회
 		ResponseEntity<ProductDto> response = restTemplate.getForEntity(
-			productApiUrl + productId.toString(),
+			productApiUrl + productId,
 			ProductDto.class);
 		if (response.getBody() == null) {
 			throw new NotFoundException("상품 id가 없습니다.");
@@ -57,7 +57,7 @@ public class RecommendService {
 		ProductDto productDto = response.getBody();
 
 		// 할인율 계산
-		Long prevPrice = paymentDetail.getPrice();
+		Long prevPrice = paymentDetail.getProductPrice();
 		Long currPrice = productDto.getPrice();
 		if (prevPrice <= currPrice) {
 			return null;

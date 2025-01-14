@@ -32,8 +32,8 @@ public class ReceiptService {
 		List<PaymentDetail> products = requestDto.getProductList().stream()
 			.map(product -> PaymentDetail.builder()
 				.payment(payment)
-				.name(product.getProductName())
-				.price(product.getPrice())
+				.productName(product.getProductName())
+				.productPrice(product.getPrice())
 				.quantity(product.getQuantity()).build())
 			.toList();
 
