@@ -1,5 +1,6 @@
 package com.example.PayAll_BE.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.PayAll_BE.entity.Payment;
+import com.example.PayAll_BE.entity.enums.StatisticsCategory;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
@@ -21,5 +23,11 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	List<Payment> findRecentPaymentsByUserId(@Param("userId") Long userId, Pageable pageable);
 
 	// List<Payment> findByAccountId(Long accountId);
+	List<Payment> findByAccount_User_IdAndCategoryAndPaymentTimeBetween(
+		Long userId,
+		StatisticsCategory category,
+		LocalDateTime startDate,
+		LocalDateTime endDate
+	);
 
 }
