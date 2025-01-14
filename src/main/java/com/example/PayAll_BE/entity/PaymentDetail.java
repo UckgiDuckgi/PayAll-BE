@@ -12,16 +12,14 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
-@Getter
+@Data
 @Table(name = "Payment_Detail")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-@ToString
 public class PaymentDetail {
 
 	@Id
@@ -33,20 +31,23 @@ public class PaymentDetail {
 	@JoinColumn(name = "payment_id", nullable = false)
 	private Payment payment;
 
-	@Column(nullable = false)
-	private String name;
+	@Column(nullable = false, name = "product_id")
+	private String productId;
 
-	@Column(nullable = false)
-	private Long price;
+	@Column(nullable = false, name = "product_name")
+	private String productName;
+
+	@Column(nullable = false, name = "product_price")
+	private Long productPrice;
 
 	@Column(nullable = false)
 	private int quantity;
 
 	@Builder
-	public PaymentDetail(Payment payment, String name, Long price, int quantity) {
+	public PaymentDetail(Payment payment, String productName, Long productPrice, int quantity) {
 		this.payment = payment;
-		this.name = name;
-		this.price = price;
+		this.productName = productName;
+		this.productPrice = productPrice;
 		this.quantity = quantity;
 	}
 }
