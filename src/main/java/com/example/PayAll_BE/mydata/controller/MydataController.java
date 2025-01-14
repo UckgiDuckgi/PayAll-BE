@@ -1,6 +1,5 @@
 package com.example.PayAll_BE.mydata.controller;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +15,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.example.PayAll_BE.mydata.dto.AccountListResponseDto;
 import com.example.PayAll_BE.mydata.dto.AccountRequestDto;
 import com.example.PayAll_BE.mydata.dto.AccountResponseDto;
+import com.example.PayAll_BE.mydata.dto.TransactionRequestDto;
+import com.example.PayAll_BE.mydata.dto.TransactionResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,7 +44,7 @@ public class MydataController {
 
 		// limit 쿼리 파라미터 추가
 		UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
-			.queryParam("next_page",1)
+			.queryParam("next_page", 1)
 			.queryParam("limit", 3); // limit 값 설정
 
 		// HttpEntity 생성
@@ -73,10 +74,8 @@ public class MydataController {
 		headers.set("x-api-tran-id", "12345");
 		headers.set("x-api-type", "REGULAR");
 
-		// 요청 Body 설정
 		HttpEntity<AccountRequestDto> entity = new HttpEntity<>(requestDto, headers);
 
-		// 외부 API 호출
 		ResponseEntity<AccountResponseDto> response = restTemplate.exchange(
 			url,
 			HttpMethod.POST,
@@ -84,16 +83,28 @@ public class MydataController {
 			AccountResponseDto.class
 		);
 
-		AccountResponseDto responseBody = response.getBody();
+		return ResponseEntity.ok(response.getBody());
+	}
 
-		AccountResponseDto accountListResponse = AccountResponseDto.builder()
-			.rspCode(responseBody.getRspCode())
-			.rspMsg(responseBody.getRspMsg())
-			.baseDate(responseBody.getBaseDate())
-			.basicCnt(responseBody.getBasicCnt())
-			.basicList(responseBody.getBasicList())
-			.build();
+	@PostMapping("/transactions")
+	public ResponseEntity<TransactionResponseDto> getAccountTransactions(
+		@RequestBody TransactionRequestDto requestDto) {
+		String url = server1BaseUrl + "/api/accounts/transactions";
 
-		return ResponseEntity.ok(accountListResponse);
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Bearer my-test-token"); // 적절한 토큰 설정
+		headers.set("x-api-tran-id", "12345");
+		headers.set("x-api-type", "REGULAR");
+
+		HttpEntity<TransactionRequestDto> entity = new HttpEntity<>(requestDto, headers);
+
+		ResponseEntity<TransactionResponseDto> response = restTemplate.exchange(
+			url,
+			HttpMethod.POST,
+			entity,
+			TransactionResponseDto.class
+		);
+
+		return ResponseEntity.ok(response.getBody());
 	}
 }
