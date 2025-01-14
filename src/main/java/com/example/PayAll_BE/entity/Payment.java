@@ -25,6 +25,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.example.PayAll_BE.entity.enums.Category;
+import com.example.PayAll_BE.entity.enums.PaymentType;
 
 @Entity
 @Data
@@ -63,13 +70,13 @@ public class Payment {
 	private List<PaymentDetail> paymentDetails = new ArrayList<>();
 
 	@Builder
-	public Payment(Account account, String paymentPlace, Long price, LocalDateTime paymentTime, PaymentType paymentType,
-		Category category) {
+	public Payment(Account account, String paymentPlace, Long price, LocalDateTime paymentTime, PaymentType paymentType, Category category, List<PaymentDetail> paymentDetails) {
 		this.account = account;
 		this.paymentPlace = paymentPlace;
 		this.price = price;
 		this.paymentTime = paymentTime;
 		this.paymentType = paymentType;
 		this.category = category;
+		this.paymentDetails = paymentDetails;
 	}
 }

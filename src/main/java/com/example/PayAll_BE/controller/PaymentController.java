@@ -20,7 +20,7 @@ public class PaymentController {
 	private final PaymentService paymentService;
 
 	@GetMapping
-	public ResponseEntity<ApiResult> getPayments(@RequestParam Long userId) {
+	public ResponseEntity<ApiResult> getPayments(@RequestParam Long userId ) { //authentication으로 바꿔야 함
 		return ResponseEntity.ok(new ApiResult(200, "OK", "통합 계좌 거래 내역 조회 성공", paymentService.getPayments(userId)));
 	}
 }
