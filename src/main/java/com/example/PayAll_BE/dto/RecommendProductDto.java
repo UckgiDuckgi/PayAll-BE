@@ -11,6 +11,7 @@ public class RecommendProductDto {
 	private String productImage;
 	private Long price;
 	private String storeName;
+	private String link;
 	private Double discountRate;
 
 }

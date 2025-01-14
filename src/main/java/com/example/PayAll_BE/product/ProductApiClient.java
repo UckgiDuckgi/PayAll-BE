@@ -1,5 +1,6 @@
 package com.example.PayAll_BE.product;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -12,11 +13,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Component
 public class ProductApiClient {
+	@Value("${server1.base-url}")
+	private String baseUrl;
+
 	private final RestTemplate restTemplate;
 
-	private final String productApiUrl = "http://localhost:8081/redis/product/";
-
 	public ProductDto fetchProduct(String productId) {
+		String productApiUrl = baseUrl + "redis/product/";
 		ResponseEntity<ProductDto> response = restTemplate.getForEntity(
 			productApiUrl + productId, ProductDto.class);
 
