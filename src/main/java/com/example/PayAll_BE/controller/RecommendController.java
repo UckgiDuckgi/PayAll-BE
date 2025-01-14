@@ -20,6 +20,6 @@ public class RecommendController {
 	@GetMapping("/products")
 	public ResponseEntity<ApiResult> getRecommendProducts(@RequestParam Long userId) {  // todo. user Id 제거 필요
 		return ResponseEntity.ok(
-			new ApiResult(200, "OK", "장바구니 내역 조회 성공", recommendService.getRecommendProducts(userId)));
+			new ApiResult(200, "OK", "최근 지출 품목 최저가 추천 성공", recommendService.getRecommendProducts(userId)));
 	}
 }
