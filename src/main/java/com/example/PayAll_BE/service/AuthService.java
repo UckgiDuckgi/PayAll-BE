@@ -1,20 +1,63 @@
 package com.example.PayAll_BE.service;
 
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.dto.ApiResult;
+import com.example.PayAll_BE.dto.AuthRequestDto;
+import com.example.PayAll_BE.dto.AuthResponseDto;
 import com.example.PayAll_BE.dto.RegisterRequestDto;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.exception.BadRequestException;
+import com.example.PayAll_BE.exception.NotFoundException;
+import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.repository.UserRepository;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+	@Getter
+	@Value("${jwt.access.token.expiration}")
+	private Long accessTokenExpiration;
+
+	@Getter
+	@Value("${jwt.refresh.token.expiration}")
+	private Long refreshTokenExpiration;
+
 	private final UserRepository userRepository;
+	private final JwtService jwtService;
+	private final RedisService redisService;
+
+	public AuthResponseDto login(AuthRequestDto request) {
+		User user = userRepository.findByAuthId(request.getAuthId())
+			.orElseThrow(() -> new NotFoundException("로그인 : User not found"));
+
+		if (!user.getPassword().equals(request.getPassword())) {
+			throw new UnauthorizedException("로그인 : Invalid password");
+		}
+
+		return generateTokens(user.getAuthId(), user.getName(), user.getId());
+	}
+
+	public AuthResponseDto generateTokens(String authId, String name, Long userId) {
+		String accessToken = jwtService.generateAccessToken(authId, userId);
+		String refreshToken = jwtService.generateRefreshToken(authId, userId);
+
+		// Redis에는 Refresh Token만 저장
+		redisService.saveRefreshToken(authId, refreshToken, refreshTokenExpiration);
+
+		return AuthResponseDto.builder()
+			.accessToken(accessToken)
+			.refreshToken(refreshToken)
+			.authId(authId)
+			.userName(name)
+			.build();
+	}
 
 	public ApiResult register(RegisterRequestDto request) {
 		try {

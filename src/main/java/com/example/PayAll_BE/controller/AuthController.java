@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.PayAll_BE.dto.ApiResult;
+import com.example.PayAll_BE.dto.AuthRequestDto;
 import com.example.PayAll_BE.dto.RegisterRequestDto;
 import com.example.PayAll_BE.exception.BadRequestException;
 import com.example.PayAll_BE.service.AuthService;
@@ -25,6 +26,11 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/cert")
 public class AuthController {
 	private final AuthService authService;
+
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@RequestBody AuthRequestDto request) {
+		return ResponseEntity.ok(authService.login(request));
+	}
 
 	@PostMapping("/register")
 	public ResponseEntity<ApiResult> register(@RequestBody RegisterRequestDto request) {
