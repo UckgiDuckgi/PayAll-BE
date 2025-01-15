@@ -103,7 +103,7 @@ public class AuthService {
 
 	public AuthResponseDto refreshToken(String refreshToken) {
 		if (!jwtService.isValidToken(refreshToken)) {
-			throw new RuntimeException("유효하지 않은 리프레시 토큰입니다.");
+			throw new ForbiddenException("유효하지 않은 리프레시 토큰입니다.");
 		}
 
 		String authId = jwtService.extractAuthId(refreshToken);
@@ -112,7 +112,7 @@ public class AuthService {
 		// Redis에 저장된 리프레시 토큰과 비교
 		String storedRefreshToken = redisService.getRefreshToken(authId);
 		if (!refreshToken.equals(storedRefreshToken)) {
-			throw new ForbiddenException("토큰이 일치하지 않습니다.");
+			throw new UnauthorizedException("토큰이 일치하지 않습니다.");
 		}
 
 		User user = userRepository.findById(userId)

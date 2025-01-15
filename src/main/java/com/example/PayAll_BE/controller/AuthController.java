@@ -48,13 +48,8 @@ public class AuthController {
 
 	@PostMapping("/refresh")
 	public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequestDto request) {
-		try {
 			AuthResponseDto newTokens = authService.refreshToken(request.getRefreshToken());
 			return ResponseEntity.ok(new ApiResult(200, "OK", "토큰 갱신 성공", newTokens));
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-				.body(new ApiResult(401, "UNAUTHORIZED", "토큰 갱신 실패: " + e.getMessage(), null));
-		}
 	}
 
 	@GetMapping("/test")
