@@ -38,7 +38,7 @@ public class ProductApiClient {
 		return response.getBody();
 	}
 	public ProductDto fetchProductByName(String productName) {
-		String url = baseUrl + "redis/product/" + "by-name/" + productName;
+		String url = baseUrl + "redis/product/by-name/" + productName;
 		ResponseEntity<ProductDto> response = restTemplate.getForEntity(url, ProductDto.class);
 
 		if (response.getBody() == null) {
