@@ -1,11 +1,14 @@
 package com.example.PayAll_BE.mapper;
 
 import com.example.PayAll_BE.dto.Payment.DayPaymentResponseDto;
-import com.example.PayAll_BE.dto.Payment.PaymentDetailDto;
 import com.example.PayAll_BE.dto.Payment.PaymentDetailResponseDto;
 import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
 import com.example.PayAll_BE.dto.Payment.PaymentResponseDto;
+import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailDto;
+import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailInfoRequestDto;
+import com.example.PayAll_BE.dto.ProductDto;
 import com.example.PayAll_BE.entity.Payment;
+import com.example.PayAll_BE.entity.PaymentDetail;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -62,6 +65,16 @@ public class PaymentMapper {
 			.accountName(payment.getAccount().getAccountName())
 			.paymentPrice(payment.getPrice())
 			.paymentDetailList(details)
+			.build();
+	}
+
+	public static PaymentDetail toPaymentDetailEntity(Payment payment, PaymentDetailInfoRequestDto.PurchaseProductRequestDto requestDto, String productId) {
+		return PaymentDetail.builder()
+			.payment(payment)  // 연관된 Payment 엔티티 설정
+			.productName(requestDto.getProductName())
+			.productId(productId)
+			.productPrice(requestDto.getPrice())
+			.quantity(requestDto.getAmount())
 			.build();
 	}
 }

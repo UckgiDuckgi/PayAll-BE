@@ -1,6 +1,6 @@
 package com.example.PayAll_BE.mapper;
 
-import com.example.PayAll_BE.dto.Payment.PaymentDetailDto;
+import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailDto;
 import com.example.PayAll_BE.dto.ProductDto;
 import com.example.PayAll_BE.entity.PaymentDetail;
 

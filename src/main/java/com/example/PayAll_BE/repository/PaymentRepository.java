@@ -2,6 +2,7 @@ package com.example.PayAll_BE.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		"ORDER BY p.paymentTime DESC")
 	List<Payment> findRecentPaymentsByUserId(@Param("userId") Long userId, Pageable pageable);
 
+	Optional<Payment> findByPaymentTimeAndPaymentPlace(LocalDateTime paymentTime, String paymentPlace);
 	// List<Payment> findByAccountId(Long accountId);
 	List<Payment> findByAccountUserIdAndCategoryAndPaymentTimeBetween(
 		Long userId,

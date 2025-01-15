@@ -13,10 +13,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.dto.Payment.DayPaymentResponseDto;
-import com.example.PayAll_BE.dto.Payment.PaymentDetailDto;
 import com.example.PayAll_BE.dto.Payment.PaymentDetailResponseDto;
 import com.example.PayAll_BE.dto.Payment.PaymentResponseDto;
 import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
+import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailDto;
+import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailInfoRequestDto;
 import com.example.PayAll_BE.dto.ProductDto;
 import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.PaymentDetail;
@@ -112,4 +113,27 @@ public class PaymentService {
 
 		return PaymentMapper.toPaymentDto(payment, paymentDetailDtos);
 	}
+
+	public void uploadPaymentDetail(PaymentDetailInfoRequestDto requestDto) {
+		// Payment 조회
+		Payment payment = paymentRepository.findByPaymentTimeAndPaymentPlace(
+			requestDto.getPaymentTime(), requestDto.getPaymentPlace()
+		).orElseThrow(() -> new IllegalArgumentException("해당 결제를 찾을 수 없습니다."));
+
+		// PaymentDetail 생성 및 저장
+		List<PaymentDetail> paymentDetails = requestDto.getPurchaseProductList().stream()
+			.map(product -> {
+				// ProductName으로 ProductId 조회
+				ProductDto productDto = productApiClient.fetchProductByName(product.getProductName());
+				String productId = productDto.getPCode().toString();  // 상품 코드(pcode) 가져오기
+
+				// PaymentDetail 엔터티 생성
+				return PaymentMapper.toPaymentDetailEntity(payment, product, productId);
+			})
+			.collect(Collectors.toList());
+
+		paymentDetailRepository.saveAll(paymentDetails);  // DB에 저장
+	}
+
+
 }

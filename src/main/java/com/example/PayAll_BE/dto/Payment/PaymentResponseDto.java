@@ -5,6 +5,8 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailDto;
+
 @Data
 @Builder
 public class PaymentResponseDto {
@@ -15,5 +17,5 @@ public class PaymentResponseDto {
 	private String bankName;
 	private String accountName;
 	private Long paymentPrice;
-	private List<com.example.PayAll_BE.dto.Payment.PaymentDetailDto> paymentDetailList;
+	private List<PaymentDetailDto> paymentDetailList;
 }
