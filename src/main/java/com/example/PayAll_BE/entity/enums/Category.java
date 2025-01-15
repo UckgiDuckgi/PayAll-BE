@@ -13,6 +13,7 @@ public enum Category {
 	CULTURE("문화,여가"),
 	RESTAURANT("음식점"),
 	CAFE("카페"),
-	HEALTH("병원비,약국");
+	HEALTH("병원비,약국"),
+	OTHERS("기타");
 	private final String category;
 }
