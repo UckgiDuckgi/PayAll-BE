@@ -12,9 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class StatisticsResponseDto {
+	private String name; // 사용자 이름 추가
 	private String date;
-	private long totalSpent; // 총 지출
-	private long dateAverage; // 하루 평균 지출
+	private long totalSpent;
+	private long dateAverage;
 	private long difference; // 전월 대비 차이
 	private List<CategoryExpense> categoryExpenses; // 카테고리별 지출
 	private List<FixedExpense> fixedExpenses; // 고정 지출
