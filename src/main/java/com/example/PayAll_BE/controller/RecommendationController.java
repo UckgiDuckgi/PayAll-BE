@@ -23,9 +23,7 @@ public class RecommendationController {
 
 	@GetMapping("/cards")
 	public ResponseEntity<?> recommendCards(@RequestParam Long accountId) {
-		// // 서비스 로직 호출
-		// List<CardRecommendationResultDto> recommendations = recommendationService.getCardRecommendations(accountId);
-		// return ResponseEntity.ok(new ApiResult(200,"OK","추천 성공", recommendations));
-		return null;
+		List<CardRecommendationResultDto> recommendations = recommendationService.getCardRecommendations(accountId);
+		return ResponseEntity.ok(new ApiResult(200,"OK","추천 성공", recommendations));
 	}
 }

@@ -20,4 +20,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		LocalDateTime endDate
 	);
 
+	List<Payment> findByAccountId(Long accountId);
+
 }
