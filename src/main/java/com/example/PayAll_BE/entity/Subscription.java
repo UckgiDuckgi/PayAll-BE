@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "Subscription")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Builder
 public class Subscription {
 
 	@Id
@@ -31,11 +30,53 @@ public class Subscription {
 	@Column(name = "monthly_fee", nullable = false)
 	private Long monthlyFee;
 
-	//Todo 헤택률
+	@Column(name = "shopping_benefit_rate", nullable = false)
+	private Double shoppingBenefitRate;
+
+	@Column(name = "education_benefit_rate", nullable = false)
+	private Double educationBenefitRate;
+
+	@Column(name = "living_benefit_rate", nullable = false)
+	private Double livingBenefitRate;
+
+	@Column(name = "transport_benefit_rate", nullable = false)
+	private Double transportBenefitRate;
+
+	@Column(name = "culture_benefit_rate", nullable = false)
+	private Double cultureBenefitRate;
+
+	@Column(name = "restaurant_benefit_rate", nullable = false)
+	private Double restaurantBenefitRate;
+
+	@Column(name = "cafe_benefit_rate", nullable = false)
+	private Double cafeBenefitRate;
+
+	@Column(name = "health_benefit_rate", nullable = false)
+	private Double healthBenefitRate;
 
 	@Builder
-	public Subscription(String subscriptionName, Long monthlyFee) {
+	public Subscription(
+		String subscriptionName,
+		Long monthlyFee,
+		Double shoppingBenefitRate,
+		Double educationBenefitRate,
+		Double livingBenefitRate,
+		Double transportBenefitRate,
+		Double cultureBenefitRate,
+		Double restaurantBenefitRate,
+		Double cafeBenefitRate,
+		Double healthBenefitRate
+	) {
 		this.subscriptionName = subscriptionName;
 		this.monthlyFee = monthlyFee;
+		this.shoppingBenefitRate = shoppingBenefitRate;
+		this.educationBenefitRate = educationBenefitRate;
+		this.livingBenefitRate = livingBenefitRate;
+		this.transportBenefitRate = transportBenefitRate;
+		this.cultureBenefitRate = cultureBenefitRate;
+		this.restaurantBenefitRate = restaurantBenefitRate;
+		this.cafeBenefitRate = cafeBenefitRate;
+		this.healthBenefitRate = healthBenefitRate;
 	}
+
 }

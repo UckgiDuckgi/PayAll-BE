@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.dto.Payment.DayPaymentResponseDto;
@@ -17,13 +20,16 @@ import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
 import com.example.PayAll_BE.dto.ProductDto;
 import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.PaymentDetail;
+import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.mapper.PaymentDetailMapper;
 import com.example.PayAll_BE.mapper.PaymentMapper;
 import com.example.PayAll_BE.product.ProductApiClient;
 import com.example.PayAll_BE.repository.PaymentDetailRepository;
 import com.example.PayAll_BE.repository.PaymentRepository;
+import com.example.PayAll_BE.repository.UserRepository;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -33,11 +39,17 @@ public class PaymentService {
 	private final PaymentRepository paymentRepository;
 	private final PaymentDetailRepository paymentDetailRepository;
 	private final ProductApiClient productApiClient;
+	private final JwtService jwtService;
+	private final UserRepository userRepository;
 
-	public TotalPaymentResponseDto getPayments(Long userId) {
-		List<Payment> payments = paymentRepository.findAllByUserId(userId);
+	public TotalPaymentResponseDto getPayments(HttpServletRequest request, String category, Pageable pageable) {
+		String token = request.getHeader("Authorization").replace("Bearer ", "");
+		String authId = jwtService.extractAuthId(token);
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
+		Page<Payment> paymentPage = paymentRepository.findAllByUserIdAndCategory(user.getId(), category, pageable);
 
-		if (payments.isEmpty()) {
+		if (paymentPage.isEmpty()) {
 			return TotalPaymentResponseDto.builder()
 				.totalBalance(0L)
 				.monthPaymentPrice(0L)
@@ -45,9 +57,9 @@ public class PaymentService {
 				.build();
 		}
 
+		List<Payment> payments = paymentPage.getContent();
 		LocalDateTime startOfMonth = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay();
 		LocalDateTime endOfMonth = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()).atTime(23, 59, 59);
-
 
 		Long totalBalance = payments.stream()
 			.map(payment -> payment.getAccount().getBalance())
