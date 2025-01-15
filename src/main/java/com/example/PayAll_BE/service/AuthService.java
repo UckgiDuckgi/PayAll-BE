@@ -54,10 +54,10 @@ public class AuthService {
 
 		return AuthResponseDto.builder()
 			.code(200)
+			.status("OK")
+			.message("로그인이 완료되었습니다.")
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
-			.authId(authId)
-			.userName(name)
 			.build();
 	}
 

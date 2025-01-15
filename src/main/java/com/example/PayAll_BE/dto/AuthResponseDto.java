@@ -13,6 +13,6 @@ public class AuthResponseDto {
 	private int code;
 	private String accessToken;
 	private String refreshToken;
-	private String authId;
-	private String userName;
+	private String message;
+	private String status;
 }
