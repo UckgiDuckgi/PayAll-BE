@@ -58,8 +58,8 @@ public class CategoryService {
 	}
 
 	private Category mappingCategory(String kakaoCategory) {
-		if (kakaoCategory == null || kakaoCategory.isEmpty()) {
-			return Category.OTHERS;
+		if (kakaoCategory.isEmpty()) {
+			return Category.LIVING;
 		}
 
 		return switch (kakaoCategory) {
