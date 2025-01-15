@@ -53,6 +53,7 @@ public class AuthService {
 		redisService.saveRefreshToken(authId, refreshToken, refreshTokenExpiration);
 
 		return AuthResponseDto.builder()
+			.code(200)
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
 			.authId(authId)
