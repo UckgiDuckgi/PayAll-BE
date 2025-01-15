@@ -125,7 +125,7 @@ public class PaymentService {
 			.map(product -> {
 				// ProductName으로 ProductId 조회
 				ProductDto productDto = productApiClient.fetchProductByName(product.getProductName());
-				String productId = productDto.getPCode().toString();  // 상품 코드(pcode) 가져오기
+				Long productId = productDto.getPCode();  // 상품 코드(pcode) 가져오기
 
 				// PaymentDetail 엔터티 생성
 				return PaymentMapper.toPaymentDetailEntity(payment, product, productId);

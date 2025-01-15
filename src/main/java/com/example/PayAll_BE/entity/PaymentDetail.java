@@ -44,7 +44,7 @@ public class PaymentDetail {
 	private int quantity;
 
 	@Builder
-	public PaymentDetail(Payment payment, String productName, Long productPrice, int quantity, String productId) {
+	public PaymentDetail(Payment payment, String productName, Long productPrice, int quantity, Long productId) {
 		this.payment = payment;
 		this.productName = productName;
 		this.productPrice = productPrice;

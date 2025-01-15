@@ -68,7 +68,7 @@ public class PaymentMapper {
 			.build();
 	}
 
-	public static PaymentDetail toPaymentDetailEntity(Payment payment, PaymentDetailInfoRequestDto.PurchaseProductRequestDto requestDto, String productId) {
+	public static PaymentDetail toPaymentDetailEntity(Payment payment, PaymentDetailInfoRequestDto.PurchaseProductRequestDto requestDto, Long productId) {
 		return PaymentDetail.builder()
 			.payment(payment)  // 연관된 Payment 엔티티 설정
 			.productName(requestDto.getProductName())
