@@ -11,6 +11,7 @@ import com.example.PayAll_BE.dto.AuthResponseDto;
 import com.example.PayAll_BE.dto.RegisterRequestDto;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.exception.BadRequestException;
+import com.example.PayAll_BE.exception.ForbiddenException;
 import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.repository.UserRepository;
@@ -98,5 +99,25 @@ public class AuthService {
 			e.printStackTrace();
 			throw new RuntimeException("회원가입 실패: " + e.getMessage());
 		}
+	}
+
+	public AuthResponseDto refreshToken(String refreshToken) {
+		if (!jwtService.isValidToken(refreshToken)) {
+			throw new RuntimeException("유효하지 않은 리프레시 토큰입니다.");
+		}
+
+		String authId = jwtService.extractAuthId(refreshToken);
+		Long userId = jwtService.extractUserId(refreshToken);
+
+		// Redis에 저장된 리프레시 토큰과 비교
+		String storedRefreshToken = redisService.getRefreshToken(authId);
+		if (!refreshToken.equals(storedRefreshToken)) {
+			throw new ForbiddenException("토큰이 일치하지 않습니다.");
+		}
+
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+
+		return generateTokens(authId, user.getName(), userId);
 	}
 }
