@@ -60,7 +60,7 @@ public class AuthService {
 			.build();
 	}
 
-	public ApiResult register(RegisterRequestDto request) {
+	public void register(RegisterRequestDto request) {
 		try {
 			// Validate simple password
 			if (request.getPassword() == null || request.getPassword().length() < 6) {
@@ -93,7 +93,6 @@ public class AuthService {
 				.build();
 
 			userRepository.save(newUser);
-			return new ApiResult(200, "NEW", "회원가입 성공", null);
 
 		} catch (Exception e) {
 			e.printStackTrace();

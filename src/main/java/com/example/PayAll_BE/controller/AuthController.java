@@ -41,13 +41,12 @@ public class AuthController {
 		if (request.getPassword() == null || request.getPassword().isEmpty()) {
 			throw new BadRequestException("올바른 비밀번호를 입력해주세요.");
 		}
-
-		ApiResult response = authService.register(request);
-		return ResponseEntity.ok(response);
+		authService.register(request);
+		return ResponseEntity.ok(new ApiResult(200,"OK","회원가입이 완료되었습니다."));
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequestDto request) {
+	public ResponseEntity<ApiResult> refreshToken(@RequestBody RefreshTokenRequestDto request) {
 			AuthResponseDto newTokens = authService.refreshToken(request.getRefreshToken());
 			return ResponseEntity.ok(new ApiResult(200, "OK", "토큰 갱신 성공", newTokens));
 	}
