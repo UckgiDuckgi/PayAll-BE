@@ -64,6 +64,10 @@ public class JwtService {
             .getBody();
     }
 
+    public Long extractUserId(String token) {
+        return extractAllClaims(token).get("userId",Long.class);
+    }
+
     public boolean isValidToken(String token) {
         try {
             // todo 블랙리스트 체크

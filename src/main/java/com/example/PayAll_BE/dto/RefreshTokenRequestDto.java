@@ -7,12 +7,8 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class AuthResponseDto {
-	private int code;
-	private String accessToken;
+@AllArgsConstructor
+public class RefreshTokenRequestDto {
 	private String refreshToken;
-	private String message;
-	private String status;
 }

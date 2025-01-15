@@ -41,8 +41,8 @@ public class RedisService {
 		);
 	}
 
-	public String getRefreshToken(String email) {
-		return (String) redisTemplate.opsForValue().get("refresh:" + email);
+	public String getRefreshToken(String authId) {
+		return (String) redisTemplate.opsForValue().get("refresh:" + authId);
 	}
 
 	// Blacklist 관리
