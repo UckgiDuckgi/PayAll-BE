@@ -43,22 +43,20 @@ public class RecommendationService {
 
 		// 3. 각 가맹점에 대해 혜택 폭이 가장 큰 카드 찾기 및 할인 금액 계산
 		for (Map.Entry<Category, String> entry : topStoresByCategory.entrySet()) {
-			Category category = entry.getKey(); // 카테고리
-			String paymentPlace = entry.getValue(); // 소비 금액 1등 가맹점
+			Category category = entry.getKey();
+			String paymentPlace = entry.getValue();
 
 			// 카드 혜택 조회
 			CardBenefit bestCard = cardBenefitsRepository.findTopByStoreNameOrderByBenefitValueDesc(paymentPlace);
 
 			if (bestCard != null) {
 				// 해당 가맹점의 총 소비 금액 계산
-				BigDecimal totalSpentAtPlace = payments.stream()
-					.filter(payment -> payment.getPaymentPlace().equals(paymentPlace)) // 해당 가맹점 필터
-					.map(Payment::getPrice); // 소비 금액 추출
-					.reduce(BigDecimal.ZERO, BigDecimal::add); // 총합 계산
+				long totalSpentAtPlace = payments.stream()
+					.filter(payment -> payment.getPaymentPlace().equals(paymentPlace))
+					.mapToLong(Payment::getPrice)
+					.sum();
 
-				// 할인 금액 계산
-				BigDecimal discountAmount = totalSpentAtPlace.multiply(
-					bestCard.getBenefitValue().divide(new BigDecimal(100)));
+				long discountAmount = (long) (totalSpentAtPlace * (bestCard.getBenefitValue().doubleValue() / 100.0));
 
 				// 추천 결과 저장
 				recommendations.add(
