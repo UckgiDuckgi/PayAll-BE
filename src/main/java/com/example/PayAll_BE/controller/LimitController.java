@@ -17,10 +17,11 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/limit")
+@RequestMapping("/api/limit")
 public class LimitController {
 	private final LimitService limitService;
 
+	// 소비목표 등록
 	@PostMapping
 	public ResponseEntity<ApiResult> registerLimit(
 		@RequestParam Long userId,
@@ -32,6 +33,7 @@ public class LimitController {
 		);
 	}
 
+	// 소비목표 조회
 	@GetMapping
 	public ResponseEntity<ApiResult> getLimit(
 		@RequestParam Long userId

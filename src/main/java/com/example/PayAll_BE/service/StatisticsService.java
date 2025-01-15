@@ -12,9 +12,11 @@ import com.example.PayAll_BE.dto.Statistics.StatisticsDetailResponseDto;
 import com.example.PayAll_BE.dto.Statistics.StatisticsResponseDto;
 import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.Statistics;
+import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.entity.enums.StatisticsCategory;
 import com.example.PayAll_BE.repository.PaymentRepository;
 import com.example.PayAll_BE.repository.StatisticsRepository;
+import com.example.PayAll_BE.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,8 +25,12 @@ import lombok.RequiredArgsConstructor;
 public class StatisticsService {
 	private final StatisticsRepository statisticsRepository;
 	private final PaymentRepository paymentRepository;
+	private final UserRepository userRepository;
 
 	public StatisticsResponseDto getStatistics(Long userId, String date) {
+
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
 		LocalDate startDate = LocalDate.parse(date + "-01");
 		LocalDateTime startDateTime = startDate.atStartOfDay();
@@ -62,8 +68,8 @@ public class StatisticsService {
 		long previousTotalSpent = previousStatistics.stream().mapToLong(Statistics::getStatisticsAmount).sum();
 		long difference = totalSpent - previousTotalSpent;
 
-		// ResponseDTO 생성
 		return StatisticsResponseDto.builder()
+			.name(user.getName())
 			.date(date)
 			.totalSpent(totalSpent)
 			.dateAverage(dateAverage) // 하루 평균 지출
@@ -113,7 +119,7 @@ public class StatisticsService {
 				List<StatisticsDetailResponseDto.TransactionDetail.HistoryDetail> historyDetails = dailyPayments.stream()
 					.map(payment -> new StatisticsDetailResponseDto.TransactionDetail.HistoryDetail(
 						payment.getPaymentPlace(),
-						category.name(), // 태그: 카테고리 이름 사용
+						category.name(), // 태그? 배지? -> 카테고리 이름 사용
 						payment.getPrice(),
 						payment.getPaymentType().name(),
 						payment.getPaymentTime().toLocalTime().toString()
