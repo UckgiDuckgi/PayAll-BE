@@ -7,9 +7,11 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.enums.StatisticsCategory;
@@ -39,8 +41,16 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		LocalDateTime endDate
 	);
 
+	// 특정 결제처와 시간대에 해당하는 결제 내역 가져오기
+	@Query("SELECT p FROM Payment p WHERE p.account.id = :accountId AND p.paymentTime = :paymentTime AND p.paymentPlace IN ('카카오페이', '네이버페이')")
+	Payment findPaymentToUpdateByAccountIdAndPaymentTime(Long accountId, LocalDateTime paymentTime);
 	List<Payment> findByAccountId(Long accountId);
 
 
 
+	// 결제 내역의 실제 결제처 업데이트
+	@Transactional
+	@Modifying
+	@Query("UPDATE Payment p SET p.paymentPlace = :newPaymentPlace WHERE p.id = :paymentId ")
+	int updatePaymentPlace(@Param("paymentId") Long paymentId, @Param("newPaymentPlace") String newPaymentPlace);
 }

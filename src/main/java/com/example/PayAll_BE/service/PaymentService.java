@@ -3,6 +3,7 @@ package com.example.PayAll_BE.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,10 +12,12 @@ import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.PayAll_BE.dto.Payment.DayPaymentResponseDto;
 import com.example.PayAll_BE.dto.Payment.PaymentDetailResponseDto;
 import com.example.PayAll_BE.dto.Payment.PaymentResponseDto;
+import com.example.PayAll_BE.dto.Payment.PaymentUpdateRequestDto;
 import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
 import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailDto;
 import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailInfoRequestDto;
@@ -135,5 +138,25 @@ public class PaymentService {
 		paymentDetailRepository.saveAll(paymentDetails);  // DB에 저장
 	}
 
+	@Transactional
+	public void updatePaymentPlaces(List<PaymentUpdateRequestDto> paymentList) {
+		List<Payment> paymentsToUpdate = new ArrayList<>();
 
+		for (PaymentUpdateRequestDto request : paymentList) {
+			Payment payment = paymentRepository.findPaymentToUpdateByAccountIdAndPaymentTime(
+				request.getAccountId(), request.getPaymentTime()
+			);
+
+			if (payment != null) {
+				payment.setPaymentPlace(request.getPaymentPlace());
+				paymentsToUpdate.add(payment);
+			} else {
+				throw new NotFoundException("해당 결제 내역이 없습니다. Account ID: " + request.getAccountId());
+			}
+		}
+
+		if (!paymentsToUpdate.isEmpty()) {
+			paymentRepository.saveAll(paymentsToUpdate);
+		}
+	}
 }
