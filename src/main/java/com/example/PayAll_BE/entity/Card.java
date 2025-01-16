@@ -35,11 +35,60 @@ public class Card {
 	@Column(name = "annual_fee", nullable = false)
 	private Long annualFee;
 
+	//전월 실적
+	@Column(name = "monthly_spending_requirement", nullable = false)
+	private Long monthlySpendingRequirement;
+
+	@Column(name = "shopping_benefit_rate", nullable = false)
+	private Double shoppingBenefitRate;
+
+	@Column(name = "education_benefit_rate", nullable = false)
+	private Double educationBenefitRate;
+
+	@Column(name = "living_benefit_rate", nullable = false)
+	private Double livingBenefitRate;
+
+	@Column(name = "transport_benefit_rate", nullable = false)
+	private Double transportBenefitRate;
+
+	@Column(name = "culture_benefit_rate", nullable = false)
+	private Double cultureBenefitRate;
+
+	@Column(name = "restaurant_benefit_rate", nullable = false)
+	private Double restaurantBenefitRate;
+
+	@Column(name = "cafe_benefit_rate", nullable = false)
+	private Double cafeBenefitRate;
+
+	@Column(name = "health_benefit_rate", nullable = false)
+	private Double healthBenefitRate;
+
 	@Builder
-	public Card(String cardName, CardType cardType, String cardCompany, Long annualFee) {
+	public Card(
+		String cardName,
+		CardType cardType,
+		String cardCompany,
+		Long annualFee,
+		Double shoppingBenefitRate,
+		Double educationBenefitRate,
+		Double livingBenefitRate,
+		Double transportBenefitRate,
+		Double cultureBenefitRate,
+		Double restaurantBenefitRate,
+		Double cafeBenefitRate,
+		Double healthBenefitRate
+	) {
 		this.cardName = cardName;
 		this.cardType = cardType;
 		this.cardCompany = cardCompany;
 		this.annualFee = annualFee;
+		this.shoppingBenefitRate = shoppingBenefitRate;
+		this.educationBenefitRate = educationBenefitRate;
+		this.livingBenefitRate = livingBenefitRate;
+		this.transportBenefitRate = transportBenefitRate;
+		this.cultureBenefitRate = cultureBenefitRate;
+		this.restaurantBenefitRate = restaurantBenefitRate;
+		this.cafeBenefitRate = cafeBenefitRate;
+		this.healthBenefitRate = healthBenefitRate;
 	}
 }

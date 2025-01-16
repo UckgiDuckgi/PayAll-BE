@@ -46,8 +46,7 @@ public class PaymentService {
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
 
-	public TotalPaymentResponseDto getPayments(HttpServletRequest request, String category, Pageable pageable) {
-		String token = request.getHeader("Authorization").replace("Bearer ", "");
+	public TotalPaymentResponseDto getPayments(String token, String category, Pageable pageable) {
 		String authId = jwtService.extractAuthId(token);
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
@@ -91,7 +90,7 @@ public class PaymentService {
 						.paymentTime(payment.getPaymentTime())
 						.bankName(payment.getAccount().getBankName())
 						.accountName(payment.getAccount().getAccountName())
-						.shootNeed(false)
+						.shootNeed(payment.getPaymentDetails().isEmpty())
 						.build())
 					.collect(Collectors.toList()))
 				.build())
@@ -117,11 +116,14 @@ public class PaymentService {
 		return PaymentMapper.toPaymentDto(payment, paymentDetailDtos);
 	}
 
-	public void uploadPaymentDetail(PaymentDetailInfoRequestDto requestDto) {
+	public void uploadPaymentDetail(String token, PaymentDetailInfoRequestDto requestDto) {
+		String authId = jwtService.extractAuthId(token);
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
 		// Payment 조회
-		Payment payment = paymentRepository.findByPaymentTimeAndPaymentPlace(
-			requestDto.getPaymentTime(), requestDto.getPaymentPlace()
-		).orElseThrow(() -> new IllegalArgumentException("해당 결제를 찾을 수 없습니다."));
+		Payment payment = paymentRepository.findByAccount_User_IdAndPaymentTimeAndPaymentPlace(
+			user.getId(),requestDto.getPaymentTime(), requestDto.getPaymentPlace()
+		);
 
 		// PaymentDetail 생성 및 저장
 		List<PaymentDetail> paymentDetails = requestDto.getPurchaseProductList().stream()

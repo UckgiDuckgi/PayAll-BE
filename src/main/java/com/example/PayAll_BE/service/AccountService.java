@@ -21,13 +21,15 @@ public class AccountService {
 
 	private final AccountRepository accountRepository;
 	private final UserRepository userRepository;
+	private final JwtService jwtService;
 
-	public AccountListResponseDto getUserAccounts(Long userId) {
-		User user = userRepository.findById(userId)
+	public AccountListResponseDto getUserAccounts(String token) {
+		String authId = jwtService.extractAuthId(token);
+		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다."));
 
-		List<Account> accounts = accountRepository.findAllByUserId(userId);
+		List<Account> accounts = accountRepository.findAllByUserId(user.getId());
 
-		return AccountMapper.toAccountListResponseDto(user.getName(), accounts);
+		return AccountMapper.toAccountListResponseDto(user, accounts);
 	}
 }

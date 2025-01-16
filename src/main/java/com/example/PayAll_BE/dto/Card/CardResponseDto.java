@@ -8,9 +8,8 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class CardResponseDto {
-	private Long cardId;
 	private String cardName;
 	private String cardType;
 	private String cardCompany;
-	private Long annualFee;
+	// 연회비, 전월실적, 카테고리별 혜택률...
 }

@@ -7,11 +7,14 @@ public class CardMapper {
 
 	public static CardResponseDto toDto(Card card) {
 		return CardResponseDto.builder()
-			.cardId(card.getCardId())
 			.cardName(card.getCardName())
 			.cardType(card.getCardType().name())
 			.cardCompany(card.getCardCompany())
-			.annualFee(card.getAnnualFee())
+			/*
+			연회비
+			전월실적
+			카테고리별 혜택률 ...
+			 */
 			.build();
 	}
 }

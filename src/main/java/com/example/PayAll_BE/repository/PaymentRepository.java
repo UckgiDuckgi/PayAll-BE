@@ -32,13 +32,12 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		"ORDER BY p.paymentTime DESC")
 	List<Payment> findRecentPaymentsByUserId(@Param("userId") Long userId, Pageable pageable);
 
-	Optional<Payment> findByPaymentTimeAndPaymentPlace(LocalDateTime paymentTime, String paymentPlace);
+	Payment findByAccount_User_IdAndPaymentTimeAndPaymentPlace(
+		Long userId, LocalDateTime paymentTime, String paymentPlace
+	);
 	// List<Payment> findByAccountId(Long accountId);
-	List<Payment> findByAccountUserIdAndCategoryAndPaymentTimeBetween(
-		Long userId,
-		StatisticsCategory category,
-		LocalDateTime startDate,
-		LocalDateTime endDate
+	List<Payment> findByAccount_User_IdAndCategoryAndPaymentTimeBetween(
+		Long userId, StatisticsCategory category, LocalDateTime startDate, LocalDateTime endDate
 	);
 
 	// 특정 결제처와 시간대에 해당하는 결제 내역 가져오기

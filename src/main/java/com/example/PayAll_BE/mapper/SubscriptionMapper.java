@@ -7,9 +7,11 @@ public class SubscriptionMapper {
 
 	public static SubscriptionResponseDto toDto(Subscription subscription) {
 		return SubscriptionResponseDto.builder()
-			.subscriptionId(subscription.getSubscriptionId())
 			.subscriptionName(subscription.getSubscriptionName())
 			.monthlyFee(subscription.getMonthlyFee())
+			/*
+			카테고리 별 혜택률 추가 가능
+			 */
 			.build();
 	}
 }
