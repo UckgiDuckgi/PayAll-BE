@@ -10,11 +10,21 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.dto.CardRecommendationResultDto;
-import com.example.PayAll_BE.entity.CardBenefit;
+import com.example.PayAll_BE.dto.StoreStatisticsDto;
+import com.example.PayAll_BE.entity.Benefit;
 import com.example.PayAll_BE.entity.Payment;
+import com.example.PayAll_BE.entity.Product;
+import com.example.PayAll_BE.entity.Recommendation;
+import com.example.PayAll_BE.entity.Statistics;
+import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.entity.enums.Category;
-import com.example.PayAll_BE.repository.CardBenefitsRepository;
+import com.example.PayAll_BE.repository.BenefitRepository;
+import com.example.PayAll_BE.repository.CardBenefitRepository;
 import com.example.PayAll_BE.repository.PaymentRepository;
+import com.example.PayAll_BE.repository.ProductRepository;
+import com.example.PayAll_BE.repository.RecommendationRepository;
+import com.example.PayAll_BE.repository.StatisticsRepository;
+import com.example.PayAll_BE.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,47 +33,52 @@ import lombok.RequiredArgsConstructor;
 public class RecommendationService {
 
 	private final PaymentRepository paymentRepository;
-	private final CardBenefitsRepository cardBenefitsRepository;
+	private final CardBenefitRepository cardBenefitsRepository;
+	private final UserRepository userRepository;
+	private final BenefitRepository benefitRepository;
+	private final ProductRepository productRepository;
+	private final RecommendationRepository recommendationRepository;
+	private StatisticsRepository statisticsRepository;
 
-	public List<CardRecommendationResultDto> getCardRecommendations(Long accountId) {
-		// 1. 사용자 소비 데이터 조회
-		List<Payment> payments = paymentRepository.findByAccountId(accountId);
+	public void generateBenefits(User user) {
+		List<StoreStatisticsDto> storeStatisticsDtos = paymentRepository.getCategoryStoreStats(user.getId());
 
-		// 2. 카테고리별로 가장 소비가 많은 가맹점 찾기
-		Map<Category, String> topStoresByCategory = payments.stream()
-			.collect(Collectors.groupingBy(
-				Payment::getCategory,
-				Collectors.collectingAndThen(
-					Collectors.maxBy(Comparator.comparing(Payment::getPrice)),
-					optional -> optional.map(Payment::getPaymentPlace).orElse(null)
-				)
-			));
+		List<Statistics> statisticsList = storeStatisticsDtos.stream()
+			.map(dto -> Statistics.builder()
+				.user(user)
+				.category(dto.getCategory())
+				.statisticsAmount(dto.getTotalSpent())
+				.build())
+			.collect(Collectors.toList());
 
-		List<CardRecommendationResultDto> recommendations = new ArrayList<>();
+		statisticsRepository.saveAll(statisticsList);
 
-		// 3. 각 가맹점에 대해 혜택 폭이 가장 큰 카드 찾기 및 할인 금액 계산
-		for (Map.Entry<Category, String> entry : topStoresByCategory.entrySet()) {
-			Category category = entry.getKey();
-			String paymentPlace = entry.getValue();
+		//알맞은 카드는 사용자의 paymentplace를 아니까 paymentplace가 있는 benefit을 찾아서 product를 가져옴
+		List<Recommendation> recommendationList = storeStatisticsDtos.stream()
+			.map(dto -> {
+				Benefit benefit = benefitRepository.findByPaymentPlace(dto.getPaymentPlace())
+					.orElseThrow(() -> new IllegalArgumentException("일치하는 store가 없습니다."));
 
-			// 카드 혜택 조회
-			CardBenefit bestCard = cardBenefitsRepository.findTopByStoreNameOrderByBenefitValueDesc(paymentPlace);
+				Product product = productRepository.findById(benefit.getId())
+					.orElseThrow(() -> new IllegalArgumentException("해당 제품을 찾을 수 없습니다."));
 
-			if (bestCard != null) {
-				// 해당 가맹점의 총 소비 금액 계산
-				long totalSpentAtPlace = payments.stream()
-					.filter(payment -> payment.getPaymentPlace().equals(paymentPlace))
-					.mapToLong(Payment::getPrice)
-					.sum();
+				BigDecimal storeTotalSpent = new BigDecimal(dto.getStoreTotalSpent());
+				long discountAmount = storeTotalSpent
+					.multiply(benefit.getBenefitValue())
+					.longValue(); // 할인 금액 계산
 
-				long discountAmount = (long) (totalSpentAtPlace * (bestCard.getBenefitValue().doubleValue() / 100.0));
+				return Recommendation.builder()
+					.user(user)
+					.storeName(dto.getPaymentPlace())
+					.visitCount(dto.getStorePurchaseCount())
+					.product(product)
+					.discountAmount(discountAmount)
+					.category(dto.getCategory())
+					.build();
+			})
+			.toList();
 
-				// 추천 결과 저장
-				recommendations.add(
-					new CardRecommendationResultDto(bestCard.getCardName(), paymentPlace, discountAmount));
-			}
-		}
-
-		return recommendations;
+		recommendationRepository.saveAll(recommendationList);
 	}
+
 }
