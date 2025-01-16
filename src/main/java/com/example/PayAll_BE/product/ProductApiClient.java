@@ -1,11 +1,19 @@
 package com.example.PayAll_BE.product;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.PayAll_BE.dto.ProductDto;
+import com.example.PayAll_BE.dto.SearchProductDto;
 import com.example.PayAll_BE.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -28,5 +36,20 @@ public class ProductApiClient {
 		}
 
 		return response.getBody();
+	}
+
+	public List<SearchProductDto> searchProducts(String query, int page, int size) {
+
+		String searchApiUrl = String.format("%s/redis/search?page=%d&size=%d&query=%s", baseUrl, page, size,
+			URLEncoder.encode(query, StandardCharsets.UTF_8));
+
+		ResponseEntity<SearchProductDto[]> response = restTemplate.getForEntity(
+			searchApiUrl, SearchProductDto[].class);
+
+		if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+			return Arrays.asList(response.getBody());
+		}
+
+		return Collections.emptyList();
 	}
 }
