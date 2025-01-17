@@ -1,20 +1,29 @@
 package com.example.PayAll_BE.service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.example.PayAll_BE.dto.CardRecommendationResultDto;
-import com.example.PayAll_BE.entity.CardBenefit;
-import com.example.PayAll_BE.entity.Payment;
+import com.example.PayAll_BE.dto.StoreStatisticsDto;
+import com.example.PayAll_BE.entity.Benefit;
+import com.example.PayAll_BE.entity.Product;
+import com.example.PayAll_BE.entity.Recommendation;
+import com.example.PayAll_BE.entity.Statistics;
+import com.example.PayAll_BE.entity.Store;
+import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.entity.enums.Category;
-import com.example.PayAll_BE.repository.CardBenefitsRepository;
+import com.example.PayAll_BE.repository.BenefitRepository;
 import com.example.PayAll_BE.repository.PaymentRepository;
+import com.example.PayAll_BE.repository.ProductRepository;
+import com.example.PayAll_BE.repository.RecommendationRepository;
+import com.example.PayAll_BE.repository.StatisticsRepository;
+import com.example.PayAll_BE.repository.StoreRepository;
+import com.example.PayAll_BE.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,47 +32,83 @@ import lombok.RequiredArgsConstructor;
 public class RecommendationService {
 
 	private final PaymentRepository paymentRepository;
-	private final CardBenefitsRepository cardBenefitsRepository;
+	private final BenefitRepository benefitRepository;
+	private final ProductRepository productRepository;
+	private final RecommendationRepository recommendationRepository;
+	private final StatisticsRepository statisticsRepository;
+	private final StoreRepository storeRepository;
 
-	public List<CardRecommendationResultDto> getCardRecommendations(Long accountId) {
-		// 1. 사용자 소비 데이터 조회
-		List<Payment> payments = paymentRepository.findByAccountId(accountId);
+	public void generateBenefits(User user,String yearMonth) {
+		LocalDateTime startDate = getStartOfMonth(yearMonth).atStartOfDay();
+		LocalDateTime endDate = getEndOfMonth(yearMonth).atStartOfDay();
 
-		// 2. 카테고리별로 가장 소비가 많은 가맹점 찾기
-		Map<Category, String> topStoresByCategory = payments.stream()
-			.collect(Collectors.groupingBy(
-				Payment::getCategory,
-				Collectors.collectingAndThen(
-					Collectors.maxBy(Comparator.comparing(Payment::getPrice)),
-					optional -> optional.map(Payment::getPaymentPlace).orElse(null)
-				)
-			));
+		System.out.println("user = " + user.getId());
+		List<StoreStatisticsDto> storeStatisticsDtos = paymentRepository.getCategoryStoreStats(user.getId(),
+			startDate,endDate);
 
-		List<CardRecommendationResultDto> recommendations = new ArrayList<>();
+		System.out.println("storeStatisticsDtos = " + storeStatisticsDtos);
+		storeStatisticsDtos.stream()
+			.forEach(dto -> System.out.println("Type: " + Category.valueOf(dto.getName())));
 
-		// 3. 각 가맹점에 대해 혜택 폭이 가장 큰 카드 찾기 및 할인 금액 계산
-		for (Map.Entry<Category, String> entry : topStoresByCategory.entrySet()) {
-			Category category = entry.getKey();
-			String paymentPlace = entry.getValue();
+		System.out.println("storeStatisticsDtos = " + storeStatisticsDtos);
 
-			// 카드 혜택 조회
-			CardBenefit bestCard = cardBenefitsRepository.findTopByStoreNameOrderByBenefitValueDesc(paymentPlace);
+		List<Statistics> statisticsList = storeStatisticsDtos.stream()
+			.filter(dto -> dto.getType().equals("CATEGORY")) // 'CATEGORY'인 항목만 필터링
+			.map(dto -> Statistics.builder()
+				.user(user)
+				.category(Category.valueOf(dto.getName()))  // Enum으로 변환
+				.statisticsAmount(dto.getTotalSpent())
+				.statisticsDate(startDate)  // startDate로 통일
+				.build())
+			.collect(Collectors.toList());
+		// 'statisticsList'에 저장
+		statisticsRepository.saveAll(statisticsList);
 
-			if (bestCard != null) {
-				// 해당 가맹점의 총 소비 금액 계산
-				long totalSpentAtPlace = payments.stream()
-					.filter(payment -> payment.getPaymentPlace().equals(paymentPlace))
-					.mapToLong(Payment::getPrice)
-					.sum();
+		List<Recommendation> recommendationList = storeStatisticsDtos.stream()
+			.map(dto -> {
+				Benefit benefit = benefitRepository.findByPaymentPlace(dto.getStore())
+					.orElse(null);
 
-				long discountAmount = (long) (totalSpentAtPlace * (bestCard.getBenefitValue().doubleValue() / 100.0));
+				if (benefit == null) {
+					return null;
+				}
 
-				// 추천 결과 저장
-				recommendations.add(
-					new CardRecommendationResultDto(bestCard.getCardName(), paymentPlace, discountAmount));
-			}
-		}
+				Long discountAmount = dto.getTotalSpent() * benefit.getBenefitValue() / 100;
 
-		return recommendations;
+				return Recommendation.builder()
+					.user(user)
+					.storeName(dto.getStore())
+					.visitCount(dto.getStorePurchaseCount())
+					.product(benefit.getProduct())
+					.discountAmount(discountAmount)
+					.dateTime(startDate)
+					.category(Category.valueOf(dto.getName()))
+					.build();
+			})
+			.filter(Objects::nonNull)  // null인 항목은 필터링
+			.collect(Collectors.toList());
+
+		recommendationRepository.saveAll(recommendationList);
 	}
+
+
+	private LocalDate getStartOfMonth(String yearMonth) {
+		int year = Integer.parseInt(yearMonth.substring(0, 4));
+		int month = Integer.parseInt(yearMonth.substring(4, 6));
+
+		return LocalDate.of(year, month, 1);
+	}
+
+	private LocalDate getEndOfMonth(String yearMonth) {
+		int year = Integer.parseInt(yearMonth.substring(0, 4));
+		int month = Integer.parseInt(yearMonth.substring(4, 6));
+		if (month == 12) {
+			year++;
+			month = 1;
+		} else {
+			month++;
+		}
+		return LocalDate.of(year, month, 1);
+	}
+
 }

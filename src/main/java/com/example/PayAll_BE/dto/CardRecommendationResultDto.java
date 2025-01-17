@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class CardRecommendationResultDto {
 		private String cardName;
 		private String paymentPlace;
