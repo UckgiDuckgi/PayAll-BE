@@ -44,7 +44,7 @@ public class StatisticsService {
 		// 카테고리별 지출 계산
 		List<StatisticsResponseDto.CategoryExpense> categoryExpenses = statistics.stream()
 			.collect(Collectors.groupingBy(
-				Statistics::getStatisticsCategory,
+				Statistics::getCategory,
 				Collectors.summingLong(Statistics::getStatisticsAmount)
 			))
 			.entrySet().stream()
