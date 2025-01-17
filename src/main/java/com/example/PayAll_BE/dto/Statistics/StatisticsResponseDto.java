@@ -33,6 +33,7 @@ public class StatisticsResponseDto {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class FixedExpense {
+		private int fixedId;
 		private String fixedName; // 고정 지출 이름
 		private long amount; // 지출 금액
 		private String dueDate; // 결제일

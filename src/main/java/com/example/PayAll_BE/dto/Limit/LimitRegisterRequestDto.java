@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LimitRequestDto {
+public class LimitRegisterRequestDto {
 	private long limitPrice;
 }
