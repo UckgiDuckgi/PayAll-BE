@@ -80,7 +80,7 @@ public class LimitService {
 		Long lastMonthLimitPrice = lastMonthLimit != null ? lastMonthLimit.getLimitPrice() : null;
 
 		// 현재 소비 금액과 절약 금액은 기본값으로 설정
-		long spentAmount = 0; // 아직 데이터를 가져오는 로직이 없으므로 기본값
+		long spentAmount = 0; // 일단 뒀어요...(추후 구현)
 		long savedAmount = 0; // 소비 목표 - 소비 금액 (추후 계산)
 
 		return LimitResponseDto.builder()

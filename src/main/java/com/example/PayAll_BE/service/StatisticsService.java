@@ -13,7 +13,7 @@ import com.example.PayAll_BE.dto.Statistics.StatisticsResponseDto;
 import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.Statistics;
 import com.example.PayAll_BE.entity.User;
-import com.example.PayAll_BE.entity.enums.StatisticsCategory;
+import com.example.PayAll_BE.entity.enums.Category;
 import com.example.PayAll_BE.repository.PaymentRepository;
 import com.example.PayAll_BE.repository.StatisticsRepository;
 import com.example.PayAll_BE.repository.UserRepository;
@@ -36,7 +36,7 @@ public class StatisticsService {
 		LocalDateTime startDateTime = startDate.atStartOfDay();
 		LocalDateTime endDateTime = startDate.plusMonths(1).atStartOfDay().minusSeconds(1);
 
-		List<Statistics> statistics = statisticsRepository.findByUserIdAndStatisticsDateBetween(1L, startDateTime, endDateTime);
+		List<Statistics> statistics = statisticsRepository.findByUserIdAndStatisticsDateBetween(userId, startDateTime, endDateTime);
 
 		// 총 지출 계산
 		long totalSpent = statistics.stream().mapToLong(Statistics::getStatisticsAmount).sum();
@@ -79,7 +79,7 @@ public class StatisticsService {
 			.build();
 	}
 
-	public StatisticsDetailResponseDto getCategoryDetails(Long userId, StatisticsCategory category, String date) {
+	public StatisticsDetailResponseDto getCategoryDetails(Long userId, Category category, String date) {
 
 		LocalDate startDate = LocalDate.parse(date + "-01");
 		LocalDateTime startDateTime = startDate.atStartOfDay();

@@ -3,7 +3,6 @@ package com.example.PayAll_BE.entity;
 import java.time.LocalDateTime;
 
 import com.example.PayAll_BE.entity.enums.Category;
-import com.example.PayAll_BE.entity.enums.StatisticsCategory;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
