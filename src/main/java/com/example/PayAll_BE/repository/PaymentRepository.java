@@ -114,7 +114,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	List<StoreStatisticsDto> getCategoryStoreStats(@Param("userId") Long userId,
 		@Param("startDate") LocalDateTime startDate,
 		@Param("endDate") LocalDateTime endDate);
-	}
 
 
 	// 결제 내역의 실제 결제처 업데이트
