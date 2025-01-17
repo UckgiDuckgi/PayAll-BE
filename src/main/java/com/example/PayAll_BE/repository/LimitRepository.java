@@ -5,13 +5,13 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.PayAll_BE.entity.Limit;
+import com.example.PayAll_BE.entity.Limits;
 
-public interface LimitRepository extends JpaRepository<Limit, Long> {
+public interface LimitRepository extends JpaRepository<Limits, Long> {
 
-	Optional<Limit> findTopByUser_IdOrderByLimitDateDesc(Long userId);
+	Optional<Limits> findTopByUser_IdOrderByLimitDateDesc(Long userId);
 
-	Optional<Limit> findFirstByUserIdAndLimitDateBetweenOrderByLimitDateDesc(
+	Optional<Limits> findFirstByUserIdAndLimitDateBetweenOrderByLimitDateDesc(
 		Long userId, LocalDateTime startDate, LocalDateTime endDate
 	);
 }

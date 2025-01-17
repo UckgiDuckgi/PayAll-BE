@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Limit {
+public class Limits {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long limitId;

@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.PayAll_BE.dto.ApiResult;
-import com.example.PayAll_BE.dto.Limit.LimitRequestDto;
+import com.example.PayAll_BE.dto.Limit.LimitRegisterRequestDto;
+import com.example.PayAll_BE.dto.Limit.LimitRegisterResponseDto;
 import com.example.PayAll_BE.dto.Limit.LimitResponseDto;
 import com.example.PayAll_BE.service.LimitService;
 
@@ -25,9 +26,9 @@ public class LimitController {
 	@PostMapping
 	public ResponseEntity<ApiResult> registerLimit(
 		@RequestParam Long userId,
-		@RequestBody LimitRequestDto requestDto
+		@RequestBody LimitRegisterRequestDto requestDto
 	) {
-		LimitResponseDto responseDto = limitService.registerLimit(userId, requestDto);
+		LimitRegisterResponseDto responseDto = limitService.registerLimit(userId, requestDto);
 		return ResponseEntity.ok(
 			new ApiResult(200, "OK", "소비 목표 등록 성공", responseDto)
 		);
