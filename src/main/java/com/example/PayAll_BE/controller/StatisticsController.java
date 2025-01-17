@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.Statistics.StatisticsDetailResponseDto;
-import com.example.PayAll_BE.entity.enums.StatisticsCategory;
+import com.example.PayAll_BE.entity.enums.Category;
 import com.example.PayAll_BE.service.StatisticsService;
 
 
@@ -31,7 +31,7 @@ public class StatisticsController {
 
 	@GetMapping("/{category}")
 	public ResponseEntity<ApiResult> getStatisticsDetails(
-		@PathVariable StatisticsCategory category,
+		@PathVariable Category category,
 		@RequestParam Long userId,
 		@RequestParam String date
 	) {

@@ -2,7 +2,7 @@ package com.example.PayAll_BE.entity;
 
 import java.time.LocalDateTime;
 
-import com.example.PayAll_BE.entity.enums.StatisticsCategory;
+import com.example.PayAll_BE.entity.enums.Category;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,7 +34,7 @@ public class Statistics {
 	private User user;
 
 	@Enumerated(EnumType.STRING)
-	private StatisticsCategory statisticsCategory;
+	private Category statisticsCategory;
 
 	@Column(nullable = false)
 	private long statisticsAmount;

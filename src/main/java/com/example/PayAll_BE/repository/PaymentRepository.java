@@ -2,7 +2,6 @@ package com.example.PayAll_BE.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.PayAll_BE.entity.Payment;
-import com.example.PayAll_BE.entity.enums.StatisticsCategory;
+import com.example.PayAll_BE.entity.enums.Category;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
@@ -37,7 +36,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	);
 	// List<Payment> findByAccountId(Long accountId);
 	List<Payment> findByAccount_User_IdAndCategoryAndPaymentTimeBetween(
-		Long userId, StatisticsCategory category, LocalDateTime startDate, LocalDateTime endDate
+		Long userId, Category category, LocalDateTime startDate, LocalDateTime endDate
 	);
 
 	// 특정 결제처와 시간대에 해당하는 결제 내역 가져오기
