@@ -36,7 +36,7 @@ public class StatisticsService {
 		LocalDateTime startDateTime = startDate.atStartOfDay();
 		LocalDateTime endDateTime = startDate.plusMonths(1).atStartOfDay().minusSeconds(1);
 
-		List<Statistics> statistics = statisticsRepository.findByUserIdAndStatisticsDateBetween(1L, startDateTime, endDateTime);
+		List<Statistics> statistics = statisticsRepository.findByUserIdAndStatisticsDateBetween(userId, startDateTime, endDateTime);
 
 		// 총 지출 계산
 		long totalSpent = statistics.stream().mapToLong(Statistics::getStatisticsAmount).sum();
