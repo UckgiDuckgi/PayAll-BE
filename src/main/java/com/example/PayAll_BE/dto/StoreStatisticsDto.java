@@ -1,8 +1,11 @@
 package com.example.PayAll_BE.dto;
 
+import java.math.BigDecimal;
+
 import com.example.PayAll_BE.entity.enums.Category;
 import com.example.PayAll_BE.entity.enums.StatisticsCategory;
 
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,9 +14,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StoreStatisticsDto {
-	private Category category;
-	private Long totalSpent;
-	private String paymentPlace;
-	private Long storeTotalSpent;
-	private Long storePurchaseCount;
+	private String name;                // 카테고리 또는 가게 이름
+	private String store;               // 가게 이름
+	private Long totalSpent;            // 총 소비 금액
+	private Long storePurchaseCount;    // 가게 방문 횟수
+	private String type;                // CATEGORY 또는 STORE
 }

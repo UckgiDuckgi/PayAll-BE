@@ -1,5 +1,6 @@
 package com.example.PayAll_BE.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.CardRecommendationResultDto;
 import com.example.PayAll_BE.entity.User;
+import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.repository.UserRepository;
 import com.example.PayAll_BE.service.JwtService;
 import com.example.PayAll_BE.service.RecommendationService;
@@ -28,10 +30,18 @@ public class RecommendationController {
 	private final JwtService jwtService;
 
 	@GetMapping
-	public ResponseEntity<?> recommend(@RequestHeader("Authorization") String token) {
-		String authId = jwtService.extractAuthId(token);
-		User user = userRepository.findByAuthId(authId);
-		recommendationService.generateBenefits(user);
-		return ResponseEntity.ok((new ApiResult(200,"OK","데이터 적재")));
+	public ResponseEntity<?> recommend(
+		@RequestHeader("Authorization") String token,
+		@RequestParam String yearMonth) {
+		// JWT에서 사용자 인증 정보 추출
+		String authId = jwtService.extractAuthId(token.replace("Bearer ", ""));
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
+
+		// 기간에 맞는 데이터 생성
+		recommendationService.generateBenefits(user,yearMonth);
+
+		// 응답 반환
+		return ResponseEntity.ok(new ApiResult(200, "OK", "데이터 적재 성공"));
 	}
 }

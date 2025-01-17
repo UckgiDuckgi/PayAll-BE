@@ -31,6 +31,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "Payment")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
+@Builder
 public class Payment {
 
 	@Id
@@ -61,15 +62,4 @@ public class Payment {
 
 	@OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<PaymentDetail> paymentDetails = new ArrayList<>();
-
-	@Builder
-	public Payment(Account account, String paymentPlace, Long price, LocalDateTime paymentTime, PaymentType paymentType,
-		Category category) {
-		this.account = account;
-		this.paymentPlace = paymentPlace;
-		this.price = price;
-		this.paymentTime = paymentTime;
-		this.paymentType = paymentType;
-		this.category = category;
-	}
 }

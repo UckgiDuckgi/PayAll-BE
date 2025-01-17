@@ -38,7 +38,7 @@ public class Statistics {
 	private Category category;
 
 	@Column(nullable = false)
-	private long statisticsAmount;
+	private Long statisticsAmount;
 
 	@Column(nullable = false)
 	private LocalDateTime statisticsDate;

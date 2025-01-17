@@ -36,6 +36,6 @@ public class Benefit {
 	private Product product;
 
 	@Column(nullable = false)
-	private BigDecimal benefitValue; // 혜택 비율 (예: 10.00 -> 10%)
+	private Long benefitValue; // 혜택 비율 (예: 10.00 -> 10%)
 
 }
