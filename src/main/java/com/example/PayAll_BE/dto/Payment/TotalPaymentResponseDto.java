@@ -16,4 +16,9 @@ public class TotalPaymentResponseDto {
 	private Long totalBalance;
 	private Long monthPaymentPrice;
 	private List<DayPaymentResponseDto> paymentList;
+	private String bankName;
+	private String accountName;
+	private String accountNumber;
+	private Integer paymentCount;
+	private String category;
 }

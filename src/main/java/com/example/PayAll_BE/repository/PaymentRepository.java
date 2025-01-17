@@ -22,8 +22,13 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	@Query("SELECT p FROM Payment p WHERE p.account.user.id = :userId " +
 		"AND (:category IS NULL OR p.category = :category) " +
 		"ORDER BY p.paymentTime DESC")
-	Page<Payment> findAllByUserIdAndCategory(@Param("userId") Long userId, @Param("category") String category,
-		Pageable pageable);
+	Page<Payment> findAllByUserIdAndCategory(@Param("userId") Long userId, @Param("category") String category, Pageable pageable);
+
+	@Query("SELECT p FROM Payment p WHERE p.account.id = :accountId " +
+		"AND (:category IS NULL OR p.category = :category) " +
+		"ORDER BY p.paymentTime DESC")
+	Page<Payment> findAllByAccountIdAndCategory(@Param("accountId") Long accountId, @Param("category") String category, Pageable pageable);
+
 
 	// 최근 결제 상품 중 조회
 	@Query("SELECT p FROM Payment p " +

@@ -33,9 +33,10 @@ public class PaymentController {
 	public ResponseEntity<ApiResult> getPayments(
 		@RequestHeader("Authorization") String token,
 		@RequestParam(required = false) String category,
+		@RequestParam(required = false) Long accountId,
 		Pageable pageable
 	) {
-		TotalPaymentResponseDto response = paymentService.getPayments(token, category, pageable);
+		TotalPaymentResponseDto response = paymentService.getPayments(token, accountId, category, pageable);
 		return ResponseEntity.ok(new ApiResult(200, "OK", "통합 계좌 거래 내역 조회 성공", response));
 	}
 
