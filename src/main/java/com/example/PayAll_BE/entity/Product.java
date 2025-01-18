@@ -3,8 +3,12 @@ package com.example.PayAll_BE.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.PayAll_BE.entity.enums.ProductType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,7 +38,10 @@ public class Product {
 
 	private String benefitDescription;
 
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private ProductType productType;
+
 	@OneToMany(mappedBy = "product")
 	private List<Benefit> benefits = new ArrayList<>();
-
 }
