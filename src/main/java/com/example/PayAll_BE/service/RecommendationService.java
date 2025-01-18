@@ -75,6 +75,7 @@ public class RecommendationService {
 					.visitCount(dto.getStorePurchaseCount())
 					.product(benefit.getProduct())
 					.discountAmount(discountAmount)
+					.productType(benefit.getProduct().getProductType())
 					.dateTime(startDate)
 					.category(Category.valueOf(dto.getName()))
 					.build();
