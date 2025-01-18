@@ -3,6 +3,7 @@ package com.example.PayAll_BE.entity;
 import java.time.LocalDateTime;
 
 import com.example.PayAll_BE.entity.enums.Category;
+import com.example.PayAll_BE.entity.enums.ProductType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,4 +56,8 @@ public class Recommendation {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_id", nullable = false)
 	private Product product;
+
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private ProductType productType;
 }
