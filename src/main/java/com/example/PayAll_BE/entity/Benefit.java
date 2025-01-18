@@ -3,6 +3,7 @@ package com.example.PayAll_BE.entity;
 import java.math.BigDecimal;
 
 import com.example.PayAll_BE.entity.enums.Category;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,10 +15,11 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -36,6 +38,7 @@ public class Benefit {
 	private Product product;
 
 	@Column(nullable = false)
+	@JsonManagedReference  // 순환 참조 방지
 	private Long benefitValue; // 혜택 비율 (예: 10.00 -> 10%)
 
 }

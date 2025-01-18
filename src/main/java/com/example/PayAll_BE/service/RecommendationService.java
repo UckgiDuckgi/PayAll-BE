@@ -42,15 +42,8 @@ public class RecommendationService {
 		LocalDateTime startDate = getStartOfMonth(yearMonth).atStartOfDay();
 		LocalDateTime endDate = getEndOfMonth(yearMonth).atStartOfDay();
 
-		System.out.println("user = " + user.getId());
 		List<StoreStatisticsDto> storeStatisticsDtos = paymentRepository.getCategoryStoreStats(user.getId(),
 			startDate,endDate);
-
-		System.out.println("storeStatisticsDtos = " + storeStatisticsDtos);
-		storeStatisticsDtos.stream()
-			.forEach(dto -> System.out.println("Type: " + Category.valueOf(dto.getName())));
-
-		System.out.println("storeStatisticsDtos = " + storeStatisticsDtos);
 
 		List<Statistics> statisticsList = storeStatisticsDtos.stream()
 			.filter(dto -> dto.getType().equals("CATEGORY")) // 'CATEGORY'인 항목만 필터링
@@ -75,6 +68,7 @@ public class RecommendationService {
 
 				Long discountAmount = dto.getTotalSpent() * benefit.getBenefitValue() / 100;
 
+				System.out.println("discountAmount = " + benefit);
 				return Recommendation.builder()
 					.user(user)
 					.storeName(dto.getStore())
@@ -88,6 +82,7 @@ public class RecommendationService {
 			.filter(Objects::nonNull)  // null인 항목은 필터링
 			.collect(Collectors.toList());
 
+		System.out.println("recommendationList = " + recommendationList);
 		recommendationRepository.saveAll(recommendationList);
 	}
 
