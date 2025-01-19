@@ -1,12 +1,10 @@
 package com.example.PayAll_BE.mydata.service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.example.PayAll_BE.dto.AccountDto;
 import com.example.PayAll_BE.entity.Account;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.exception.BadRequestException;
@@ -38,10 +36,30 @@ public class MydataService {
 		// 계좌 목록 조회 호출
 		ResponseEntity<AccountListResponseDto> accountList = mydataController.loadMydataAccountList();
 		if (accountList.getBody() != null) {
-			saveAccount(accountList.getBody().getAccountList(), userId);
-			accountList.getBody()
-				.getAccountList()
-				.forEach(account -> syncAccountBasicInfo(account.getAccountNum(), userId));
+			accountList.getBody().getAccountList().forEach(accountDto -> {
+				Account checkAccount = accountRepository.findByUserIdAndAccountNumber(userId,
+					accountDto.getAccountNum()).orElse(null);
+				// 새로운 account이면 db 저장
+				if (checkAccount == null) {
+					User user = userRepository.findById(userId)
+						.orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다."));
+					Account account = Account.builder()
+						.user(user)
+						.bankName(getBankNameByAccountNum(accountDto.getAccountNum()))
+						.accountName(accountDto.getAccountName())
+						.accountNumber(accountDto.getAccountNum())
+						.balance(0L)   // 처음엔 0으로 해두고 계좌 정보 조회 호출해서 update
+						.build();
+					accountRepository.save(account);
+
+					syncAccountBasicInfo(accountDto.getAccountNum(), userId);
+				}
+
+				// 기존 계좌가 있다면 balance만 update
+				syncAccountBasicInfo(accountDto.getAccountNum(), userId);
+
+			});
+
 		}
 	}
 
@@ -61,22 +79,6 @@ public class MydataService {
 			account.setBalance(balance);
 			accountRepository.save(account);
 		}
-	}
-
-	// account db 저장
-	private void saveAccount(List<AccountDto> accounts, Long userId) {
-		User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다."));
-		List<Account> accountList = accounts.stream()
-			.map(account -> Account.builder()
-				.user(user)
-				.bankName(getBankNameByAccountNum(account.getAccountNum()))
-				.accountName(account.getAccountName())
-				.accountNumber(account.getAccountNum())
-				.balance(0L)   // 처음엔 0으로 해두고 계좌 정보 조회 호출해서 update
-				.build())
-			.toList();
-
-		accountRepository.saveAll(accountList);
 	}
 
 	// 계좌번호 앞 3자리 기준으로 은행명 조회
