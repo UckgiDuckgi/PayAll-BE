@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.example.PayAll_BE.dto.RecommendationResponseDto;
 import com.example.PayAll_BE.dto.StoreStatisticsDto;
 import com.example.PayAll_BE.entity.Benefit;
-import com.example.PayAll_BE.entity.Product;
 import com.example.PayAll_BE.entity.Recommendation;
 import com.example.PayAll_BE.entity.Statistics;
-import com.example.PayAll_BE.entity.Store;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.entity.enums.Category;
 import com.example.PayAll_BE.repository.BenefitRepository;
@@ -23,7 +23,6 @@ import com.example.PayAll_BE.repository.ProductRepository;
 import com.example.PayAll_BE.repository.RecommendationRepository;
 import com.example.PayAll_BE.repository.StatisticsRepository;
 import com.example.PayAll_BE.repository.StoreRepository;
-import com.example.PayAll_BE.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,10 +32,8 @@ public class RecommendationService {
 
 	private final PaymentRepository paymentRepository;
 	private final BenefitRepository benefitRepository;
-	private final ProductRepository productRepository;
 	private final RecommendationRepository recommendationRepository;
 	private final StatisticsRepository statisticsRepository;
-	private final StoreRepository storeRepository;
 
 	public void generateBenefits(User user,String yearMonth) {
 		LocalDateTime startDate = getStartOfMonth(yearMonth).atStartOfDay();
@@ -85,6 +82,25 @@ public class RecommendationService {
 
 		System.out.println("recommendationList = " + recommendationList);
 		recommendationRepository.saveAll(recommendationList);
+	}
+
+	public List<RecommendationResponseDto> getRecommendation(User user){
+		// 유저의 추천 정보 리스트 조회
+		List<Recommendation> recommendations = recommendationRepository.findByUser(user);
+
+		// Recommendation 엔티티를 RecommendationDto로 변환
+		List<RecommendationResponseDto> recommendationDtos = recommendations.stream()
+			.map(dto -> RecommendationResponseDto.builder()
+				.storeName(dto.getStoreName())
+				.discountAmount(dto.getDiscountAmount())
+				.productName(dto.getProduct().getProductName())
+				.category(dto.getCategory())
+				.productType(dto.getProductType())
+				.build(
+				))
+			.collect(Collectors.toList());
+
+		return recommendationDtos;
 	}
 
 
