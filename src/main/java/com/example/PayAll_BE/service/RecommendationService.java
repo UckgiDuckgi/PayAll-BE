@@ -3,26 +3,28 @@ package com.example.PayAll_BE.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.example.PayAll_BE.dto.ProductResponseDto;
 import com.example.PayAll_BE.dto.RecommendationResponseDto;
 import com.example.PayAll_BE.dto.StoreStatisticsDto;
 import com.example.PayAll_BE.entity.Benefit;
+import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.Recommendation;
 import com.example.PayAll_BE.entity.Statistics;
+import com.example.PayAll_BE.entity.Store;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.entity.enums.Category;
+import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.repository.BenefitRepository;
 import com.example.PayAll_BE.repository.PaymentRepository;
-import com.example.PayAll_BE.repository.ProductRepository;
 import com.example.PayAll_BE.repository.RecommendationRepository;
 import com.example.PayAll_BE.repository.StatisticsRepository;
-import com.example.PayAll_BE.repository.StoreRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,12 +37,12 @@ public class RecommendationService {
 	private final RecommendationRepository recommendationRepository;
 	private final StatisticsRepository statisticsRepository;
 
-	public void generateBenefits(User user,String yearMonth) {
-		LocalDateTime startDate = getStartOfMonth(yearMonth).atStartOfDay();
-		LocalDateTime endDate = getEndOfMonth(yearMonth).atStartOfDay();
+	public void generateBenefits(User user, String yearMonth) {
+		LocalDateTime startDate = getStartOfMonthWithyearMonth(yearMonth).atStartOfDay();
+		LocalDateTime endDate = getEndOfMonthWithyearMonth(yearMonth).atStartOfDay();
 
 		List<StoreStatisticsDto> storeStatisticsDtos = paymentRepository.getCategoryStoreStats(user.getId(),
-			startDate,endDate);
+			startDate, endDate);
 
 		List<Statistics> statisticsList = storeStatisticsDtos.stream()
 			.filter(dto -> dto.getType().equals("CATEGORY")) // 'CATEGORY'인 항목만 필터링
@@ -84,11 +86,9 @@ public class RecommendationService {
 		recommendationRepository.saveAll(recommendationList);
 	}
 
-	public List<RecommendationResponseDto> getRecommendation(User user){
-		// 유저의 추천 정보 리스트 조회
+	public List<RecommendationResponseDto> getRecommendation(User user) {
 		List<Recommendation> recommendations = recommendationRepository.findByUser(user);
 
-		// Recommendation 엔티티를 RecommendationDto로 변환
 		List<RecommendationResponseDto> recommendationDtos = recommendations.stream()
 			.map(dto -> RecommendationResponseDto.builder()
 				.storeName(dto.getStoreName())
@@ -103,15 +103,55 @@ public class RecommendationService {
 		return recommendationDtos;
 	}
 
+	public List<ProductResponseDto> calculateDiscount(User user, Long productId) {
+		LocalDateTime startDate = getStartOfLastMonth();
+		LocalDateTime endDate = getEndOfLastMonth();
 
-	private LocalDate getStartOfMonth(String yearMonth) {
+		List<Object[]> benefitsWithStores = benefitRepository.findBenefitsWithStoresByProductId(productId);
+
+		List<ProductResponseDto> responseList = new ArrayList<>();
+
+		Long totalDiscount = 0L;
+
+		for (Object[] result : benefitsWithStores) {
+			Benefit benefit = (Benefit)result[0];
+			Store store = (Store)result[1];
+
+			List<Payment> payments = paymentRepository.findByUserAndPaymentPlace(user.getId(), store.getStoreName(),startDate,endDate);
+
+			if (payments.isEmpty()) {
+				continue;
+			}
+
+			Long totalSpent = payments.stream()
+				.mapToLong(Payment::getPrice)
+				.sum();
+
+			Long discountAmount = totalSpent * benefit.getBenefitValue() / 100;
+			totalDiscount += discountAmount;
+
+			ProductResponseDto responseDto = ProductResponseDto.builder()
+				.productName(benefit.getProduct().getProductName())
+				.benefitDescription(benefit.getProduct().getBenefitDescription())
+				.category(store.getCategory())
+				.storeName(store.getStoreName())
+				.discountAmount(discountAmount)
+				.visitCount(payments.size())
+				.build();
+
+			responseList.add(responseDto);
+		}
+		return responseList;
+	}
+
+	private LocalDate getStartOfMonthWithyearMonth(String yearMonth) {
 		int year = Integer.parseInt(yearMonth.substring(0, 4));
 		int month = Integer.parseInt(yearMonth.substring(4, 6));
 
 		return LocalDate.of(year, month, 1);
 	}
 
-	private LocalDate getEndOfMonth(String yearMonth) {
+	private LocalDate getEndOfMonthWithyearMonth(String yearMonth) {
 		int year = Integer.parseInt(yearMonth.substring(0, 4));
 		int month = Integer.parseInt(yearMonth.substring(4, 6));
 		if (month == 12) {
@@ -121,6 +161,18 @@ public class RecommendationService {
 			month++;
 		}
 		return LocalDate.of(year, month, 1);
+	}
+
+	private LocalDateTime getStartOfLastMonth() {
+		LocalDate now = LocalDate.now();
+		LocalDate firstDayOfLastMonth = now.minusMonths(1).withDayOfMonth(1);
+		return firstDayOfLastMonth.atStartOfDay();
+	}
+
+	private LocalDateTime getEndOfLastMonth() {
+		LocalDate now = LocalDate.now();
+		LocalDate lastDayOfLastMonth = now.minusMonths(1).withDayOfMonth(now.minusMonths(1).lengthOfMonth());
+		return lastDayOfLastMonth.atTime(23, 59, 59, 999999999); // 마지막 시간까지
 	}
 
 }
