@@ -25,6 +25,7 @@ import com.example.PayAll_BE.repository.AccountRepository;
 import com.example.PayAll_BE.repository.PaymentRepository;
 import com.example.PayAll_BE.repository.UserRepository;
 import com.example.PayAll_BE.service.CategoryService;
+import com.example.PayAll_BE.service.JwtService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,15 +37,18 @@ public class MydataService {
 	private final PaymentRepository paymentRepository;
 	private final UserRepository userRepository;
 	private final CategoryService categoryService;
+	private final JwtService jwtService;
 
 	public Object getAccountList(String authorization, String transactionId, String apiType, String orgCode,
 		String searchTimestamp, String nextPage, int limit) {
 		return null;
 	}
 
-	public void syncMydataInfo(Long userId) {
+	public void syncMydataInfo(String token) {
+		Long userId = jwtService.extractUserId(token.replace("Bearer ", ""));
+
 		// 계좌 목록 조회 호출
-		ResponseEntity<AccountListResponseDto> accountList = mydataController.loadMydataAccountList();
+		ResponseEntity<AccountListResponseDto> accountList = mydataController.loadMydataAccountList(token);
 		if (accountList.getBody() != null) {
 			accountList.getBody().getAccountList().forEach(accountDto -> {
 				Account checkAccount = accountRepository.findByUserIdAndAccountNumber(userId,
@@ -70,6 +74,7 @@ public class MydataService {
 
 				// 거래 내역 호출 및 update
 				String fromDate = accountList.getBody().getSearchTimestamp();
+				System.out.println("fromDate = " + fromDate);
 				syncAccountTransactions(accountDto.getAccountNum(), fromDate, userId);
 			});
 

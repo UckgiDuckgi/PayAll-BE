@@ -17,7 +17,7 @@ public class TestController {
 
 	@GetMapping("/mydata/test")
 	public void getTest(@RequestHeader("Authorization") String token) {
-		Long userID = jwtService.extractUserId(token.replace("Bearer ", ""));
-		mydataService.syncMydataInfo(userID);
+		// Long userID = jwtService.extractUserId(token.replace("Bearer ", ""));
+		mydataService.syncMydataInfo(token);
 	}
 }

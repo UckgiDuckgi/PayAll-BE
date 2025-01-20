@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +19,7 @@ import com.example.PayAll_BE.mydata.dto.AccountRequestDto;
 import com.example.PayAll_BE.mydata.dto.AccountResponseDto;
 import com.example.PayAll_BE.mydata.dto.TransactionRequestDto;
 import com.example.PayAll_BE.mydata.dto.TransactionResponseDto;
+import com.example.PayAll_BE.service.JwtService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,16 +29,17 @@ import lombok.RequiredArgsConstructor;
 public class MydataController {
 
 	private final RestTemplate restTemplate;
+	private final JwtService jwtService;
 
 	@Value("${server1.base-url}")
 	private String server1BaseUrl;
 
 	@GetMapping("/load")
-	public ResponseEntity<AccountListResponseDto> loadMydataAccountList() {
+	public ResponseEntity<AccountListResponseDto> loadMydataAccountList(@RequestHeader("Authorization") String token) {
 		String url = server1BaseUrl + "api/accounts";
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", "Bearer my-test-token");
+		headers.set("Authorization", token);
 		headers.set("x-api-tran-id", "12345");
 		headers.set("x-api-type", "REGULAR");
 		headers.set("org_code", "98765");
