@@ -1,6 +1,5 @@
 package com.example.PayAll_BE.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ import com.example.PayAll_BE.entity.Statistics;
 import com.example.PayAll_BE.entity.Store;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.entity.enums.Category;
-import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.repository.BenefitRepository;
 import com.example.PayAll_BE.repository.PaymentRepository;
 import com.example.PayAll_BE.repository.RecommendationRepository;
@@ -117,7 +115,8 @@ public class RecommendationService {
 			Benefit benefit = (Benefit)result[0];
 			Store store = (Store)result[1];
 
-			List<Payment> payments = paymentRepository.findByUserAndPaymentPlace(user.getId(), store.getStoreName(),startDate,endDate);
+			List<Payment> payments = paymentRepository.findByUserAndPaymentPlace(user.getId(), store.getStoreName(),
+				startDate, endDate);
 
 			if (payments.isEmpty()) {
 				continue;

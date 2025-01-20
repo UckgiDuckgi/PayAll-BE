@@ -1,6 +1,5 @@
 package com.example.PayAll_BE.controller;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.PayAll_BE.dto.ApiResult;
-import com.example.PayAll_BE.dto.CardRecommendationResultDto;
 import com.example.PayAll_BE.dto.RecommendationResponseDto;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.exception.UnauthorizedException;

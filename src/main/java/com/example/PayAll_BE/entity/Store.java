@@ -34,5 +34,6 @@ public class Store {
 	private Category category;
 
 	@OneToMany(mappedBy = "store")
+	@Builder.Default
 	private List<Benefit> benefits = new ArrayList<>();
 }
