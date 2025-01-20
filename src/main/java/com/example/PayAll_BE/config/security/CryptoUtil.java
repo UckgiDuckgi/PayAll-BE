@@ -6,9 +6,14 @@ import java.util.Base64;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import jakarta.annotation.PostConstruct;
+
 public class CryptoUtil {
-	@Value("${Crypto.SecretKey}")
 	private static String SECRET_KEY;
+
+	public static void setSecretKey(String secretKey) {
+		SECRET_KEY = secretKey;
+	}
 
 	public static String encrypt(String input) throws Exception {
 		SecretKeySpec keySpec = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");

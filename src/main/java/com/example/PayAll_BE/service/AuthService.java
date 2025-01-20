@@ -19,6 +19,7 @@ import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.repository.UserRepository;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -162,8 +163,18 @@ public class AuthService {
 			.naverPassword(CryptoUtil.encrypt(request.getNaverPassword()))
 			.build();
 
-
 		userRepository.save(updatedUser);
-
+	}
+	// 쿠키에서 특정 이름의 값을 찾는 메서드
+	public String getCookieValue(HttpServletRequest request, String cookieName) {
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if (cookie.getName().equals(cookieName)) {
+					return cookie.getValue();
+				}
+			}
+		}
+		return null;
 	}
 }
