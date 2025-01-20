@@ -3,10 +3,18 @@ package com.example.PayAll_BE.config.security;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
-public class CryptoUtil {
-	private static final String SECRET_KEY = "MySecretKey12345"; // 16바이트 키 (128비트)
 
-	// AES 암호화
+import org.springframework.beans.factory.annotation.Value;
+
+import jakarta.annotation.PostConstruct;
+
+public class CryptoUtil {
+	private static String SECRET_KEY;
+
+	public static void setSecretKey(String secretKey) {
+		SECRET_KEY = secretKey;
+	}
+
 	public static String encrypt(String input) throws Exception {
 		SecretKeySpec keySpec = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
 		Cipher cipher = Cipher.getInstance("AES");
@@ -15,7 +23,6 @@ public class CryptoUtil {
 		return Base64.getEncoder().encodeToString(encryptedBytes);
 	}
 
-	// AES 복호화
 	public static String decrypt(String encryptedInput) throws Exception {
 		SecretKeySpec keySpec = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
 		Cipher cipher = Cipher.getInstance("AES");
