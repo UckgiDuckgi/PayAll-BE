@@ -130,4 +130,32 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	@Modifying
 	@Query("UPDATE Payment p SET p.paymentPlace = :newPaymentPlace WHERE p.id = :paymentId ")
 	int updatePaymentPlace(@Param("paymentId") Long paymentId, @Param("newPaymentPlace") String newPaymentPlace);
+
+	// 고정 지출 계산 로직
+	@Query("SELECT p FROM Payment p " +
+		"WHERE p.account.user.id = :userId " +
+		"AND p.paymentTime BETWEEN :startDate AND :endDate " +
+		"AND EXISTS (" +
+		"    SELECT 1 FROM Payment p2 " +
+		"    WHERE p2.account.user.id = :userId " +
+		"    AND p2.paymentTime BETWEEN :lastMonthStart AND :lastMonthEnd " +
+		"    AND p2.paymentPlace = p.paymentPlace " +
+		"    AND p2.price = p.price " +
+		") " +
+		"AND EXISTS (" +
+		"    SELECT 1 FROM Payment p3 " +
+		"    WHERE p3.account.user.id = :userId " +
+		"    AND p3.paymentTime BETWEEN :twoMonthsAgoStart AND :twoMonthsAgoEnd " +
+		"    AND p3.paymentPlace = p.paymentPlace " +
+		"    AND p3.price = p.price " +
+		")")
+	List<Payment> findFixedExpenses(
+		@Param("userId") Long userId,
+		@Param("startDate") LocalDateTime startDate,
+		@Param("endDate") LocalDateTime endDate,
+		@Param("lastMonthStart") LocalDateTime lastMonthStart,
+		@Param("lastMonthEnd") LocalDateTime lastMonthEnd,
+		@Param("twoMonthsAgoStart") LocalDateTime twoMonthsAgoStart,
+		@Param("twoMonthsAgoEnd") LocalDateTime twoMonthsAgoEnd
+	);
 }
