@@ -16,6 +16,8 @@ import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.repository.UserRepository;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -119,5 +121,15 @@ public class AuthService {
 			.orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
 		return generateTokens(authId, user.getName(), userId);
+	}
+
+	public void setRefreshTokenCookie(String refreshToken, HttpServletResponse response) {
+		Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+		refreshTokenCookie.setHttpOnly(true);
+		refreshTokenCookie.setSecure(true);
+		refreshTokenCookie.setPath("/");
+		refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30);
+
+		response.addCookie(refreshTokenCookie);
 	}
 }

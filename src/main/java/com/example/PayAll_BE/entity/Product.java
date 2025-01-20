@@ -43,5 +43,6 @@ public class Product {
 	private ProductType productType;
 
 	@OneToMany(mappedBy = "product")
+	@Builder.Default
 	private List<Benefit> benefits = new ArrayList<>();
 }

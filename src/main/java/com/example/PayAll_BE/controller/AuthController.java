@@ -20,6 +20,8 @@ import com.example.PayAll_BE.exception.BadRequestException;
 import com.example.PayAll_BE.service.AuthService;
 import com.example.PayAll_BE.service.JwtService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +34,12 @@ public class AuthController {
 	private final JwtService jwtService;
 
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody AuthRequestDto request) {
-		return ResponseEntity.ok(authService.login(request));
+	public ResponseEntity<?> login(@RequestBody AuthRequestDto request, HttpServletResponse response) {
+		AuthResponseDto authResponse = authService.login(request);
+
+		authService.setRefreshTokenCookie(authResponse.getRefreshToken(), response);
+
+		return ResponseEntity.ok(authResponse);
 	}
 
 	@PostMapping("/register")
@@ -42,17 +48,21 @@ public class AuthController {
 			throw new BadRequestException("올바른 비밀번호를 입력해주세요.");
 		}
 		authService.register(request);
-		return ResponseEntity.ok(new ApiResult(200,"OK","회원가입이 완료되었습니다."));
+		return ResponseEntity.ok(new ApiResult(200, "OK", "회원가입이 완료되었습니다."));
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<ApiResult> refreshToken(@RequestBody RefreshTokenRequestDto request) {
-			AuthResponseDto newTokens = authService.refreshToken(request.getRefreshToken());
-			return ResponseEntity.ok(new ApiResult(200, "OK", "토큰 갱신 성공", newTokens));
+	public ResponseEntity<ApiResult> refreshToken(@RequestBody RefreshTokenRequestDto request,
+		HttpServletResponse response) {
+		AuthResponseDto newTokens = authService.refreshToken(request.getRefreshToken());
+
+		authService.setRefreshTokenCookie(newTokens.getRefreshToken(), response);
+
+		return ResponseEntity.ok(new ApiResult(200, "OK", "토큰 갱신 성공", newTokens));
 	}
 
 	@GetMapping("/test")
-	public String test(@RequestHeader("Authorization") String token){
+	public String test(@RequestHeader("Authorization") String token) {
 		String userId = jwtService.extractAuthId(token.replace("Bearer ", ""));
 		System.out.println("userId = " + userId);
 		return userId;

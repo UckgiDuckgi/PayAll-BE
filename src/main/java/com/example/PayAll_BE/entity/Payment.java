@@ -68,5 +68,6 @@ public class Payment {
 	private Category category;
 
 	@OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<PaymentDetail> paymentDetails = new ArrayList<>();
 }
