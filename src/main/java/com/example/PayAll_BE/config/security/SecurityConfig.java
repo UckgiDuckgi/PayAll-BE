@@ -31,6 +31,7 @@ public class SecurityConfig {
 		return new JwtAuthenticationFilter(jwtService, redisService);
 	}
 
+	//
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
@@ -48,8 +49,8 @@ public class SecurityConfig {
 				).permitAll()
 				.requestMatchers(
 					"/",
-					"/auth/sign-in",
-					"/auth/sign-up",
+					"/api/auth/sign-in",
+					"/api/auth/sign-up",
 					"/api/cert/**",
 					"/ws/**",           // WebSocket 엔드포인트 추가
 					"/ws"              // WebSocket 기본 경로 추가
