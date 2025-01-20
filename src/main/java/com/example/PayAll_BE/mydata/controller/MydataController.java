@@ -1,14 +1,15 @@
 package com.example.PayAll_BE.mydata.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -41,7 +42,8 @@ public class MydataController {
 		headers.set("org_code", "98765");
 
 		UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
-			.queryParam("next_page", 1)
+			// .queryParam("next_page", 1)
+			// .queryParam("search_timestamp", "0")
 			.queryParam("limit", 3);
 
 		HttpEntity<Void> entity = new HttpEntity<>(headers);
