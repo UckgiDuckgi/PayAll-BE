@@ -26,17 +26,19 @@ public class StatisticsService {
 	private final StatisticsRepository statisticsRepository;
 	private final PaymentRepository paymentRepository;
 	private final UserRepository userRepository;
+	private final JwtService jwtService;
 
-	public StatisticsResponseDto getStatistics(Long userId, String date) {
+	public StatisticsResponseDto getStatistics(String token, String date) {
 
-		User user = userRepository.findById(userId)
+		String authId = jwtService.extractAuthId(token);
+		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
 		LocalDate startDate = LocalDate.parse(date + "-01");
 		LocalDateTime startDateTime = startDate.atStartOfDay();
 		LocalDateTime endDateTime = startDate.plusMonths(1).atStartOfDay().minusSeconds(1);
 
-		List<Statistics> statistics = statisticsRepository.findByUserIdAndStatisticsDateBetween(userId, startDateTime, endDateTime);
+		List<Statistics> statistics = statisticsRepository.findByUserIdAndStatisticsDateBetween(user.getId(), startDateTime, endDateTime);
 
 		// 총 지출 계산
 		long totalSpent = statistics.stream().mapToLong(Statistics::getStatisticsAmount).sum();
@@ -64,9 +66,34 @@ public class StatisticsService {
 		LocalDateTime previousEndDateTime = previousMonthStart.plusMonths(1).atStartOfDay().minusSeconds(1);
 
 		List<Statistics> previousStatistics = statisticsRepository.findByUserIdAndStatisticsDateBetween(
-			userId, previousStartDateTime, previousEndDateTime);
+			user.getId(), previousStartDateTime, previousEndDateTime);
 		long previousTotalSpent = previousStatistics.stream().mapToLong(Statistics::getStatisticsAmount).sum();
 		long difference = totalSpent - previousTotalSpent;
+
+		// 고정 지출 데이터 조회
+		LocalDateTime lastMonthStart = startDate.minusMonths(1).atStartOfDay();
+		LocalDateTime lastMonthEnd = lastMonthStart.plusMonths(1).minusSeconds(1);
+		LocalDateTime twoMonthsAgoStart = startDate.minusMonths(2).atStartOfDay();
+		LocalDateTime twoMonthsAgoEnd = twoMonthsAgoStart.plusMonths(1).minusSeconds(1);
+
+		List<Payment> fixedPayments = paymentRepository.findFixedExpenses(
+			user.getId(),
+			startDateTime,
+			endDateTime,
+			lastMonthStart,
+			lastMonthEnd,
+			twoMonthsAgoStart,
+			twoMonthsAgoEnd
+		);
+
+		List<StatisticsResponseDto.FixedExpense> fixedExpenses = fixedPayments.stream()
+			.map(payment -> new StatisticsResponseDto.FixedExpense(
+				payment.getId().intValue(),
+				payment.getPaymentPlace(),
+				payment.getPrice(),
+				payment.getPaymentTime().toLocalDate().toString()
+			))
+			.toList();
 
 		return StatisticsResponseDto.builder()
 			.name(user.getName())
@@ -75,7 +102,7 @@ public class StatisticsService {
 			.dateAverage(dateAverage) // 하루 평균 지출
 			.difference(difference) // 전월 대비 차이
 			.categoryExpenses(categoryExpenses)
-			.fixedExpenses(null) // 고정 지출(일단 비움)
+			.fixedExpenses(fixedExpenses) // 고정 지출
 			.build();
 	}
 
