@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.AuthRequestDto;
 import com.example.PayAll_BE.dto.AuthResponseDto;
+import com.example.PayAll_BE.dto.PlatformRequestDto;
 import com.example.PayAll_BE.dto.RefreshTokenRequestDto;
 import com.example.PayAll_BE.dto.RegisterRequestDto;
 import com.example.PayAll_BE.exception.BadRequestException;
@@ -58,7 +59,26 @@ public class AuthController {
 	@GetMapping("/test")
 	public String test(@RequestHeader("Authorization") String token) {
 		String userId = jwtService.extractAuthId(token.replace("Bearer ", ""));
-		System.out.println("userId = " + userId);
 		return userId;
 	}
+
+	@PostMapping("platform")
+	public ResponseEntity<ApiResult> setPlatform(@RequestHeader("Authorization") String token,@RequestBody PlatformRequestDto request) throws
+		Exception {
+		String authId = jwtService.extractAuthId(token.replace("Bearer ", ""));
+
+		authService.updatePlatformInfo(authId,request);
+
+		return ResponseEntity.ok(new ApiResult(200, "OK", "플랫폼 계정 등록에 성공하였습니다."));
+	}
+
+	// @GetMapping("platform")
+	// public ResponseEntity<ApiResult> getPlatform(@RequestHeader("Authorization") String token,@RequestBody PlatformRequestDto request) throws
+	// 	Exception {
+	// 	String authId = jwtService.extractAuthId(token.replace("Bearer ", ""));
+	//
+	// 	authService.updatePlatformInfo(authId,request);
+	//
+	// 	return ResponseEntity.ok(new ApiResult(200, "OK", "플랫폼 계정 등록에 성공하였습니다."));
+	// }
 }

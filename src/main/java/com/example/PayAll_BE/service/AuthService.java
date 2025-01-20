@@ -9,6 +9,7 @@ import com.example.PayAll_BE.config.security.CryptoUtil;
 import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.AuthRequestDto;
 import com.example.PayAll_BE.dto.AuthResponseDto;
+import com.example.PayAll_BE.dto.PlatformRequestDto;
 import com.example.PayAll_BE.dto.RegisterRequestDto;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.exception.BadRequestException;
@@ -132,5 +133,30 @@ public class AuthService {
 		refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30);
 
 		response.addCookie(refreshTokenCookie);
+	}
+
+	public void updatePlatformInfo(String authId, PlatformRequestDto request) throws Exception {
+
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new NotFoundException("User not found"));
+
+		User updatedUser = User.builder()
+			.id(user.getId())
+			.name(user.getName())
+			.authId(user.getAuthId())
+			.password(user.getPassword())
+			.phone(user.getPhone())
+			.address(user.getAddress())
+			.coupangId(CryptoUtil.encrypt(request.getCoupangId()))
+			.coupangPassword(CryptoUtil.encrypt(request.getCoupangPassword()))
+			.elevenstId(CryptoUtil.encrypt(request.getElevenstId()))
+			.elevenstPassword(CryptoUtil.encrypt(request.getElevenstPassword()))
+			.naverId(CryptoUtil.encrypt(request.getNaverId()))
+			.naverPassword(CryptoUtil.encrypt(request.getNaverPassword()))
+			.build();
+
+
+		userRepository.save(updatedUser);
+
 	}
 }
