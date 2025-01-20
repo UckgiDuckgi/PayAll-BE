@@ -34,8 +34,4 @@ public class User {
 
 	private String phone;
 	private String address;
-
-	// @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	// private List<Cart> carts = new ArrayList<>();
-
 }
