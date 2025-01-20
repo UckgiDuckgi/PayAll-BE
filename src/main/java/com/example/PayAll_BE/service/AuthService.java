@@ -5,9 +5,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.example.PayAll_BE.config.security.CryptoUtil;
 import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.AuthRequestDto;
 import com.example.PayAll_BE.dto.AuthResponseDto;
+import com.example.PayAll_BE.dto.PlatformRequestDto;
 import com.example.PayAll_BE.dto.RegisterRequestDto;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.exception.BadRequestException;
@@ -36,12 +38,12 @@ public class AuthService {
 	private final JwtService jwtService;
 	private final RedisService redisService;
 
-	public AuthResponseDto login(AuthRequestDto request) {
+	public AuthResponseDto login(AuthRequestDto request) throws Exception {
 		User user = userRepository.findByAuthId(request.getAuthId())
-			.orElseThrow(() -> new NotFoundException("로그인 : User not found"));
+			.orElseThrow(() -> new NotFoundException("로그인 : Id에 맞는 유저를 찾을 수 없습니다."));
 
-		if (!user.getPassword().equals(request.getPassword())) {
-			throw new UnauthorizedException("로그인 : Invalid password");
+		if (!CryptoUtil.decrypt(user.getPassword()).equals(request.getPassword())) {
+			throw new UnauthorizedException("로그인 : 잘못된 비밀번호 입니다.");
 		}
 
 		return generateTokens(user.getAuthId(), user.getName(), user.getId());
@@ -55,9 +57,6 @@ public class AuthService {
 		redisService.saveRefreshToken(authId, refreshToken, refreshTokenExpiration);
 
 		return AuthResponseDto.builder()
-			.code(200)
-			.status("OK")
-			.message("로그인이 완료되었습니다.")
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
 			.build();
@@ -92,7 +91,7 @@ public class AuthService {
 				.name(request.getName())
 				.phone(formattedPhone)
 				.address(request.getAddress())
-				.password(request.getPassword())
+				.password(CryptoUtil.encrypt(request.getPassword())) // 암호화 후 저장
 				.build();
 
 			userRepository.save(newUser);
@@ -131,5 +130,30 @@ public class AuthService {
 		refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30);
 
 		response.addCookie(refreshTokenCookie);
+	}
+
+	public void updatePlatformInfo(String authId, PlatformRequestDto request) throws Exception {
+
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new NotFoundException("User not found"));
+
+		User updatedUser = User.builder()
+			.id(user.getId())
+			.name(user.getName())
+			.authId(user.getAuthId())
+			.password(user.getPassword())
+			.phone(user.getPhone())
+			.address(user.getAddress())
+			.coupangId(CryptoUtil.encrypt(request.getCoupangId()))
+			.coupangPassword(CryptoUtil.encrypt(request.getCoupangPassword()))
+			.elevenstId(CryptoUtil.encrypt(request.getElevenstId()))
+			.elevenstPassword(CryptoUtil.encrypt(request.getElevenstPassword()))
+			.naverId(CryptoUtil.encrypt(request.getNaverId()))
+			.naverPassword(CryptoUtil.encrypt(request.getNaverPassword()))
+			.build();
+
+
+		userRepository.save(updatedUser);
+
 	}
 }

@@ -35,7 +35,21 @@ public class User {
 	private String phone;
 	private String address;
 
-	// @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	// private List<Cart> carts = new ArrayList<>();
+	@Column(name = "coupang_id")
+	private String coupangId;
 
+	@Column(name = "coupang_password")
+	private String coupangPassword;
+
+	@Column(name = "elevenst_id")
+	private String elevenstId;
+
+	@Column(name = "elevenst_password")
+	private String elevenstPassword;
+
+	@Column(name = "naver_id")
+	private String naverId;
+
+	@Column(name = "naver_password")
+	private String naverPassword;
 }
