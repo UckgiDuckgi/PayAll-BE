@@ -28,6 +28,16 @@ public class StatisticsService {
 	private final UserRepository userRepository;
 	private final JwtService jwtService;
 
+	public void setStatistics(String token){
+		String authId = jwtService.extractAuthId(token);
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+
+		Statistics statistics = statisticsRepository.findByUser(user);
+		LocalDateTime lastUpdateTime = statistics.getStatisticsDate();
+
+		//타임 이후에 사용자가 카테고리 별로 얼마나 썻는지 map으로 받아오고, 하나씩 statistics에 업데이트
+	}
 	public StatisticsResponseDto getStatistics(String token, String date) {
 
 		String authId = jwtService.extractAuthId(token);

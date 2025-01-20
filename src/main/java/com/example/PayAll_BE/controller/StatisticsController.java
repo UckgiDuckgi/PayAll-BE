@@ -28,6 +28,7 @@ public class StatisticsController {
 		@RequestParam String date
 	) {
 		String jwtToken = token.replace("Bearer ", "");
+		statisticsService.setStatistics(token);
 		return ResponseEntity.ok(
 			new ApiResult(200, "OK", "소비분석 조회 성공", statisticsService.getStatistics(jwtToken, date))
 		);
