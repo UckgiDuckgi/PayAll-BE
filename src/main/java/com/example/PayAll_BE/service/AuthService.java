@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.example.PayAll_BE.config.security.CryptoUtil;
 import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.AuthRequestDto;
 import com.example.PayAll_BE.dto.AuthResponseDto;
@@ -36,11 +37,11 @@ public class AuthService {
 	private final JwtService jwtService;
 	private final RedisService redisService;
 
-	public AuthResponseDto login(AuthRequestDto request) {
+	public AuthResponseDto login(AuthRequestDto request) throws Exception {
 		User user = userRepository.findByAuthId(request.getAuthId())
 			.orElseThrow(() -> new NotFoundException("로그인 : User not found"));
 
-		if (!user.getPassword().equals(request.getPassword())) {
+		if (!CryptoUtil.decrypt(user.getPassword()).equals(request.getPassword())) {
 			throw new UnauthorizedException("로그인 : Invalid password");
 		}
 
@@ -92,7 +93,7 @@ public class AuthService {
 				.name(request.getName())
 				.phone(formattedPhone)
 				.address(request.getAddress())
-				.password(request.getPassword())
+				.password(CryptoUtil.encrypt(request.getPassword())) // 암호화 후 저장
 				.build();
 
 			userRepository.save(newUser);

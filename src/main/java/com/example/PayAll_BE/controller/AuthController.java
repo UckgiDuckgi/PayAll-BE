@@ -1,8 +1,5 @@
 package com.example.PayAll_BE.controller;
 
-import java.util.Optional;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,10 +17,7 @@ import com.example.PayAll_BE.exception.BadRequestException;
 import com.example.PayAll_BE.service.AuthService;
 import com.example.PayAll_BE.service.JwtService;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -34,7 +28,7 @@ public class AuthController {
 	private final JwtService jwtService;
 
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody AuthRequestDto request, HttpServletResponse response) {
+	public ResponseEntity<?> login(@RequestBody AuthRequestDto request, HttpServletResponse response) throws Exception {
 		AuthResponseDto authResponse = authService.login(request);
 
 		authService.setRefreshTokenCookie(authResponse.getRefreshToken(), response);
