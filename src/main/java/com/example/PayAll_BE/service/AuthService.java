@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.config.security.CryptoUtil;
-import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.AuthRequestDto;
 import com.example.PayAll_BE.dto.AuthResponseDto;
 import com.example.PayAll_BE.dto.PlatformRequestDto;
@@ -16,6 +15,7 @@ import com.example.PayAll_BE.exception.BadRequestException;
 import com.example.PayAll_BE.exception.ForbiddenException;
 import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.exception.UnauthorizedException;
+import com.example.PayAll_BE.mydata.service.MydataService;
 import com.example.PayAll_BE.repository.UserRepository;
 
 import jakarta.servlet.http.Cookie;
@@ -23,9 +23,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 	@Getter
 	@Value("${jwt.access.token.expiration}")
@@ -38,6 +40,7 @@ public class AuthService {
 	private final UserRepository userRepository;
 	private final JwtService jwtService;
 	private final RedisService redisService;
+	private final MydataService mydataService;
 
 	public AuthResponseDto login(AuthRequestDto request) throws Exception {
 		User user = userRepository.findByAuthId(request.getAuthId())
@@ -56,6 +59,14 @@ public class AuthService {
 
 		// Redis에는 Refresh Token만 저장
 		redisService.saveRefreshToken(authId, refreshToken, refreshTokenExpiration);
+
+		// 마이데이터 연동 로직
+		try {
+			mydataService.syncMydataInfo("Bearer " + accessToken);
+			log.info("마이데이터 연동 성공");
+		} catch (Exception e) {
+			log.error("마이데이터 연동 실패 : {} ", e.getMessage());
+		}
 
 		return AuthResponseDto.builder()
 			.accessToken(accessToken)
@@ -165,6 +176,7 @@ public class AuthService {
 
 		userRepository.save(updatedUser);
 	}
+
 	// 쿠키에서 특정 이름의 값을 찾는 메서드
 	public String getCookieValue(HttpServletRequest request, String cookieName) {
 		Cookie[] cookies = request.getCookies();
