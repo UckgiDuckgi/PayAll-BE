@@ -18,6 +18,7 @@ import com.example.PayAll_BE.exception.BadRequestException;
 import com.example.PayAll_BE.service.AuthService;
 import com.example.PayAll_BE.service.JwtService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -48,9 +49,11 @@ public class AuthController {
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<ApiResult> refreshToken(@RequestBody RefreshTokenRequestDto request,
+	public ResponseEntity<ApiResult> refreshToken(HttpServletRequest request,
 		HttpServletResponse response) {
-		AuthResponseDto newTokens = authService.refreshToken(request.getRefreshToken());
+		// 1. 쿠키에서 리프레시 토큰을 찾기
+		String refreshToken = authService.getCookieValue(request, "refreshToken");
+		AuthResponseDto newTokens = authService.refreshToken(refreshToken);
 
 		authService.setRefreshTokenCookie(newTokens.getRefreshToken(), response);
 		authService.setAccessTokenCookie(newTokens.getAccessToken(),response);
