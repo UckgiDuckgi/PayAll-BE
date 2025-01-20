@@ -23,12 +23,12 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/cert")
+@RequestMapping("/api/auth")
 public class AuthController {
 	private final AuthService authService;
 	private final JwtService jwtService;
 
-	@PostMapping("/login")
+	@PostMapping("/sign-in")
 	public ResponseEntity<?> login(@RequestBody AuthRequestDto request, HttpServletResponse response) throws Exception {
 		AuthResponseDto authResponse = authService.login(request);
 
@@ -38,7 +38,7 @@ public class AuthController {
 		return ResponseEntity.ok(new ApiResult(200, "OK", "로그인에 성공했습니다."));
 	}
 
-	@PostMapping("/register")
+	@PostMapping("/sign-up")
 	public ResponseEntity<ApiResult> register(@RequestBody RegisterRequestDto request) {
 		if (request.getPassword() == null || request.getPassword().isEmpty()) {
 			throw new BadRequestException("올바른 비밀번호를 입력해주세요.");
