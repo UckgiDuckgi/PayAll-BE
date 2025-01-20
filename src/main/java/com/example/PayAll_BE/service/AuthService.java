@@ -127,9 +127,19 @@ public class AuthService {
 		refreshTokenCookie.setHttpOnly(true);
 		refreshTokenCookie.setSecure(true);
 		refreshTokenCookie.setPath("/");
-		refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30);
+		refreshTokenCookie.setMaxAge(60 * 60); //1시간 유지
 
 		response.addCookie(refreshTokenCookie);
+	}
+
+	public void setAccessTokenCookie(String accessToken, HttpServletResponse response) {
+		Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+		accessTokenCookie.setHttpOnly(true);
+		accessTokenCookie.setSecure(true);
+		accessTokenCookie.setPath("/");
+		accessTokenCookie.setMaxAge(60 * 60); //1시간 유지
+
+		response.addCookie(accessTokenCookie);
 	}
 
 	public void updatePlatformInfo(String authId, PlatformRequestDto request) throws Exception {

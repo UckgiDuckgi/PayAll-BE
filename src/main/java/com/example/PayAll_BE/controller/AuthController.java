@@ -33,8 +33,9 @@ public class AuthController {
 		AuthResponseDto authResponse = authService.login(request);
 
 		authService.setRefreshTokenCookie(authResponse.getRefreshToken(), response);
+		authService.setAccessTokenCookie(authResponse.getAccessToken(),response);
 
-		return ResponseEntity.ok(new ApiResult(200, "OK", "토큰 갱신 성공", authResponse));
+		return ResponseEntity.ok(new ApiResult(200, "OK", "로그인에 성공했습니다."));
 	}
 
 	@PostMapping("/register")
@@ -52,8 +53,9 @@ public class AuthController {
 		AuthResponseDto newTokens = authService.refreshToken(request.getRefreshToken());
 
 		authService.setRefreshTokenCookie(newTokens.getRefreshToken(), response);
+		authService.setAccessTokenCookie(newTokens.getAccessToken(),response);
 
-		return ResponseEntity.ok(new ApiResult(200, "OK", "토큰 갱신 성공", newTokens));
+		return ResponseEntity.ok(new ApiResult(200, "OK", "토큰 갱신 성공"));
 	}
 
 	@GetMapping("/test")
