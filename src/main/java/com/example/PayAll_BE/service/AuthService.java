@@ -40,10 +40,10 @@ public class AuthService {
 
 	public AuthResponseDto login(AuthRequestDto request) throws Exception {
 		User user = userRepository.findByAuthId(request.getAuthId())
-			.orElseThrow(() -> new NotFoundException("로그인 : User not found"));
+			.orElseThrow(() -> new NotFoundException("로그인 : Id에 맞는 유저를 찾을 수 없습니다."));
 
 		if (!CryptoUtil.decrypt(user.getPassword()).equals(request.getPassword())) {
-			throw new UnauthorizedException("로그인 : Invalid password");
+			throw new UnauthorizedException("로그인 : 잘못된 비밀번호 입니다.");
 		}
 
 		return generateTokens(user.getAuthId(), user.getName(), user.getId());
@@ -57,9 +57,6 @@ public class AuthService {
 		redisService.saveRefreshToken(authId, refreshToken, refreshTokenExpiration);
 
 		return AuthResponseDto.builder()
-			.code(200)
-			.status("OK")
-			.message("로그인이 완료되었습니다.")
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
 			.build();

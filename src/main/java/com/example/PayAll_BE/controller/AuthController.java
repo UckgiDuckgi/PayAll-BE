@@ -34,7 +34,7 @@ public class AuthController {
 
 		authService.setRefreshTokenCookie(authResponse.getRefreshToken(), response);
 
-		return ResponseEntity.ok(authResponse);
+		return ResponseEntity.ok(new ApiResult(200, "OK", "토큰 갱신 성공", authResponse));
 	}
 
 	@PostMapping("/register")
