@@ -2,8 +2,6 @@ package com.example.PayAll_BE.dto;
 
 import java.math.BigDecimal;
 
-import com.example.PayAll_BE.entity.enums.Category;
-import com.example.PayAll_BE.entity.enums.StatisticsCategory;
 
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;

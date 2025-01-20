@@ -3,7 +3,12 @@ package com.example.PayAll_BE.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.PayAll_BE.entity.enums.ProductType;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,10 +17,11 @@ import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -23,6 +29,7 @@ public class Product {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "product_id")
 	private Long id;
 
 	private String productName;
@@ -30,6 +37,10 @@ public class Product {
 	private String productDescription;
 
 	private String benefitDescription;
+
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private ProductType productType;
 
 	@OneToMany(mappedBy = "product")
 	private List<Benefit> benefits = new ArrayList<>();

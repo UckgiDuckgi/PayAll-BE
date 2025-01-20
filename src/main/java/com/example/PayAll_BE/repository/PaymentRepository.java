@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.PayAll_BE.dto.StoreStatisticsDto;
 import com.example.PayAll_BE.entity.Payment;
+import com.example.PayAll_BE.entity.Store;
+import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.entity.enums.Category;
 
 import jakarta.persistence.ColumnResult;
@@ -27,8 +29,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	@Query("SELECT p FROM Payment p WHERE p.account.user.id = :userId " +
 		"AND (:category IS NULL OR p.category = :category) " +
 		"ORDER BY p.paymentTime DESC")
-	Page<Payment> findAllByUserIdAndCategory(@Param("userId") Long userId, @Param("category") String category, Pageable pageable);
-
+	Page<Payment> findAllByUserIdAndCategory(@Param("userId") Long userId, @Param("category") String category,
+		Pageable pageable);
 
 	// 최근 결제 상품 중 조회
 	@Query("SELECT p FROM Payment p " +
@@ -40,6 +42,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	Payment findByAccount_User_IdAndPaymentTimeAndPaymentPlace(
 		Long userId, LocalDateTime paymentTime, String paymentPlace
 	);
+
 	// List<Payment> findByAccountId(Long accountId);
 	List<Payment> findByAccount_User_IdAndCategoryAndPaymentTimeBetween(
 		Long userId, Category category, LocalDateTime startDate, LocalDateTime endDate
@@ -48,6 +51,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	// 특정 결제처와 시간대에 해당하는 결제 내역 가져오기
 	@Query("SELECT p FROM Payment p WHERE p.account.id = :accountId AND p.paymentTime = :paymentTime AND p.paymentPlace IN ('카카오페이', '네이버페이')")
 	Payment findPaymentToUpdateByAccountIdAndPaymentTime(Long accountId, LocalDateTime paymentTime);
+
 	List<Payment> findByAccountId(Long accountId);
 
 	// @Query(value = "SELECT " +
@@ -65,29 +69,28 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	// 	"GROUP BY p.category, p.payment_place " +
 	// 	"ORDER BY p.category, p.payment_place",
 	// 	nativeQuery = true)
-// 	@Repository
-// 	public interface PaymentRepository extends JpaRepository<Payment, Long> {
-//
-// 		@Query(value = "SELECT " +
-// 			"p.category AS name, " +
-// 			"p.payment_place AS store, " +
-// 			"SUM(p.price) AS total_spent, " +
-// 			"CASE " +
-// 			"   WHEN p.payment_place IS NULL THEN 'CATEGORY' " +
-// 			"   ELSE 'STORE' " +
-// 			"END AS type " +
-// 			"FROM payment p " +
-// 			"JOIN account a ON p.account_id = a.account_id " +
-// 			"WHERE a.user_id = :userId " +
-// 			"GROUP BY p.category, p.payment_place WITH ROLLUP " +
-// 			"ORDER BY name, store",
-// 			nativeQuery = true)
-// 		List<StoreStatisticsDto> getCategoryStoreStats(@Param("userId") Long userId);
-// 	}
-// 	List<StoreStatisticsDto> getCategoryStoreStats(@Param("userId") Long userId);
-//
-// }
-
+	// 	@Repository
+	// 	public interface PaymentRepository extends JpaRepository<Payment, Long> {
+	//
+	// 		@Query(value = "SELECT " +
+	// 			"p.category AS name, " +
+	// 			"p.payment_place AS store, " +
+	// 			"SUM(p.price) AS total_spent, " +
+	// 			"CASE " +
+	// 			"   WHEN p.payment_place IS NULL THEN 'CATEGORY' " +
+	// 			"   ELSE 'STORE' " +
+	// 			"END AS type " +
+	// 			"FROM payment p " +
+	// 			"JOIN account a ON p.account_id = a.account_id " +
+	// 			"WHERE a.user_id = :userId " +
+	// 			"GROUP BY p.category, p.payment_place WITH ROLLUP " +
+	// 			"ORDER BY name, store",
+	// 			nativeQuery = true)
+	// 		List<StoreStatisticsDto> getCategoryStoreStats(@Param("userId") Long userId);
+	// 	}
+	// 	List<StoreStatisticsDto> getCategoryStoreStats(@Param("userId") Long userId);
+	//
+	// }
 
 	@Query(value = "SELECT " +
 		"CASE " +
@@ -115,6 +118,12 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		@Param("startDate") LocalDateTime startDate,
 		@Param("endDate") LocalDateTime endDate);
 
+	@Query("SELECT p FROM Payment p " +
+		"JOIN p.account a ON p.account.id = a.id " +
+		"WHERE a.user.id = :userId AND p.paymentPlace = :paymentPlace " +
+		"AND p.paymentTime BETWEEN :startDate AND :endDate")
+	List<Payment> findByUserAndPaymentPlace(Long userId, String paymentPlace, LocalDateTime startDate,
+		LocalDateTime endDate);
 
 	// 결제 내역의 실제 결제처 업데이트
 	@Transactional
