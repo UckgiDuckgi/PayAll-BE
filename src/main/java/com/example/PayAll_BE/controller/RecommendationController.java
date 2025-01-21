@@ -14,9 +14,11 @@ import com.example.PayAll_BE.dto.RecommendationResponseDto;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.repository.UserRepository;
+import com.example.PayAll_BE.service.AuthService;
 import com.example.PayAll_BE.service.JwtService;
 import com.example.PayAll_BE.service.RecommendationService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -27,10 +29,15 @@ public class RecommendationController {
 	private final RecommendationService recommendationService;
 	private final UserRepository userRepository;
 	private final JwtService jwtService;
+	private final AuthService authService;
 
 	@GetMapping
-	public ResponseEntity<?> recommendation(@RequestHeader("Authorization") String token){
-		String authId = jwtService.extractAuthId(token.replace("Bearer ", ""));
+	public ResponseEntity<?> recommendation(HttpServletRequest request) {
+		String accessToken = authService.getCookieValue(request, "accessToken");
+		if(accessToken == null){
+			throw new UnauthorizedException("액세스 토큰이 없습니다");
+		}
+		String authId = jwtService.extractAuthId(accessToken);
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
 
@@ -41,10 +48,15 @@ public class RecommendationController {
 
 	@GetMapping("set")
 	public ResponseEntity<?> setRecommendation(
-		@RequestHeader("Authorization") String token,
+		HttpServletRequest request,
 		@RequestParam String yearMonth) {
+
+		String accessToken = authService.getCookieValue(request, "accessToken");
+		if(accessToken == null){
+			throw new UnauthorizedException("액세스 토큰이 없습니다");
+		}
 		// JWT에서 사용자 인증 정보 추출
-		String authId = jwtService.extractAuthId(token.replace("Bearer ", ""));
+		String authId = jwtService.extractAuthId(accessToken);
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
 

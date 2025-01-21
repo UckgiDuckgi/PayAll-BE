@@ -75,6 +75,8 @@ public class SecurityConfig {
 
 		configuration.addExposedHeader("Authorization");
 
+		configuration.addExposedHeader("Set-Cookie");
+
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;

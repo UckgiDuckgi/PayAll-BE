@@ -15,6 +15,7 @@ public enum Category {
 	RESTAURANT("음식점"),
 	CAFE("카페"),
 	HEALTH("병원비,약국"),
+	INCOME("수입"),
 	OTHERS("기타");
 	private final String category;
 }

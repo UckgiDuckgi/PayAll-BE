@@ -34,6 +34,7 @@ public class User {
 
 	private String phone;
 	private String address;
+	private String email;
 
 	@Column(name = "coupang_id")
 	private String coupangId;
@@ -52,4 +53,7 @@ public class User {
 
 	@Column(name = "naver_password")
 	private String naverPassword;
+
+	@Column(name = "permission", nullable = false)
+	private boolean permission = false;
 }
