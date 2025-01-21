@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import com.example.PayAll_BE.entity.enums.Category;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,5 +22,5 @@ public class TotalPaymentResponseDto {
 	private String accountName;
 	private String accountNumber;
 	private Integer paymentCount;
-	private String category;
+	private Category category;
 }

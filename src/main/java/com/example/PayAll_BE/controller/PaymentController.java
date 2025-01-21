@@ -17,6 +17,7 @@ import com.example.PayAll_BE.dto.Payment.PaymentResponseDto;
 import com.example.PayAll_BE.dto.Payment.PaymentUpdateRequest;
 import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
 import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailInfoRequestDto;
+import com.example.PayAll_BE.entity.enums.Category;
 import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.service.AuthService;
@@ -36,7 +37,7 @@ public class PaymentController {
 	@GetMapping
 	public ResponseEntity<ApiResult> getPayments(
 		HttpServletRequest request,
-		@RequestParam(required = false) String category,
+		@RequestParam(required = false) Category category,
 		@RequestParam(required = false) Long accountId,
 		Pageable pageable
 	) {
