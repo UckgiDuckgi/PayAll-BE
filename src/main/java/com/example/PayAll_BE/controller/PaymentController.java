@@ -18,8 +18,11 @@ import com.example.PayAll_BE.dto.Payment.PaymentUpdateRequest;
 import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
 import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailInfoRequestDto;
 import com.example.PayAll_BE.exception.NotFoundException;
+import com.example.PayAll_BE.exception.UnauthorizedException;
+import com.example.PayAll_BE.service.AuthService;
 import com.example.PayAll_BE.service.PaymentService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -28,37 +31,57 @@ import lombok.RequiredArgsConstructor;
 public class PaymentController {
 
 	private final PaymentService paymentService;
+	private final AuthService authService;
 
 	@GetMapping
 	public ResponseEntity<ApiResult> getPayments(
-		@RequestHeader("Authorization") String token,
+		HttpServletRequest request,
 		@RequestParam(required = false) String category,
 		@RequestParam(required = false) Long accountId,
 		Pageable pageable
 	) {
-		TotalPaymentResponseDto response = paymentService.getPayments(token, accountId, category, pageable);
+		String accessToken = authService.getCookieValue(request, "access_token");
+		if(accessToken == null){
+			throw new UnauthorizedException("액세스 토큰이 없습니다");
+		}
+		TotalPaymentResponseDto response = paymentService.getPayments(accessToken, accountId, category, pageable);
 		return ResponseEntity.ok(new ApiResult(200, "OK", "통합 계좌 거래 내역 조회 성공", response));
 	}
 
 	@GetMapping("/{paymentId}")
 	public ResponseEntity<ApiResult> getPaymentDetail(
-		@RequestHeader("Authorization") String token,
+		HttpServletRequest request,
 		@PathVariable Long paymentId
 	) {
+		String accessToken = authService.getCookieValue(request, "access_token");
+		if(accessToken == null){
+			throw new UnauthorizedException("액세스 토큰이 없습니다");
+		}
 		PaymentResponseDto paymentResponseDto = paymentService.getPaymentById(paymentId);
 		return ResponseEntity.ok(new ApiResult(200, "OK", "결제 상세 조회 성공", paymentResponseDto));
 	}
 
 	@PostMapping("/details")
 	public ResponseEntity<ApiResult> uploadPaymentDetail(
-		@RequestHeader("Authorization") String token,
+		HttpServletRequest request,
 		@RequestBody PaymentDetailInfoRequestDto requestDto) {
-		paymentService.uploadPaymentDetail(token, requestDto);
+		String accessToken = authService.getCookieValue(request, "access_token");
+		if(accessToken == null){
+			throw new UnauthorizedException("액세스 토큰이 없습니다");
+		}
+		paymentService.uploadPaymentDetail(accessToken, requestDto);
 		return ResponseEntity.ok(new ApiResult(200,"OK", "결제 내역 상세 업로드 성공", null));
 	}
 
 	@PatchMapping
-	public ResponseEntity<ApiResult> uploadPayments(@RequestBody PaymentUpdateRequest paymentRequest) {
+	public ResponseEntity<ApiResult> uploadPayments(
+		HttpServletRequest request,
+		@RequestBody PaymentUpdateRequest paymentRequest
+	) {
+		String accessToken = authService.getCookieValue(request, "access_token");
+		if(accessToken == null){
+			throw new UnauthorizedException("액세스 토큰이 없습니다");
+		}
 		try {
 			paymentService.updatePaymentPlaces(paymentRequest.getPaymentList());
 			return ResponseEntity.ok(new ApiResult(200, "OK", "결제처 업데이트가 완료되었습니다."));

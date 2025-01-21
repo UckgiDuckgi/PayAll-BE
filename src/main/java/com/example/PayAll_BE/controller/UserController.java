@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.UserResponseDto;
 import com.example.PayAll_BE.service.AuthService;
-import com.example.PayAll_BE.service.JwtService;
+import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,8 +23,11 @@ public class UserController {
 
 	@GetMapping
 	public ResponseEntity<ApiResult> getUserInfo(HttpServletRequest request) {
-		String token = authService.getCookieValue(request, "accessToken");
-		UserResponseDto userInfo = userService.getUserInfo(token);
+		String accessToken = authService.getCookieValue(request, "access_token");
+		if(accessToken == null){
+			throw new UnauthorizedException("액세스 토큰이 없습니다");
+		}
+		UserResponseDto userInfo = userService.getUserInfo(accessToken);
 
 		return ResponseEntity.ok(new ApiResult(200, "OK", "사용자 정보 조회 성공", userInfo));
 	}
