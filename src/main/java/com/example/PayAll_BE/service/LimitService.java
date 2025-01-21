@@ -38,6 +38,15 @@ public class LimitService {
 		LocalDateTime now = LocalDateTime.now();
 		long averageSpent = calculateAverageSpent(userId, threeMonthsAgo, now);
 
+		int currentYear = now.getYear();
+		int currentMonth = now.getMonthValue();
+
+		// 현재 달에 이미 등록된 소비 목표가 있는지 확인
+		boolean exists = limitRepository.existsByUserIdAndMonth(userId, currentYear, currentMonth);
+		if (exists) {
+			throw new IllegalArgumentException("이미 이번 달에 소비 목표가 등록되었습니다.");
+		}
+
 		Limits limit = Limits.builder()
 			.user(user)
 			.limitPrice(limitRequestDto.getLimitPrice())
@@ -45,7 +54,6 @@ public class LimitService {
 			.build();
 
 		limitRepository.save(limit);
-
 	}
 
 	// 소비 목표 조회
