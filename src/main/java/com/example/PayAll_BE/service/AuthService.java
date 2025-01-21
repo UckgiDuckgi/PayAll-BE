@@ -80,14 +80,6 @@ public class AuthService {
 		// Redis에는 Refresh Token만 저장
 		redisService.saveRefreshToken(authId, refreshToken, refreshTokenExpiration);
 
-		// 마이데이터 연동 로직
-		try {
-			mydataService.syncMydataInfo("Bearer " + accessToken);
-			log.info("마이데이터 연동 성공");
-		} catch (Exception e) {
-			log.error("마이데이터 연동 실패 : {} ", e.getMessage());
-		}
-
 		return AuthResponseDto.builder()
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
