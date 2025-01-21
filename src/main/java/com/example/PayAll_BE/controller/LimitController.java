@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.Limit.LimitRegisterRequestDto;
-import com.example.PayAll_BE.dto.Limit.LimitRegisterResponseDto;
 import com.example.PayAll_BE.dto.Limit.LimitResponseDto;
 import com.example.PayAll_BE.service.AuthService;
 import com.example.PayAll_BE.service.JwtService;
@@ -35,9 +34,11 @@ public class LimitController {
 	) {
 		String token = authService.getCookieValue(request, "accessToken");
 		Long userId = jwtService.extractUserId(token);
-		LimitRegisterResponseDto responseDto = limitService.registerLimit(userId, requestDto);
+
+		limitService.registerLimit(userId, requestDto);
+
 		return ResponseEntity.ok(
-			new ApiResult(200, "OK", "소비 목표 등록 성공", responseDto)
+			new ApiResult(200, "OK", "소비 목표 등록 성공")
 		);
 	}
 

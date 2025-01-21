@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.dto.Limit.LimitRegisterRequestDto;
-import com.example.PayAll_BE.dto.Limit.LimitRegisterResponseDto;
 import com.example.PayAll_BE.dto.Limit.LimitResponseDto;
 import com.example.PayAll_BE.entity.Limits;
 import com.example.PayAll_BE.entity.Payment;
@@ -31,7 +30,7 @@ public class LimitService {
 
 
 	// 소비 목표 등록
-	public LimitRegisterResponseDto registerLimit(Long userId, LimitRegisterRequestDto limitRequestDto) {
+	public void registerLimit(Long userId, LimitRegisterRequestDto limitRequestDto) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다."));
 
@@ -45,14 +44,8 @@ public class LimitService {
 			.limitDate(LocalDateTime.now())
 			.build();
 
-		Limits savedLimit = limitRepository.save(limit);
+		limitRepository.save(limit);
 
-		return LimitRegisterResponseDto.builder()
-			.limitId(savedLimit.getLimitId())
-			.userId(userId)
-			.limitPrice(savedLimit.getLimitPrice())
-			.limitDate(savedLimit.getLimitDate())
-			.build();
 	}
 
 	// 소비 목표 조회
