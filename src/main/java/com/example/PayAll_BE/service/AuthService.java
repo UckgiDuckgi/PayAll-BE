@@ -1,12 +1,12 @@
 package com.example.PayAll_BE.service;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.config.security.CryptoUtil;
-import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.AuthRequestDto;
 import com.example.PayAll_BE.dto.AuthResponseDto;
 import com.example.PayAll_BE.dto.PlatformRequestDto;
@@ -16,6 +16,7 @@ import com.example.PayAll_BE.exception.BadRequestException;
 import com.example.PayAll_BE.exception.ForbiddenException;
 import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.exception.UnauthorizedException;
+import com.example.PayAll_BE.mydata.service.MydataService;
 import com.example.PayAll_BE.repository.UserRepository;
 
 import jakarta.servlet.http.Cookie;
@@ -23,9 +24,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 	@Getter
 	@Value("${jwt.access.token.expiration}")
@@ -38,6 +41,7 @@ public class AuthService {
 	private final UserRepository userRepository;
 	private final JwtService jwtService;
 	private final RedisService redisService;
+	private final MydataService mydataService;
 
 	public AuthResponseDto login(AuthRequestDto request) throws Exception {
 		User user = userRepository.findByAuthId(request.getAuthId())
@@ -56,6 +60,14 @@ public class AuthService {
 
 		// Redis에는 Refresh Token만 저장
 		redisService.saveRefreshToken(authId, refreshToken, refreshTokenExpiration);
+
+		// 마이데이터 연동 로직
+		try {
+			mydataService.syncMydataInfo("Bearer " + accessToken);
+			log.info("마이데이터 연동 성공");
+		} catch (Exception e) {
+			log.error("마이데이터 연동 실패 : {} ", e.getMessage());
+		}
 
 		return AuthResponseDto.builder()
 			.accessToken(accessToken)
@@ -148,23 +160,36 @@ public class AuthService {
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new NotFoundException("User not found"));
 
-		User updatedUser = User.builder()
-			.id(user.getId())
-			.name(user.getName())
-			.authId(user.getAuthId())
-			.password(user.getPassword())
-			.phone(user.getPhone())
-			.address(user.getAddress())
-			.coupangId(CryptoUtil.encrypt(request.getCoupangId()))
-			.coupangPassword(CryptoUtil.encrypt(request.getCoupangPassword()))
-			.elevenstId(CryptoUtil.encrypt(request.getElevenstId()))
-			.elevenstPassword(CryptoUtil.encrypt(request.getElevenstPassword()))
-			.naverId(CryptoUtil.encrypt(request.getNaverId()))
-			.naverPassword(CryptoUtil.encrypt(request.getNaverPassword()))
-			.build();
+		// 플랫폼 타입 검증
+		String platformType = request.getPlatformName().toUpperCase();
+		// if (!isValidPlatform(platformType)) {
+		// 	throw new BadRequestException("유효하지 않은 플랫폼입니다: " + platformType);
+		// }
 
-		userRepository.save(updatedUser);
+		switch (platformType) {
+			case "Coupang" -> {
+				user.setCoupangId(CryptoUtil.encrypt(request.getId()));
+				user.setCoupangPassword(CryptoUtil.encrypt(request.getPassword()));
+			}
+			case "11st" -> {
+				user.setElevenstId(CryptoUtil.encrypt(request.getId()));
+				user.setElevenstPassword(CryptoUtil.encrypt(request.getPassword()));
+			}
+			case "Naver" -> {
+				user.setNaverId(CryptoUtil.encrypt(request.getId()));
+				user.setNaverPassword(CryptoUtil.encrypt(request.getPassword()));
+			}
+
+			default -> throw new BadRequestException("유효하지 않은 플랫폼입니다: " + platformType);
+		}
+
+		userRepository.save(user);
 	}
+
+	private boolean isValidPlatform(String platformType) {
+		return Arrays.asList("Coupang", "11st", "Naver").contains(platformType);
+	}
+
 	// 쿠키에서 특정 이름의 값을 찾는 메서드
 	public String getCookieValue(HttpServletRequest request, String cookieName) {
 		Cookie[] cookies = request.getCookies();

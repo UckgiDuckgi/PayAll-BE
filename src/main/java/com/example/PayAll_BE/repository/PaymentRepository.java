@@ -10,18 +10,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.PayAll_BE.dto.StoreStatisticsDto;
 import com.example.PayAll_BE.entity.Payment;
-import com.example.PayAll_BE.entity.Store;
-import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.entity.enums.Category;
-
-import jakarta.persistence.ColumnResult;
-import jakarta.persistence.ConstructorResult;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
@@ -158,4 +151,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		@Param("twoMonthsAgoStart") LocalDateTime twoMonthsAgoStart,
 		@Param("twoMonthsAgoEnd") LocalDateTime twoMonthsAgoEnd
 	);
+
+	// 결제 내역 있는지 확인
+	boolean existsByAccountIdAndPaymentTimeAndPriceAndPaymentPlace(Long accountId,
+		LocalDateTime paymentTime,
+		Long price,
+		String paymentPlace);
 }
