@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.dto.ProductDescriptionDto;
 import com.example.PayAll_BE.entity.Product;
-import com.example.PayAll_BE.entity.Subscription;
 import com.example.PayAll_BE.mapper.ProductMapper;
 import com.example.PayAll_BE.repository.ProductRepository;
 
