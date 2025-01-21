@@ -94,5 +94,4 @@ public class AuthController {
 		return ResponseEntity.ok(new ApiResult(200, "OK", "플랫폼 계정 조회 성공", platformInfo));
 
 	}
-
 }
