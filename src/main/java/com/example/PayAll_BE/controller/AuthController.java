@@ -77,6 +77,7 @@ public class AuthController {
 		return ResponseEntity.ok(new ApiResult(200, "OK", "플랫폼 계정 등록에 성공하였습니다."));
 	}
 
+
 	// @GetMapping("platform")
 	// public ResponseEntity<ApiResult> getPlatform(@RequestHeader("Authorization") String token,@RequestBody PlatformRequestDto request) throws
 	// 	Exception {

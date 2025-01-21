@@ -13,6 +13,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.example.PayAll_BE.service.AuthService;
 import com.example.PayAll_BE.service.JwtService;
 import com.example.PayAll_BE.service.RedisService;
 
@@ -25,10 +26,11 @@ public class SecurityConfig {
 
 	private final JwtService jwtService;
 	private final RedisService redisService;
+	private final AuthService authService;
 
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() {
-		return new JwtAuthenticationFilter(jwtService, redisService);
+		return new JwtAuthenticationFilter(jwtService, redisService, authService);
 	}
 
 	//

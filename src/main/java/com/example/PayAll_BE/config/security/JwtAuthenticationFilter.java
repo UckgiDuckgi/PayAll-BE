@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.PayAll_BE.dto.ApiResult;
+import com.example.PayAll_BE.service.AuthService;
 import com.example.PayAll_BE.service.JwtService;
 import com.example.PayAll_BE.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,27 +29,23 @@ import lombok.RequiredArgsConstructor;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtService jwtService;
 	private final RedisService redisService;
+	private final AuthService authService;
 
 	@Override
-	protected void doFilterInternal(
-		HttpServletRequest request,
-		HttpServletResponse response,
-		FilterChain filterChain) throws ServletException, IOException {
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+		throws ServletException, IOException {
+		// 쿠키에서 accessToken을 추출
+		String accessToken = authService.getCookieValue(request, "accessToken");
 
-		final String authHeader = request.getHeader("Authorization");
-
-		// Authorization 헤더가 없거나 Bearer 토큰이 아닌 경우 통과
-		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+		// 토큰이 없으면 필터 체인으로 넘어감
+		if (accessToken == null) {
 			filterChain.doFilter(request, response);
 			return;
 		}
 
 		try {
-			final String jwt = authHeader.substring(7);
-			final String userId = jwtService.extractAuthId(jwt);
-
 			// 토큰이 블랙리스트에 있는지 확인
-			if (redisService.isBlacklisted(jwt)) {
+			if (redisService.isBlacklisted(accessToken)) {
 				ApiResult apiResult = new ApiResult(403, "FORBIDDEN", "Token is blacklisted", null);
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				response.setContentType("application/json");
@@ -56,9 +53,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				return;
 			}
 
-			if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-				if (jwtService.isValidToken(jwt)) {
+			// JWT 유효성 검사
+			final String userId = jwtService.extractAuthId(accessToken);
 
+			if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+				if (jwtService.isValidToken(accessToken)) {
 					List<SimpleGrantedAuthority> authorities =
 						Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 
