@@ -24,8 +24,8 @@ public class StatisticsResponseDto {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class CategoryExpense {
-		private int categoryId;
-		private String category; // 카테고리 이름
+		private int id;
+		private String categoryName; // 카테고리 이름
 		private long amount; // 지출 금액
 	}
 

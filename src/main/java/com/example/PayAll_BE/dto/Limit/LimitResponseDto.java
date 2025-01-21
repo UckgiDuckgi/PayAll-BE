@@ -15,9 +15,9 @@ import java.time.LocalDateTime;
 public class LimitResponseDto {
 	private Long limitId;
 	private Long userId;
-	private long limitPrice;
+	private Long limitPrice;
 	private long spentAmount; // 현재 소비 금액 (기본값: 0)
-	private long savedAmount; // 절약 금액 (기본값: 0)
+	private Long savedAmount; // 절약 금액 (기본값: 0)
 	private long averageSpent; // 지난 3개월 평균 소비 금액
 	private Long lastMonthLimit; // 지난달 소비 목표 금액
 	private LocalDate startDate; // 소비 목표 기간 시작 날짜
