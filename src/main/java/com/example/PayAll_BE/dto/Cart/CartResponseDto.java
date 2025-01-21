@@ -13,8 +13,8 @@ public class CartResponseDto {
 	private Long cartId;
 	private Long productId;
 	private String productName;
-	private String productImage;
-	private Long price;
+	private String image;
+	private Long productPrice;
 	private int quantity;
 	private String storeName;
 	private String link;
