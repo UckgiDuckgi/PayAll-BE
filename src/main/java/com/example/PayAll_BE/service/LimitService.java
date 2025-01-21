@@ -57,52 +57,58 @@ public class LimitService {
 
 	// 소비 목표 조회
 	public LimitResponseDto getLimit(Long userId) {
-		// 가장 최근 소비 목표 조회
-		Limits limit = limitRepository.findTopByUser_IdOrderByLimitDateDesc(userId)
-			.orElseThrow(() -> new IllegalArgumentException("소비 목표가 존재하지 않습니다."));
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime startOfMonth = now.toLocalDate().withDayOfMonth(1).atStartOfDay();
+		LocalDateTime today = now;
+
+		// 현재 달의 소비 금액 계산
+		long spentAmount = calculateSpentAmount(userId, startOfMonth, today);
 
 		// 지난 3개월 평균 지출 계산
-		LocalDateTime threeMonthsAgo = LocalDateTime.now().minusMonths(3);
-		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime threeMonthsAgo = now.minusMonths(3);
 		long averageSpent = calculateAverageSpent(userId, threeMonthsAgo, now);
 
-		// 기간 계산
-		LocalDate startDate = calculateStartDate(limit.getLimitDate());
-		LocalDate endDate = calculateEndDate(startDate);
-
-		// 지난달 계산
+		// 이전 달 소비 목표 조회
 		int lastMonth = now.minusMonths(1).getMonthValue();
 		int lastMonthYear = now.minusMonths(1).getYear();
-
-		// 지난달 소비 목표 조회
 		Limits lastMonthLimit = limitRepository.findFirstByUserIdAndLimitDateBetweenOrderByLimitDateDesc(
 			userId,
 			LocalDateTime.of(lastMonthYear, lastMonth, 1, 0, 0),
 			LocalDateTime.of(lastMonthYear, lastMonth, 1, 0, 0).plusMonths(1).minusSeconds(1)
 		).orElse(null);
-
 		Long lastMonthLimitPrice = lastMonthLimit != null ? lastMonthLimit.getLimitPrice() : null;
 
-		LocalDateTime startOfMonth = now.toLocalDate().withDayOfMonth(1).atStartOfDay();
-		LocalDateTime today = now; // 오늘
+		// 현재 소비 목표 조회
+		Limits currentLimit = limitRepository.findTopByUser_IdOrderByLimitDateDesc(userId).orElse(null);
 
-		// 현재 달의 소비 금액 계산
-		long spentAmount = calculateSpentAmount(userId, startOfMonth, today);
-
-		// 절약 금액 계산
-		long savedAmount = limit.getLimitPrice() - spentAmount;
-
-		return LimitResponseDto.builder()
-			.limitId(limit.getLimitId())
-			.userId(limit.getUser().getId())
-			.limitPrice(limit.getLimitPrice())
-			.spentAmount(spentAmount) // 이번달 현재 날짜까지 소비금액
-			.savedAmount(savedAmount) // 목표금액 - 소비금액
-			.averageSpent(averageSpent) // 평균 지출 추가
-			.lastMonthLimit(lastMonthLimitPrice) // 지난달 소비 목표 금액
-			.startDate(startDate) // 기간 시작 날짜 추가
-			.endDate(endDate) // 기간 종료 날짜 추가
-			.build();
+		if (currentLimit == null) {
+			// 소비 목표를 등록한 적이 없는 경우
+			return LimitResponseDto.builder()
+				.userId(userId)
+				.limitPrice(null)
+				.limitPrice(null)
+				.spentAmount(spentAmount)
+				.savedAmount(null)
+				.averageSpent(averageSpent)
+				.lastMonthLimit(lastMonthLimitPrice)
+				.startDate(startOfMonth.toLocalDate())
+				.endDate(startOfMonth.plusMonths(1).minusDays(1).toLocalDate())
+				.build();
+		} else {
+			// 소비 목표가 있는 경우
+			long savedAmount = currentLimit.getLimitPrice() - spentAmount;
+			return LimitResponseDto.builder()
+				.limitId(currentLimit.getLimitId())
+				.userId(currentLimit.getUser().getId())
+				.limitPrice(currentLimit.getLimitPrice())
+				.spentAmount(spentAmount)
+				.savedAmount(savedAmount)
+				.averageSpent(averageSpent)
+				.lastMonthLimit(lastMonthLimitPrice)
+				.startDate(currentLimit.getLimitDate().toLocalDate().withDayOfMonth(1))
+				.endDate(currentLimit.getLimitDate().toLocalDate().withDayOfMonth(1).plusMonths(1).minusDays(1))
+				.build();
+		}
 	}
 
 	// 지난 3개월간 평균 지출 계산 메소드
@@ -119,6 +125,7 @@ public class LimitService {
 		return lastThreeMonthsStats.isEmpty() ? 0 : totalSpent / 3;
 	}
 
+	// 특정 기간 동안의 소비 금액 계산
 	private long calculateSpentAmount(Long userId, LocalDateTime startDate, LocalDateTime endDate) {
 		List<Payment> payments = paymentRepository.findByAccount_User_IdAndPaymentTimeBetween(userId, startDate, endDate);
 		return payments.stream()
