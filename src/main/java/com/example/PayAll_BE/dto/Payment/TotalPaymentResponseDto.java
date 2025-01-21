@@ -15,6 +15,7 @@ import com.example.PayAll_BE.entity.enums.Category;
 @AllArgsConstructor
 @Builder
 public class TotalPaymentResponseDto {
+	private String userName;
 	private Long totalBalance;
 	private Long monthPaymentPrice;
 	private List<DayPaymentResponseDto> paymentList;
