@@ -41,4 +41,7 @@ public class Statistics {
 
 	@Column(nullable = false)
 	private LocalDateTime statisticsDate;
+
+	@Column
+	private Long totalDiscountAmount;
 }
