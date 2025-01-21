@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.PayAll_BE.dto.StoreStatisticsDto;
 import com.example.PayAll_BE.entity.Payment;
+import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.entity.enums.Category;
 
 @Repository
