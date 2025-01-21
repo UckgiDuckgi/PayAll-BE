@@ -97,7 +97,7 @@ public class AuthService {
 	public void register(RegisterRequestDto request) {
 		try {
 			// Validate simple password
-			if (request.getPassword() == null || request.getPassword().length() < 6) {
+			if (request.getPassword() == null || request.getPassword().length() < 6 || request.getPassword().length() > 12) {
 				throw new BadRequestException("올바른 비밀번호를 입력해주세요.");
 			}
 

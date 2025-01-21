@@ -157,6 +157,13 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		@Param("twoMonthsAgoEnd") LocalDateTime twoMonthsAgoEnd
 	);
 
+
+	@Query("SELECT p FROM Payment p " +
+		"JOIN p.account a ON p.account.id = a.id " +
+		"JOIN a.user u ON a.user.id = u.id " +
+		"WHERE u = :user AND p.paymentTime BETWEEN :startDate AND :endDate")
+	List<Payment> findByUserAndPaymentTimeAfter(@Param("user") User user, @Param("startDate") LocalDateTime startDate,@Param("endDate") LocalDateTime endDate);
+
 	// 결제 내역 있는지 확인
 	boolean existsByAccountIdAndPaymentTimeAndPriceAndPaymentPlace(Long accountId,
 		LocalDateTime paymentTime,

@@ -11,8 +11,6 @@ import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.Statistics.StatisticsDetailResponseDto;
 import com.example.PayAll_BE.entity.enums.Category;
 import com.example.PayAll_BE.service.AuthService;
-import com.example.PayAll_BE.service.JwtService;
-import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.service.StatisticsService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +30,9 @@ public class StatisticsController {
 		@RequestParam String date
 	) {
 		String token = authService.getCookieValue(request, "accessToken");
+		statisticsService.setStatistics(token);
+		return ResponseEntity.ok(
+			new ApiResult(200, "OK", "소비분석 조회 성공", statisticsService.getStatistics(token, date))
 
 		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
