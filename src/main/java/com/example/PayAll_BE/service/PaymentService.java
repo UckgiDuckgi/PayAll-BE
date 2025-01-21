@@ -103,6 +103,7 @@ public class PaymentService {
 				.paymentDate(entry.getKey().toLocalDate().atStartOfDay())
 				.dayPaymentPrice(entry.getValue().stream().mapToLong(Payment::getPrice).sum())
 				.paymentDetail(entry.getValue().stream().map(payment -> PaymentDetailResponseDto.builder()
+						.paymentId(payment.getId())
 						.paymentPlace(payment.getPaymentPlace())
 						.category(payment.getCategory().name())
 						.paymentPrice(payment.getPrice())
