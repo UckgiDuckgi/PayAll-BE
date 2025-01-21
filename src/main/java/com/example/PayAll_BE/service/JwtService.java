@@ -1,7 +1,5 @@
 package com.example.PayAll_BE.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import java.security.Key;
 import java.util.Collections;
 import java.util.Date;
@@ -9,81 +7,110 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import com.example.PayAll_BE.mydata.service.MydataService;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class JwtService {
-    @Value("${jwt.secret}")
-    private String secret;
+	private final MydataService mydataService;
 
-    @Getter
-    @Value("${jwt.access.token.expiration}")
-    private Long accessTokenExpiration;
+	public JwtService(@Lazy MydataService mydataService) {
+		this.mydataService = mydataService;
+	}
 
-    @Getter
-    @Value("${jwt.refresh.token.expiration}")
-    private Long refreshTokenExpiration;
+	@Value("${jwt.secret}")
+	private String secret;
 
-    public String generateAccessToken(String authId, Long userId) {
-        return buildToken(authId, userId, accessTokenExpiration);
-    }
+	@Getter
+	@Value("${jwt.access.token.expiration}")
+	private Long accessTokenExpiration;
 
-    public String generateRefreshToken(String authId, Long userId) {
-        return buildToken(authId, userId, refreshTokenExpiration);
-    }
+	@Getter
+	@Value("${jwt.refresh.token.expiration}")
+	private Long refreshTokenExpiration;
 
-    private String buildToken(String authId, Long userId, Long expiration) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
-        claims.put("roles", Collections.singletonList("ROLE_USER"));
+	public String generateAccessToken(String authId, Long userId) {
+		String token = buildToken(authId, userId, accessTokenExpiration);
+		syncMyData(token);
+		return token;
+	}
 
-        return Jwts.builder()
-            .setClaims(claims)
-            .setSubject(authId)
-            .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + expiration))
-            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-            .compact();
-    }
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
-    }
-    public String extractAuthId(String token) {
-        return extractAllClaims(token).getSubject();
-    }
+	public String generateRefreshToken(String authId, Long userId) {
+		String token = buildToken(authId, userId, refreshTokenExpiration);
+		syncMyData(token);
+		return token;
+	}
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-            .setSigningKey(getSigningKey())
-            .build()
-            .parseClaimsJws(token)
-            .getBody();
-    }
+	private String buildToken(String authId, Long userId, Long expiration) {
+		Map<String, Object> claims = new HashMap<>();
+		claims.put("userId", userId);
+		claims.put("roles", Collections.singletonList("ROLE_USER"));
 
-    public Long extractUserId(String token) {
-        return extractAllClaims(token).get("userId",Long.class);
-    }
+		return Jwts.builder()
+			.setClaims(claims)
+			.setSubject(authId)
+			.setIssuedAt(new Date(System.currentTimeMillis()))
+			.setExpiration(new Date(System.currentTimeMillis() + expiration))
+			.signWith(getSigningKey(), SignatureAlgorithm.HS256)
+			.compact();
+	}
 
-    public boolean isValidToken(String token) {
-        try {
-            // todo 블랙리스트 체크
-            //if (redisService.isBlacklisted(token)) {
-            //    return false;
-            //}
+	private Key getSigningKey() {
+		return Keys.hmacShaKeyFor(secret.getBytes());
+	}
 
-            // JWT 유효성 검증
-            Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token.replace("Bearer ", ""));
+	public String extractAuthId(String token) {
+		return extractAllClaims(token).getSubject();
+	}
 
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
+	private Claims extractAllClaims(String token) {
+		return Jwts.parserBuilder()
+			.setSigningKey(getSigningKey())
+			.build()
+			.parseClaimsJws(token)
+			.getBody();
+	}
+
+	public Long extractUserId(String token) {
+		return extractAllClaims(token).get("userId", Long.class);
+	}
+
+	public boolean isValidToken(String token) {
+		try {
+			// todo 블랙리스트 체크
+			//if (redisService.isBlacklisted(token)) {
+			//    return false;
+			//}
+
+			// JWT 유효성 검증
+			Jwts.parserBuilder()
+				.setSigningKey(getSigningKey())
+				.build()
+				.parseClaimsJws(token.replace("Bearer ", ""));
+
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	// 마이데이터 연동 로직
+	private void syncMyData(String token) {
+		try {
+			mydataService.syncMydataInfo(token);
+			log.info("마이데이터 연동 성공");
+		} catch (Exception e) {
+			log.error("마이데이터 연동 실패 : {} ", e.getMessage());
+		}
+	}
 }

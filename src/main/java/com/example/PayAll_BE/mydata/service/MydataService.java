@@ -45,7 +45,7 @@ public class MydataService {
 	}
 
 	public void syncMydataInfo(String token) {
-		Long userId = jwtService.extractUserId(token.replace("Bearer ", ""));
+		Long userId = jwtService.extractUserId(token);
 
 		// 계좌 목록 조회 호출
 		ResponseEntity<AccountListResponseDto> accountList = mydataController.loadMydataAccountList(token);

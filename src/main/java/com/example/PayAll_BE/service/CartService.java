@@ -39,7 +39,7 @@ public class CartService {
 		Cart existingCart = cartRepository.findByUserIdAndProductId(user.getId(),
 			cartRequestDto.getProductId());
 		if (existingCart != null) {
-			existingCart.setQuantity(existingCart.getQuantity() + 1);
+			existingCart.setQuantity(existingCart.getQuantity() + cartRequestDto.getQuantity());
 			return CartMapper.toDto(cartRepository.save(existingCart));
 		}
 
@@ -48,7 +48,7 @@ public class CartService {
 			.productId(cartRequestDto.getProductId())
 			.productName(productDto.getProductName())
 			.productPrice(productDto.getPrice())
-			.quantity(1)
+			.quantity(cartRequestDto.getQuantity())
 			.link(productDto.getShopUrl())
 			.image(productDto.getProductImage())
 			.storeName(productDto.getShopName())
