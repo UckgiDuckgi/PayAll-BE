@@ -20,5 +20,4 @@ public class PaymentDetailResponseDto {
 	private LocalDateTime paymentTime;
 	private String bankName;
 	private String accountName;
-	private Boolean shootNeed;
 }
