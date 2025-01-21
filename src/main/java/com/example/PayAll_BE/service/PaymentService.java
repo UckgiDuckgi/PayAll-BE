@@ -68,6 +68,7 @@ public class PaymentService {
 
 		if (paymentPage.isEmpty()) {
 			return TotalPaymentResponseDto.builder()
+				.userName(user.getName())
 				.totalBalance(0L)
 				.monthPaymentPrice(0L)
 				.paymentList(List.of())
