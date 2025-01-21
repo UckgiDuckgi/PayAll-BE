@@ -6,10 +6,8 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,7 +19,7 @@ import com.example.PayAll_BE.dto.Payment.PaymentResponseDto;
 import com.example.PayAll_BE.dto.Payment.PaymentUpdateRequestDto;
 import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
 import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailDto;
-import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailInfoRequestDto;
+import com.example.PayAll_BE.dto.PaymentDetail.PaymentListRequestDto;
 import com.example.PayAll_BE.dto.ProductDto;
 import com.example.PayAll_BE.entity.Account;
 import com.example.PayAll_BE.entity.Payment;
@@ -37,7 +35,6 @@ import com.example.PayAll_BE.repository.PaymentDetailRepository;
 import com.example.PayAll_BE.repository.PaymentRepository;
 import com.example.PayAll_BE.repository.UserRepository;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -145,26 +142,30 @@ public class PaymentService {
 		return PaymentMapper.toPaymentDto(payment, paymentDetailDtos);
 	}
 
-	public void uploadPaymentDetail(String token, PaymentDetailInfoRequestDto requestDto) {
+	public void uploadPaymentDetails(String token, PaymentListRequestDto requestDto) {
 		String authId = jwtService.extractAuthId(token);
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
-		Payment payment = paymentRepository.findByAccount_User_IdAndPaymentTimeAndPaymentPlace(
-			user.getId(),requestDto.getPaymentTime(), requestDto.getPaymentPlace()
-		);
 
+		for (PaymentListRequestDto.PaymentDetailInfoRequestDto paymentDetail : requestDto.getPaymentList()) {
+			Payment payment = paymentRepository.findByAccount_User_IdAndPaymentTimeAndPaymentPlace(
+				user.getId(), paymentDetail.getPaymentTime(), paymentDetail.getPaymentPlace()
+			);
 
-		List<PaymentDetail> paymentDetails = requestDto.getPurchaseProductList().stream()
-			.map(product -> {
+			if (payment == null) {
+				throw new NotFoundException("결제 정보를 찾을 수 없습니다.");
+			}
 
-				ProductDto productDto = productApiClient.fetchProductByName(product.getProductName());
-				Long productId = productDto.getPCode();
+			List<PaymentDetail> paymentDetails = paymentDetail.getPurchaseProductList().stream()
+				.map(product -> {
+					ProductDto productDto = productApiClient.fetchProductByName(product.getProductName());
+					Long productId = productDto.getPCode();
+					return PaymentMapper.toPaymentDetailEntity(payment, product, productId);
+				})
+				.collect(Collectors.toList());
 
-				return PaymentMapper.toPaymentDetailEntity(payment, product, productId);
-			})
-			.collect(Collectors.toList());
-
-		paymentDetailRepository.saveAll(paymentDetails);
+			paymentDetailRepository.saveAll(paymentDetails);
+		}
 	}
 
 	@Transactional

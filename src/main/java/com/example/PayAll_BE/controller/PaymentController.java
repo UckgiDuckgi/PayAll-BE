@@ -16,7 +16,7 @@ import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.Payment.PaymentResponseDto;
 import com.example.PayAll_BE.dto.Payment.PaymentUpdateRequest;
 import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
-import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailInfoRequestDto;
+import com.example.PayAll_BE.dto.PaymentDetail.PaymentListRequestDto;
 import com.example.PayAll_BE.entity.enums.Category;
 import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.exception.UnauthorizedException;
@@ -65,12 +65,12 @@ public class PaymentController {
 	@PostMapping("/details")
 	public ResponseEntity<ApiResult> uploadPaymentDetail(
 		HttpServletRequest request,
-		@RequestBody PaymentDetailInfoRequestDto requestDto) {
+		@RequestBody PaymentListRequestDto requestDto) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
-		paymentService.uploadPaymentDetail(accessToken, requestDto);
+		paymentService.uploadPaymentDetails(accessToken, requestDto);
 		return ResponseEntity.ok(new ApiResult(200,"OK", "결제 내역 상세 업로드 성공", null));
 	}
 
