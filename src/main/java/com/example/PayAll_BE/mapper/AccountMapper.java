@@ -12,6 +12,7 @@ public class AccountMapper {
 
 	public static AccountResponseDto toAccountResponseDto(Account account) {
 		return AccountResponseDto.builder()
+			.accountId(account.getId())
 			.bankName(account.getBankName())
 			.accountName(account.getAccountName())
 			.balance(account.getBalance())
