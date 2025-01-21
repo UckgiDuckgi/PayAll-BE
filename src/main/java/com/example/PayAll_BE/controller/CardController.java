@@ -26,7 +26,7 @@ public class CardController {
 
 	@GetMapping
 	public ResponseEntity<ApiResult> getAllCards(HttpServletRequest request) {
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}

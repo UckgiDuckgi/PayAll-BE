@@ -40,7 +40,7 @@ public class PaymentController {
 		@RequestParam(required = false) Long accountId,
 		Pageable pageable
 	) {
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
@@ -53,7 +53,7 @@ public class PaymentController {
 		HttpServletRequest request,
 		@PathVariable Long paymentId
 	) {
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
@@ -65,7 +65,7 @@ public class PaymentController {
 	public ResponseEntity<ApiResult> uploadPaymentDetail(
 		HttpServletRequest request,
 		@RequestBody PaymentDetailInfoRequestDto requestDto) {
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
@@ -78,7 +78,7 @@ public class PaymentController {
 		HttpServletRequest request,
 		@RequestBody PaymentUpdateRequest paymentRequest
 	) {
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}

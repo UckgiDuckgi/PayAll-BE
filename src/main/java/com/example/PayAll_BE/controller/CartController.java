@@ -35,7 +35,7 @@ public class CartController {
 	@PostMapping
 	public ResponseEntity<ApiResult> addCart(HttpServletRequest request,
 		@RequestBody CartRequestDto cartRequestDto) {
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
@@ -46,7 +46,7 @@ public class CartController {
 
 	@GetMapping
 	public ResponseEntity<ApiResult> getCarts(HttpServletRequest request) {
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
@@ -59,7 +59,7 @@ public class CartController {
 	public ResponseEntity<ApiResult> updateQuantity(HttpServletRequest request,
 		@PathVariable Long cartId,
 		@RequestBody UpdateQuantityRequestDto requestDto) {
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
@@ -71,7 +71,7 @@ public class CartController {
 	@DeleteMapping("/{cartId}")
 	public ResponseEntity<ApiResult> deleteCart(HttpServletRequest request,
 		@PathVariable Long cartId) {
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
@@ -83,7 +83,7 @@ public class CartController {
 	@DeleteMapping()
 	public ResponseEntity<ApiResult> deleteSelectedCart(HttpServletRequest request,
 		@RequestBody List<Long> cartIds) {
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
