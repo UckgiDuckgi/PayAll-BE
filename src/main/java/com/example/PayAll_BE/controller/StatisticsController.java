@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.Statistics.StatisticsDetailResponseDto;
 import com.example.PayAll_BE.entity.enums.Category;
+import com.example.PayAll_BE.service.AuthService;
+import com.example.PayAll_BE.service.JwtService;
 import com.example.PayAll_BE.service.StatisticsService;
 
-
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -21,24 +23,29 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/statistics")
 public class StatisticsController {
 	private final StatisticsService statisticsService;
+	private final AuthService authService;
+	private final JwtService jwtService;
 
 	@GetMapping
 	public ResponseEntity<ApiResult> getStatistics(
-		@RequestHeader("Authorization") String token,
+		HttpServletRequest request,
 		@RequestParam String date
 	) {
-		String jwtToken = token.replace("Bearer ", "");
+		String token = authService.getCookieValue(request, "accessToken");
+
 		return ResponseEntity.ok(
-			new ApiResult(200, "OK", "소비분석 조회 성공", statisticsService.getStatistics(jwtToken, date))
+			new ApiResult(200, "OK", "소비분석 조회 성공", statisticsService.getStatistics(token, date))
 		);
 	}
 
 	@GetMapping("/{category}")
 	public ResponseEntity<ApiResult> getStatisticsDetails(
+		HttpServletRequest request,
 		@PathVariable Category category,
-		@RequestParam Long userId,
 		@RequestParam String date
 	) {
+		String token = authService.getCookieValue(request, "accessToken");
+		Long userId = jwtService.extractUserId(token);
 		StatisticsDetailResponseDto details = statisticsService.getCategoryDetails(userId, category, date);
 		return ResponseEntity.ok(new ApiResult(200, "OK", "카테고리별 소비 분석 상세 조회 성공", details));
 	}
