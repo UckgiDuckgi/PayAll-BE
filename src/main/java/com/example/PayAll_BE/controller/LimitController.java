@@ -35,11 +35,12 @@ public class LimitController {
 		String token = authService.getCookieValue(request, "accessToken");
 		Long userId = jwtService.extractUserId(token);
 
-		limitService.registerLimit(userId, requestDto);
-
-		return ResponseEntity.ok(
-			new ApiResult(200, "OK", "소비 목표 등록 성공")
-		);
+		try {
+			limitService.registerLimit(userId, requestDto);
+			return ResponseEntity.ok(new ApiResult(200, "OK", "소비 목표 등록 성공"));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(new ApiResult(400, "Bad Request", e.getMessage()));
+		}
 	}
 
 	// 소비목표 조회
