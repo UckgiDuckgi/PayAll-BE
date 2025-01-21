@@ -6,10 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class PlatformRequestDto {
-	private String coupangId;
-	private String coupangPassword;
-	private String elevenstId;
-	private String elevenstPassword;
-	private String naverId;
-	private String naverPassword;
+	private String platformName;
+	private String id;
+	private String password;
 }

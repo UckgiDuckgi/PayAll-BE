@@ -2,8 +2,10 @@ package com.example.PayAll_BE.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.Statistics;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.entity.enums.Category;
+import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.repository.PaymentRepository;
 import com.example.PayAll_BE.repository.StatisticsRepository;
 import com.example.PayAll_BE.repository.UserRepository;
@@ -28,6 +31,54 @@ public class StatisticsService {
 	private final UserRepository userRepository;
 	private final JwtService jwtService;
 
+	public void setStatistics(String token){
+		String authId = jwtService.extractAuthId(token);
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
+
+		LocalDateTime firstDayOfThisMonth = LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1, 0, 0, 0, 0);
+		LocalDateTime firstDayOfNextMonth = firstDayOfThisMonth.plusMonths(1);
+
+		List<Statistics> statisticsList = statisticsRepository.findByUserAndThisMonth(user, firstDayOfThisMonth, firstDayOfNextMonth);
+
+		LocalDateTime lastUpdateTime;
+		if (!statisticsList.isEmpty()) {
+			lastUpdateTime = statisticsList.get(0).getStatisticsDate();
+		} else {
+			lastUpdateTime = firstDayOfThisMonth;
+		}
+
+		LocalDateTime currentTime = LocalDateTime.now();
+		List<Payment> recentPayments = paymentRepository.findByUserAndPaymentTimeAfter(user, lastUpdateTime, currentTime);
+
+		Map<Category, Long> categorySpent = new HashMap<>();
+		for (Payment payment : recentPayments) {
+			Category category = payment.getCategory();
+			categorySpent.put(category, categorySpent.getOrDefault(category, 0L) + payment.getPrice());
+		}
+
+		for (Map.Entry<Category, Long> entry : categorySpent.entrySet()) {
+			Category category = entry.getKey();
+			Long totalSpent = entry.getValue();
+
+			Statistics categoryStatistics = statisticsRepository.findByUserAndCategoryAndStatisticsDate(user, category, lastUpdateTime);
+
+			if (categoryStatistics != null) {
+				categoryStatistics.setStatisticsAmount(totalSpent);
+				categoryStatistics.setStatisticsDate(currentTime);
+			} else {
+				categoryStatistics = Statistics.builder()
+					.user(user)
+					.category(category)
+					.statisticsAmount(totalSpent)
+					.statisticsDate(currentTime)
+					.build();
+			}
+
+			statisticsRepository.save(categoryStatistics);
+		}
+
+	}
 	public StatisticsResponseDto getStatistics(String token, String date) {
 
 		String authId = jwtService.extractAuthId(token);
