@@ -16,4 +16,5 @@ public class AccountListResponseDto {
 	private String userName;
 	private List<AccountResponseDto> accountList;
 	private Long totalBalance;
+	private Long PaymentDifference;
 }

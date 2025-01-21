@@ -18,7 +18,7 @@ public class AccountMapper {
 			.build();
 	}
 
-	public static AccountListResponseDto toAccountListResponseDto(User user, List<Account> accounts) {
+	public static AccountListResponseDto toAccountListResponseDto(User user, List<Account> accounts, Long lastMonthTotalPaymentPrice, Long thisMonthTotalPaymentPrice) {
 		List<AccountResponseDto> accountList = accounts.stream()
 			.map(AccountMapper::toAccountResponseDto)
 			.collect(Collectors.toList());
@@ -31,6 +31,7 @@ public class AccountMapper {
 			.userName(user.getName())
 			.accountList(accountList)
 			.totalBalance(totalBalance)
+			.PaymentDifference(lastMonthTotalPaymentPrice - thisMonthTotalPaymentPrice)
 			.build();
 	}
 }
