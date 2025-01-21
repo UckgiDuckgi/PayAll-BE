@@ -1,6 +1,8 @@
 package com.example.PayAll_BE.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +12,7 @@ import com.example.PayAll_BE.config.security.CryptoUtil;
 import com.example.PayAll_BE.dto.AuthRequestDto;
 import com.example.PayAll_BE.dto.AuthResponseDto;
 import com.example.PayAll_BE.dto.PlatformRequestDto;
+import com.example.PayAll_BE.dto.PlatformResponseDto;
 import com.example.PayAll_BE.dto.RegisterRequestDto;
 import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.exception.BadRequestException;
@@ -171,27 +174,58 @@ public class AuthService {
 		response.addCookie(accessTokenCookie);
 	}
 
+	public PlatformResponseDto getPlatformInfo(String authId) throws Exception {
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new NotFoundException("User not found"));
+
+		List<PlatformResponseDto.PlatformInfo> platformInfos = new ArrayList<>();
+
+		if (user.getCoupangId() != null) {
+			platformInfos.add(PlatformResponseDto.PlatformInfo.builder()
+				.platformName("COUPANG")
+				.id(CryptoUtil.decrypt(user.getCoupangId()))
+				.build());
+		}
+
+		if (user.getElevenstId() != null) {
+			platformInfos.add(PlatformResponseDto.PlatformInfo.builder()
+				.platformName("11ST")
+				.id(CryptoUtil.decrypt(user.getElevenstId()))
+				.build());
+		}
+
+		if (user.getNaverId() != null) {
+			platformInfos.add(PlatformResponseDto.PlatformInfo.builder()
+				.platformName("NAVER")
+				.id(CryptoUtil.decrypt(user.getNaverId()))
+				.build());
+		}
+
+		return PlatformResponseDto.builder()
+			.platformInfos(platformInfos).build();
+	}
+
 	public void updatePlatformInfo(String authId, PlatformRequestDto request) throws Exception {
 
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new NotFoundException("User not found"));
 
-		// 플랫폼 타입 검증
+		// 플랫폼 타입 검증 - 대소문자 구별 x
 		String platformType = request.getPlatformName().toUpperCase();
-		// if (!isValidPlatform(platformType)) {
-		// 	throw new BadRequestException("유효하지 않은 플랫폼입니다: " + platformType);
-		// }
+		if (!isValidPlatform(platformType)) {
+			throw new BadRequestException("유효하지 않은 플랫폼입니다: " + platformType);
+		}
 
 		switch (platformType) {
-			case "Coupang" -> {
+			case "COUPANG" -> {
 				user.setCoupangId(CryptoUtil.encrypt(request.getId()));
 				user.setCoupangPassword(CryptoUtil.encrypt(request.getPassword()));
 			}
-			case "11st" -> {
+			case "11ST" -> {
 				user.setElevenstId(CryptoUtil.encrypt(request.getId()));
 				user.setElevenstPassword(CryptoUtil.encrypt(request.getPassword()));
 			}
-			case "Naver" -> {
+			case "NAVER" -> {
 				user.setNaverId(CryptoUtil.encrypt(request.getId()));
 				user.setNaverPassword(CryptoUtil.encrypt(request.getPassword()));
 			}
@@ -203,7 +237,7 @@ public class AuthService {
 	}
 
 	private boolean isValidPlatform(String platformType) {
-		return Arrays.asList("Coupang", "11st", "Naver").contains(platformType);
+		return Arrays.asList("COUPANG", "11ST", "NAVER").contains(platformType);
 	}
 
 	// 쿠키에서 특정 이름의 값을 찾는 메서드
