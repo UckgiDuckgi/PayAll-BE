@@ -67,23 +67,19 @@ public class AuthController {
 	}
 
 	@PostMapping("/platform")
-	public ResponseEntity<ApiResult> setPlatform(@RequestHeader("Authorization") String token,
+	public ResponseEntity<ApiResult> setPlatform(HttpServletRequest httpServletRequest,
 		@RequestBody PlatformRequestDto request) throws
 		Exception {
-		String authId = jwtService.extractAuthId(token.replace("Bearer ", ""));
-
+		String accessToken = authService.getCookieValue(httpServletRequest, "accessToken");
+		String authId = jwtService.extractAuthId(accessToken);
 		authService.updatePlatformInfo(authId, request);
 
 		return ResponseEntity.ok(new ApiResult(200, "OK", "플랫폼 계정 등록에 성공하였습니다."));
 	}
 
-	// @GetMapping("platform")
-	// public ResponseEntity<ApiResult> getPlatform(@RequestHeader("Authorization") String token,@RequestBody PlatformRequestDto request) throws
-	// 	Exception {
-	// 	String authId = jwtService.extractAuthId(token.replace("Bearer ", ""));
+	// @GetMapping("/platform")
+	// public ResponseEntity<ApiResult> getPlatfomr() {
 	//
-	// 	authService.updatePlatformInfo(authId,request);
-	//
-	// 	return ResponseEntity.ok(new ApiResult(200, "OK", "플랫폼 계정 등록에 성공하였습니다."));
 	// }
+
 }

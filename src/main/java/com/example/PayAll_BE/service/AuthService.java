@@ -162,9 +162,9 @@ public class AuthService {
 
 		// 플랫폼 타입 검증
 		String platformType = request.getPlatformName().toUpperCase();
-		if (!isValidPlatform(platformType)) {
-			throw new BadRequestException("유효하지 않은 플랫폼입니다: " + platformType);
-		}
+		// if (!isValidPlatform(platformType)) {
+		// 	throw new BadRequestException("유효하지 않은 플랫폼입니다: " + platformType);
+		// }
 
 		switch (platformType) {
 			case "Coupang" -> {
