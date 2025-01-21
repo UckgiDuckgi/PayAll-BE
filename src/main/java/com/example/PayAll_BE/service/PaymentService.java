@@ -109,7 +109,6 @@ public class PaymentService {
 						.paymentTime(payment.getPaymentTime())
 						.bankName(payment.getAccount().getBankName())
 						.accountName(payment.getAccount().getAccountName())
-						.shootNeed(payment.getPaymentDetails().isEmpty())
 						.build())
 					.collect(Collectors.toList()))
 				.build())
