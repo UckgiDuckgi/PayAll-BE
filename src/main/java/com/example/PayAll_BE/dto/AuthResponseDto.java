@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class AuthResponseDto {
 	private String accessToken;
 	private String refreshToken;
+	private boolean permission; // permission 여부 반환
 }

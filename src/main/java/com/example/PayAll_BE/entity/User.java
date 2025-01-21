@@ -52,4 +52,7 @@ public class User {
 
 	@Column(name = "naver_password")
 	private String naverPassword;
+
+	@Column(name = "permission", nullable = false)
+	private boolean permission = false;
 }

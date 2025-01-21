@@ -51,7 +51,23 @@ public class AuthService {
 			throw new UnauthorizedException("로그인 : 잘못된 비밀번호 입니다.");
 		}
 
-		return generateTokens(user.getAuthId(), user.getName(), user.getId());
+		// permission = false
+		if (!user.isPermission()) {
+			user.setPermission(true);
+			userRepository.save(user);
+			return AuthResponseDto.builder()
+				.accessToken(jwtService.generateAccessToken(user.getAuthId(), user.getId()))
+				.refreshToken(jwtService.generateRefreshToken(user.getAuthId(), user.getId()))
+				.permission(false) // 처음 로그인임을 표시
+				.build();
+		}
+
+		// permission = true
+		return AuthResponseDto.builder()
+			.accessToken(jwtService.generateAccessToken(user.getAuthId(), user.getId()))
+			.refreshToken(jwtService.generateRefreshToken(user.getAuthId(), user.getId()))
+			.permission(true) // 처음 로그인이 아님
+			.build();
 	}
 
 	public AuthResponseDto generateTokens(String authId, String name, Long userId) {

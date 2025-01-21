@@ -35,7 +35,14 @@ public class AuthController {
 		authService.setRefreshTokenCookie(authResponse.getRefreshToken(), response);
 		authService.setAccessTokenCookie(authResponse.getAccessToken(), response);
 
-		return ResponseEntity.ok(new ApiResult(200, "OK", "로그인에 성공했습니다."));
+		if (authResponse.isPermission()) {
+			// permission = true
+			return ResponseEntity.ok(new ApiResult(200, "Already Exists", "로그인에 성공했습니다."));
+		} else {
+			// permission = false
+			return ResponseEntity.ok(new ApiResult(200, "OK", "mydata 연동이 되어있지 않습니다."));
+		}
+
 	}
 
 	@PostMapping("/sign-up")
