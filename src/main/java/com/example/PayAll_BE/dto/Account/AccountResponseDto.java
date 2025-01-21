@@ -15,4 +15,5 @@ public class AccountResponseDto {
 	private String bankName;
 	private String accountName;
 	private Long balance;
+	private Long accountId;
 }

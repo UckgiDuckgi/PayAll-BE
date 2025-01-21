@@ -16,6 +16,7 @@ public class AccountMapper {
 			.bankName(account.getBankName())
 			.accountName(account.getAccountName())
 			.balance(account.getBalance())
+			.accountId(account.getId())
 			.build();
 	}
 
