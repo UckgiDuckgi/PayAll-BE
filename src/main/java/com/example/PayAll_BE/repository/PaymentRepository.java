@@ -162,4 +162,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		LocalDateTime paymentTime,
 		Long price,
 		String paymentPlace);
+
+		List<Payment> findByAccount_User_IdAndPaymentTimeBetween(Long userId, LocalDateTime startDate, LocalDateTime endDate);
 }
