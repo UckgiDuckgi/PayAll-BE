@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccountResponseDto {
+	private Long accountId;
 	private String bankName;
 	private String accountName;
 	private Long balance;
