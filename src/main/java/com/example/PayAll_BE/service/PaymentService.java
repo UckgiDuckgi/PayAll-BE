@@ -6,6 +6,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
@@ -22,6 +23,7 @@ import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
 import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailDto;
 import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailInfoRequestDto;
 import com.example.PayAll_BE.dto.ProductDto;
+import com.example.PayAll_BE.entity.Account;
 import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.PaymentDetail;
 import com.example.PayAll_BE.entity.User;
@@ -29,6 +31,7 @@ import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.mapper.PaymentDetailMapper;
 import com.example.PayAll_BE.mapper.PaymentMapper;
 import com.example.PayAll_BE.product.ProductApiClient;
+import com.example.PayAll_BE.repository.AccountRepository;
 import com.example.PayAll_BE.repository.PaymentDetailRepository;
 import com.example.PayAll_BE.repository.PaymentRepository;
 import com.example.PayAll_BE.repository.UserRepository;
@@ -45,18 +48,33 @@ public class PaymentService {
 	private final ProductApiClient productApiClient;
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
+	private final AccountRepository accountRepository;
 
-	public TotalPaymentResponseDto getPayments(String token, String category, Pageable pageable) {
+	public TotalPaymentResponseDto getPayments(String token, Long accountId, String category, Pageable pageable) {
 		String authId = jwtService.extractAuthId(token);
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
-		Page<Payment> paymentPage = paymentRepository.findAllByUserIdAndCategory(user.getId(), category, pageable);
+
+		Page<Payment> paymentPage;
+
+		if (accountId == null) {
+			paymentPage = paymentRepository.findAllByUserIdAndCategory(user.getId(), category, pageable);
+		} else {
+			Account account = accountRepository.findById(accountId)
+				.orElseThrow(() -> new NotFoundException("해당 계좌를 찾을 수 없습니다."));
+			paymentPage = paymentRepository.findAllByAccountIdAndCategory(accountId, category, pageable);
+		}
 
 		if (paymentPage.isEmpty()) {
 			return TotalPaymentResponseDto.builder()
 				.totalBalance(0L)
 				.monthPaymentPrice(0L)
 				.paymentList(List.of())
+				.bankName(accountId != null ? accountRepository.findById(accountId).get().getBankName() : null)
+				.accountName(accountId != null ? accountRepository.findById(accountId).get().getAccountName() : null)
+				.accountNumber(accountId != null ? accountRepository.findById(accountId).get().getAccountNumber() : null)
+				.paymentCount(0)
+				.category(category)
 				.build();
 		}
 
@@ -96,12 +114,22 @@ public class PaymentService {
 				.build())
 			.collect(Collectors.toList());
 
+		Integer paymentCount = dayPaymentList.stream()
+			.mapToInt(dayPayment -> dayPayment.getPaymentDetail().size())
+			.sum();
+
 		return TotalPaymentResponseDto.builder()
 			.totalBalance(totalBalance)
 			.monthPaymentPrice(totalPaymentPrice)
 			.paymentList(dayPaymentList)
+			.bankName(accountId != null ? accountRepository.findById(accountId).get().getBankName() : null)
+			.accountName(accountId != null ? accountRepository.findById(accountId).get().getAccountName() : null)
+			.accountNumber(accountId != null ? accountRepository.findById(accountId).get().getAccountNumber() : null)
+			.paymentCount(paymentCount)
+			.category(category)
 			.build();
 	}
+
 
 	public PaymentResponseDto getPaymentById(Long paymentId) {
 		Payment payment = paymentRepository.findById(paymentId)
@@ -120,24 +148,22 @@ public class PaymentService {
 		String authId = jwtService.extractAuthId(token);
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
-		// Payment 조회
 		Payment payment = paymentRepository.findByAccount_User_IdAndPaymentTimeAndPaymentPlace(
 			user.getId(),requestDto.getPaymentTime(), requestDto.getPaymentPlace()
 		);
 
-		// PaymentDetail 생성 및 저장
+
 		List<PaymentDetail> paymentDetails = requestDto.getPurchaseProductList().stream()
 			.map(product -> {
-				// ProductName으로 ProductId 조회
-				ProductDto productDto = productApiClient.fetchProductByName(product.getProductName());
-				Long productId = productDto.getPCode();  // 상품 코드(pcode) 가져오기
 
-				// PaymentDetail 엔터티 생성
+				ProductDto productDto = productApiClient.fetchProductByName(product.getProductName());
+				Long productId = productDto.getPCode();
+
 				return PaymentMapper.toPaymentDetailEntity(payment, product, productId);
 			})
 			.collect(Collectors.toList());
 
-		paymentDetailRepository.saveAll(paymentDetails);  // DB에 저장
+		paymentDetailRepository.saveAll(paymentDetails);
 	}
 
 	@Transactional

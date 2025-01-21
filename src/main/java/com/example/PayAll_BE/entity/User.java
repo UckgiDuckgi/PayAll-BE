@@ -34,6 +34,7 @@ public class User {
 
 	private String phone;
 	private String address;
+	private String email;
 
 	@Column(name = "coupang_id")
 	private String coupangId;

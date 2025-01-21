@@ -3,7 +3,6 @@ package com.example.PayAll_BE.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +12,7 @@ import com.example.PayAll_BE.dto.Statistics.StatisticsDetailResponseDto;
 import com.example.PayAll_BE.entity.enums.Category;
 import com.example.PayAll_BE.service.AuthService;
 import com.example.PayAll_BE.service.JwtService;
+import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.service.StatisticsService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,8 +33,12 @@ public class StatisticsController {
 	) {
 		String token = authService.getCookieValue(request, "accessToken");
 
+		String accessToken = authService.getCookieValue(request, "access_token");
+		if(accessToken == null){
+			throw new UnauthorizedException("액세스 토큰이 없습니다");
+		}
 		return ResponseEntity.ok(
-			new ApiResult(200, "OK", "소비분석 조회 성공", statisticsService.getStatistics(token, date))
+			new ApiResult(200, "OK", "소비분석 조회 성공", statisticsService.getStatistics(accessToken, date))
 		);
 	}
 
