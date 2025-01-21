@@ -27,6 +27,7 @@ import com.example.PayAll_BE.entity.Account;
 import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.PaymentDetail;
 import com.example.PayAll_BE.entity.User;
+import com.example.PayAll_BE.entity.enums.Category;
 import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.mapper.PaymentDetailMapper;
 import com.example.PayAll_BE.mapper.PaymentMapper;
@@ -50,7 +51,7 @@ public class PaymentService {
 	private final UserRepository userRepository;
 	private final AccountRepository accountRepository;
 
-	public TotalPaymentResponseDto getPayments(String token, Long accountId, String category, Pageable pageable) {
+	public TotalPaymentResponseDto getPayments(String token, Long accountId, Category category, Pageable pageable) {
 		String authId = jwtService.extractAuthId(token);
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
