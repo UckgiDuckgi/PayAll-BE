@@ -103,7 +103,7 @@ public class StatisticsService {
 			.entrySet().stream()
 			.map(entry -> new StatisticsResponseDto.CategoryExpense(
 				entry.getKey().ordinal(), // 카테고리 ID
-				entry.getKey().getCategory(), // 카테고리 이름
+				entry.getKey().name(), // 카테고리 이름
 				entry.getValue() // 지출 금액
 			))
 			.collect(Collectors.toList());
