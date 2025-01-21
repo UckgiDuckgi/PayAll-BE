@@ -22,7 +22,7 @@ public class AccountController {
 
 	@GetMapping
 	public ResponseEntity<ApiResult> getAccounts(HttpServletRequest request){
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}

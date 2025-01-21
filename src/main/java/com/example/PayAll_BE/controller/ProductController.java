@@ -32,7 +32,7 @@ public class ProductController {
 
 	@GetMapping("{productId}")
 	public ResponseEntity<?> calculateBenefit(HttpServletRequest request,@PathVariable("productId") Long productId){
-		String accessToken = authService.getCookieValue(request, "access_token");
+		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
