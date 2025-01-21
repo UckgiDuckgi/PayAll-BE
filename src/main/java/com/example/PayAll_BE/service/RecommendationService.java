@@ -92,6 +92,7 @@ public class RecommendationService {
 				.storeName(dto.getStoreName())
 				.discountAmount(dto.getDiscountAmount())
 				.productName(dto.getProduct().getProductName())
+				.productId(dto.getProduct().getId())
 				.category(dto.getCategory())
 				.productType(dto.getProductType())
 				.build(

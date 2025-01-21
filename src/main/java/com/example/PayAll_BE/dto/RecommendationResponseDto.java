@@ -16,6 +16,7 @@ public class RecommendationResponseDto {
 	private String storeName;
 	private Long discountAmount;
 	private Category category;
+	private Long productId;
 	private String productName;
 	private ProductType productType;
 }
