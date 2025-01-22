@@ -17,6 +17,6 @@ public enum Category {
 	HEALTH("병원비"),
 	INCOME("수입"),
 	OTHERS("기타"),
-	SAVING("할인 누적 금액");
+	DISCOUNT("할인 누적 금액");
 	private final String category;
 }

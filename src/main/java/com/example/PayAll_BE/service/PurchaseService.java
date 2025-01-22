@@ -58,13 +58,13 @@ public class PurchaseService {
 			.atStartOfDay();
 
 		Statistics existingStatistic = statisticsRepository.findByUserIdAndCategoryAndStatisticsDate(
-			userId, Category.SAVING, startOfThisMonth).orElse(null);
+			userId, Category.DISCOUNT, startOfThisMonth).orElse(null);
 
 		// 테이블에 없으면 새로운 statistics 생성
 		if (existingStatistic == null) {
 			existingStatistic = Statistics.builder()
 				.user(user)
-				.category(Category.SAVING)
+				.category(Category.DISCOUNT)
 				.statisticsAmount(purchaseRequestDto.getTotalDiscountPrice())
 				.statisticsDate(startOfThisMonth)
 				.build();
