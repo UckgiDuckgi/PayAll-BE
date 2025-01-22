@@ -35,19 +35,10 @@ public class MydataController {
 	private final RestTemplate restTemplate;
 	private final JwtService jwtService;
 	private final AuthService authService;
-	private final MydataService mydataService;
 
 	@Value("${server1.base-url}")
 	private String server1BaseUrl;
 
-	@GetMapping
-	public ResponseEntity<ApiResult> getTest(HttpServletRequest httpServletRequest) {
-		String token = authService.getCookieValue(httpServletRequest, "accessToken");
-		mydataService.syncMydataInfo(token);
-		return ResponseEntity.ok(
-			new ApiResult(200, "OK", "마이데이터 연동 성공")
-		);
-	}
 	@GetMapping("/load")
 	public ResponseEntity<AccountListResponseDto> loadMydataAccountList(@RequestHeader("Authorization") String token) {
 		String url = server1BaseUrl + "api/accounts";
