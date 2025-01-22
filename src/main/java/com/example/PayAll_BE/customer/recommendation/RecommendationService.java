@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Service
 public class RecommendationService {
-
+//
 	private final PaymentRepository paymentRepository;
 	private final BenefitRepository benefitRepository;
 	private final RecommendationRepository recommendationRepository;
@@ -54,8 +54,9 @@ public class RecommendationService {
 		List<StoreStatisticsDto> storeStatisticsDtos = paymentRepository.getCategoryStoreStats(user.getId(),
 			startDate, endDate);
 
+		System.out.println("storeStatisticsDtos = " + storeStatisticsDtos);
 		List<Statistics> statisticsList = storeStatisticsDtos.stream()
-			.filter(dto -> dto.getType().equals("CATEGORY")) // 'CATEGORY'인 항목만 필터링
+			.filter(dto -> dto.getType().equals("CATEGORY") && dto.getTotalSpent() != null) // 'CATEGORY'인 항목만 필터링
 			.map(dto -> Statistics.builder()
 				.user(user)
 				.category(Category.valueOf(dto.getName()))  // Enum으로 변환
