@@ -2,6 +2,7 @@ package com.example.PayAll_BE.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,13 +24,14 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	@Query("SELECT p FROM Payment p WHERE p.account.user.id = :userId " +
 		"AND (:category IS NULL OR p.category = :category) " +
 		"ORDER BY p.paymentTime DESC")
-	Page<Payment> findAllByUserIdAndCategory(@Param("userId") Long userId, @Param("category") Category category, Pageable pageable);
+	Page<Payment> findAllByUserIdAndCategory(@Param("userId") Long userId, @Param("category") Category category,
+		Pageable pageable);
 
 	@Query("SELECT p FROM Payment p WHERE p.account.id = :accountId " +
 		"AND (:category IS NULL OR p.category = :category) " +
 		"ORDER BY p.paymentTime DESC")
-	Page<Payment> findAllByAccountIdAndCategory(@Param("accountId") Long accountId, @Param("category") Category category, Pageable pageable);
-
+	Page<Payment> findAllByAccountIdAndCategory(@Param("accountId") Long accountId,
+		@Param("category") Category category, Pageable pageable);
 
 	// 최근 결제 상품 중 조회
 	@Query("SELECT p FROM Payment p " +
@@ -52,6 +54,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	Payment findPaymentToUpdateByAccountIdAndPaymentTime(Long accountId, LocalDateTime paymentTime);
 
 	List<Payment> findByAccountId(Long accountId);
+
+	Optional<Payment> findFirstByAccountIdOrderByPaymentTimeDesc(Long accountId);
 
 	// @Query(value = "SELECT " +
 	// 	"p.category as category, " +
@@ -158,12 +162,12 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		@Param("twoMonthsAgoEnd") LocalDateTime twoMonthsAgoEnd
 	);
 
-
 	@Query("SELECT p FROM Payment p " +
 		"JOIN p.account a ON p.account.id = a.id " +
 		"JOIN a.user u ON a.user.id = u.id " +
 		"WHERE u = :user AND p.paymentTime BETWEEN :startDate AND :endDate")
-	List<Payment> findByUserAndPaymentTimeAfter(@Param("user") User user, @Param("startDate") LocalDateTime startDate,@Param("endDate") LocalDateTime endDate);
+	List<Payment> findByUserAndPaymentTimeAfter(@Param("user") User user, @Param("startDate") LocalDateTime startDate,
+		@Param("endDate") LocalDateTime endDate);
 
 	// 결제 내역 있는지 확인
 	boolean existsByAccountIdAndPaymentTimeAndPriceAndPaymentPlace(Long accountId,
@@ -171,7 +175,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		Long price,
 		String paymentPlace);
 
-		List<Payment> findByAccount_User_IdAndPaymentTimeBetween(Long userId, LocalDateTime startDate, LocalDateTime endDate);
+	List<Payment> findByAccount_User_IdAndPaymentTimeBetween(Long userId, LocalDateTime startDate,
+		LocalDateTime endDate);
 
 	@Query("SELECT SUM(p.price) FROM Payment p WHERE p.account.id IN :accountIds AND p.paymentTime BETWEEN :startDate AND :endDate")
 	Long findTotalPaymentByAccountIdsAndDateRange(@Param("accountIds") List<Long> accountIds,

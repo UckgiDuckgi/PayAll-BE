@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @Builder
-public class TransactionRequestDto {
+public class UpdateTransactionRequestDto {
 	private Long price;
 }

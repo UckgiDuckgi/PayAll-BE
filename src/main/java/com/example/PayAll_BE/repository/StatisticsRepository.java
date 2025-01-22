@@ -18,6 +18,10 @@ public interface StatisticsRepository extends JpaRepository<Statistics, Long> {
 	Statistics findByUserAndCategoryAndStatisticsDate(User user, Category category, LocalDateTime statisticsDate);
 
 	@Query("SELECT s FROM Statistics s WHERE s.user = :user AND s.statisticsDate BETWEEN :firstDayOfMonth AND :firstDayOfNextMonth")
-	List<Statistics> findByUserAndThisMonth(@Param("user") User user, @Param("firstDayOfMonth") LocalDateTime firstDayOfMonth, @Param("firstDayOfNextMonth") LocalDateTime firstDayOfNextMonth);
+	List<Statistics> findByUserAndThisMonth(@Param("user") User user,
+		@Param("firstDayOfMonth") LocalDateTime firstDayOfMonth,
+		@Param("firstDayOfNextMonth") LocalDateTime firstDayOfNextMonth);
 
+	Optional<Statistics> findByUserIdAndCategoryAndStatisticsDate(Long userId, Category category,
+		LocalDateTime statisticsDate);
 }

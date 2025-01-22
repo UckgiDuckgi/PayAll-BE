@@ -21,6 +21,7 @@ import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
 import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailDto;
 import com.example.PayAll_BE.dto.PaymentDetail.PaymentListRequestDto;
 import com.example.PayAll_BE.dto.ProductDto;
+import com.example.PayAll_BE.dto.Purchase.PurchaseRequestDto;
 import com.example.PayAll_BE.entity.Account;
 import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.PaymentDetail;
@@ -71,7 +72,8 @@ public class PaymentService {
 				.paymentList(List.of())
 				.bankName(accountId != null ? accountRepository.findById(accountId).get().getBankName() : null)
 				.accountName(accountId != null ? accountRepository.findById(accountId).get().getAccountName() : null)
-				.accountNumber(accountId != null ? accountRepository.findById(accountId).get().getAccountNumber() : null)
+				.accountNumber(
+					accountId != null ? accountRepository.findById(accountId).get().getAccountNumber() : null)
 				.paymentCount(0)
 				.category(category)
 				.build();
@@ -88,7 +90,8 @@ public class PaymentService {
 			.sum();
 
 		Long totalPaymentPrice = payments.stream()
-			.filter(payment -> payment.getPaymentTime().isAfter(startOfMonth) && payment.getPaymentTime().isBefore(endOfMonth))
+			.filter(payment -> payment.getPaymentTime().isAfter(startOfMonth) && payment.getPaymentTime()
+				.isBefore(endOfMonth))
 			.mapToLong(Payment::getPrice)
 			.sum();
 
@@ -129,7 +132,6 @@ public class PaymentService {
 			.category(category)
 			.build();
 	}
-
 
 	public PaymentResponseDto getPaymentById(Long paymentId) {
 		Payment payment = paymentRepository.findById(paymentId)
@@ -190,5 +192,25 @@ public class PaymentService {
 		if (!paymentsToUpdate.isEmpty()) {
 			paymentRepository.saveAll(paymentsToUpdate);
 		}
+	}
+	
+	public void createPaymentDetails(Long userId, String accountNum,
+		List<PurchaseRequestDto.PurchaseProductDto> products) {
+		Account account = accountRepository.findByUserIdAndAccountNumber(userId, accountNum)
+			.orElseThrow(() -> new NotFoundException("account not found"));
+		Payment payment = paymentRepository.findFirstByAccountIdOrderByPaymentTimeDesc(account.getId())
+			.orElseThrow(() -> new NotFoundException("payment not found"));
+
+		products.forEach(product -> {
+			PaymentDetail detail = PaymentDetail.builder()
+				.payment(payment)
+				.productId(product.getProductId())
+				.productName(product.getProductName())
+				.productPrice(product.getProductPrice())
+				.quantity(product.getQuantity())
+				.build();
+			paymentDetailRepository.save(detail);
+
+		});
 	}
 }

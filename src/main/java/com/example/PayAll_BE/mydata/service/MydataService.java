@@ -5,9 +5,16 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import com.example.PayAll_BE.dto.Purchase.PurchaseRequestDto;
+import com.example.PayAll_BE.dto.Purchase.UpdateTransactionRequestDto;
 import com.example.PayAll_BE.entity.Account;
 import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.User;
@@ -28,10 +35,13 @@ import com.example.PayAll_BE.service.CategoryService;
 import com.example.PayAll_BE.service.JwtService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MydataService {
+	private final RestTemplate restTemplate;
 	private final MydataController mydataController;
 	private final AccountRepository accountRepository;
 	private final PaymentRepository paymentRepository;
@@ -39,9 +49,31 @@ public class MydataService {
 	private final CategoryService categoryService;
 	private final JwtService jwtService;
 
-	public Object getAccountList(String authorization, String transactionId, String apiType, String orgCode,
-		String searchTimestamp, String nextPage, int limit) {
-		return null;
+	@Value("${server1.base-url}")
+	private String baseUrl;
+
+	public String syncPurchaseData(String token, PurchaseRequestDto purchaseRequestDto) {
+		UpdateTransactionRequestDto transactionRequestDto = UpdateTransactionRequestDto.builder()
+			.price(purchaseRequestDto.getTotalPrice())
+			.build();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", token);
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		HttpEntity<UpdateTransactionRequestDto> entity = new HttpEntity<>(
+			transactionRequestDto, headers);
+
+		String url = baseUrl + "/api/accounts/purchase";
+
+		try {
+			ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+			log.info("거래 내역 마이데이터에 저장 성공");
+			return response.getBody();
+		} catch (Exception e) {
+			throw new RuntimeException("마이데이터 동기화 실패");
+		}
+
 	}
 
 	public void syncMydataInfo(String token) {
