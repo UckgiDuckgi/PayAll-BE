@@ -9,10 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.dto.Statistics.StatisticsDetailResponseDto;
+import com.example.PayAll_BE.entity.User;
 import com.example.PayAll_BE.entity.enums.Category;
+import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.exception.UnauthorizedException;
+import com.example.PayAll_BE.repository.UserRepository;
 import com.example.PayAll_BE.service.AuthService;
 import com.example.PayAll_BE.service.JwtService;
+import com.example.PayAll_BE.service.RecommendationService;
 import com.example.PayAll_BE.service.StatisticsService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,14 +29,19 @@ public class StatisticsController {
 	private final StatisticsService statisticsService;
 	private final AuthService authService;
 	private final JwtService jwtService;
-
+	private final RecommendationService recommendationService;
+	private final UserRepository userRepository;
 	@GetMapping
 	public ResponseEntity<ApiResult> getStatistics(
 		HttpServletRequest request,
 		@RequestParam String date
 	) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
-		statisticsService.setStatistics(accessToken);
+		String authId = jwtService.extractAuthId(accessToken);
+		User user = userRepository.findByAuthId(authId)
+			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
+		statisticsService.setStatistics(user);
+		recommendationService.flagSetRecommendation(user);
 
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");

@@ -31,10 +31,7 @@ public class StatisticsService {
 	private final UserRepository userRepository;
 	private final JwtService jwtService;
 
-	public void setStatistics(String token){
-		String authId = jwtService.extractAuthId(token);
-		User user = userRepository.findByAuthId(authId)
-			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
+	public void setStatistics(User user){
 
 		LocalDateTime firstDayOfThisMonth = LocalDateTime.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1, 0, 0, 0, 0);
 		LocalDateTime firstDayOfNextMonth = firstDayOfThisMonth.plusMonths(1);

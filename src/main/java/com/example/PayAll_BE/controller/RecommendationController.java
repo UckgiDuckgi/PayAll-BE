@@ -45,25 +45,4 @@ public class RecommendationController {
 
 		return ResponseEntity.ok(new ApiResult(200,"OK","추천 데이터 응답 성공", recommendations));
 	}
-
-	@GetMapping("set")
-	public ResponseEntity<?> setRecommendation(
-		HttpServletRequest request,
-		@RequestParam String yearMonth) {
-
-		String accessToken = authService.getCookieValue(request, "accessToken");
-		if(accessToken == null){
-			throw new UnauthorizedException("액세스 토큰이 없습니다");
-		}
-		// JWT에서 사용자 인증 정보 추출
-		String authId = jwtService.extractAuthId(accessToken);
-		User user = userRepository.findByAuthId(authId)
-			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
-
-		// 기간에 맞는 데이터 생성
-		recommendationService.generateBenefits(user,yearMonth);
-
-		// 응답 반환
-		return ResponseEntity.ok(new ApiResult(200, "OK", "데이터 적재 성공"));
-	}
 }

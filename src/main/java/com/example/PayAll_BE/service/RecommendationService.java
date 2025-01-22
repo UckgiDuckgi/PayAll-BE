@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.dto.ProductResponseDto;
@@ -35,9 +37,9 @@ public class RecommendationService {
 	private final RecommendationRepository recommendationRepository;
 	private final StatisticsRepository statisticsRepository;
 
-	public void generateBenefits(User user, String yearMonth) {
-		LocalDateTime startDate = getStartOfMonthWithyearMonth(yearMonth).atStartOfDay();
-		LocalDateTime endDate = getEndOfMonthWithyearMonth(yearMonth).atStartOfDay();
+	private static final Logger logger = LoggerFactory.getLogger(RecommendationService.class);
+
+	public void generateBenefits(User user, LocalDateTime startDate,LocalDateTime endDate) {
 
 		List<StoreStatisticsDto> storeStatisticsDtos = paymentRepository.getCategoryStoreStats(user.getId(),
 			startDate, endDate);
@@ -53,6 +55,7 @@ public class RecommendationService {
 			.collect(Collectors.toList());
 		// 'statisticsList'에 저장
 		statisticsRepository.saveAll(statisticsList);
+		logger.info("Saved statisticsList:");
 
 		List<Recommendation> recommendationList = storeStatisticsDtos.stream()
 			.map(dto -> {
@@ -65,7 +68,6 @@ public class RecommendationService {
 
 				Long discountAmount = dto.getTotalSpent() * benefit.getBenefitValue() / 100;
 
-				System.out.println("discountAmount = " + benefit);
 				return Recommendation.builder()
 					.user(user)
 					.storeName(dto.getStore())
@@ -80,8 +82,9 @@ public class RecommendationService {
 			.filter(Objects::nonNull)  // null인 항목은 필터링
 			.collect(Collectors.toList());
 
-		System.out.println("recommendationList = " + recommendationList);
 		recommendationRepository.saveAll(recommendationList);
+		logger.info("Saved recommendations:");
+		logger.info("데이터 적재 성공");
 	}
 
 	public List<RecommendationResponseDto> getRecommendation(User user) {
@@ -142,6 +145,22 @@ public class RecommendationService {
 			responseList.add(responseDto);
 		}
 		return responseList;
+	}
+
+	public void flagSetRecommendation(User user){
+		// 현재 날짜에서 저번 달의 1일 00:00:00 계산
+		LocalDateTime startOfLastMonth = LocalDate.now()
+			.minusMonths(1)
+			.withDayOfMonth(1)
+			.atStartOfDay();
+
+		LocalDateTime startOfThisMonth = LocalDate.now()
+			.withDayOfMonth(1)
+			.atStartOfDay();
+
+		if (!recommendationRepository.existsRecommendationByDateTimeAndUser(startOfLastMonth,user)){
+			generateBenefits(user,startOfLastMonth,startOfThisMonth);
+		}
 	}
 
 	private LocalDate getStartOfMonthWithyearMonth(String yearMonth) {
