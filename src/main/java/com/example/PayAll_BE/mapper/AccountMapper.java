@@ -1,9 +1,9 @@
 package com.example.PayAll_BE.mapper;
 
-import com.example.PayAll_BE.dto.Account.AccountResponseDto;
-import com.example.PayAll_BE.dto.Account.AccountListResponseDto;
-import com.example.PayAll_BE.entity.Account;
-import com.example.PayAll_BE.entity.User;
+import com.example.PayAll_BE.customer.account.dto.AccountResponseDto;
+import com.example.PayAll_BE.customer.account.dto.AccountListResponseDto;
+import com.example.PayAll_BE.customer.account.Account;
+import com.example.PayAll_BE.customer.user.User;
 
 import java.util.List;
 import java.util.stream.Collectors;

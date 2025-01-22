@@ -14,26 +14,40 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.example.PayAll_BE.dto.ApiResult;
 import com.example.PayAll_BE.mydata.dto.AccountListResponseDto;
 import com.example.PayAll_BE.mydata.dto.AccountRequestDto;
 import com.example.PayAll_BE.mydata.dto.AccountResponseDto;
 import com.example.PayAll_BE.mydata.dto.TransactionRequestDto;
 import com.example.PayAll_BE.mydata.dto.TransactionResponseDto;
+import com.example.PayAll_BE.mydata.service.MydataService;
+import com.example.PayAll_BE.service.AuthService;
 import com.example.PayAll_BE.service.JwtService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping("/api/mydata")
 public class MydataController {
 
 	private final RestTemplate restTemplate;
 	private final JwtService jwtService;
+	private final AuthService authService;
+	private final MydataService mydataService;
 
 	@Value("${server1.base-url}")
 	private String server1BaseUrl;
 
+	@GetMapping
+	public ResponseEntity<ApiResult> getTest(HttpServletRequest httpServletRequest) {
+		String token = authService.getCookieValue(httpServletRequest, "accessToken");
+		mydataService.syncMydataInfo(token);
+		return ResponseEntity.ok(
+			new ApiResult(200, "OK", "마이데이터 연동 성공")
+		);
+	}
 	@GetMapping("/load")
 	public ResponseEntity<AccountListResponseDto> loadMydataAccountList(@RequestHeader("Authorization") String token) {
 		String url = server1BaseUrl + "api/accounts";

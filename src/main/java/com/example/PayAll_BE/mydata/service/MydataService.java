@@ -8,11 +8,11 @@ import java.time.format.DateTimeParseException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.example.PayAll_BE.entity.Account;
-import com.example.PayAll_BE.entity.Payment;
-import com.example.PayAll_BE.entity.User;
-import com.example.PayAll_BE.entity.enums.Category;
-import com.example.PayAll_BE.entity.enums.PaymentType;
+import com.example.PayAll_BE.customer.account.Account;
+import com.example.PayAll_BE.customer.payment.Payment;
+import com.example.PayAll_BE.customer.user.User;
+import com.example.PayAll_BE.customer.enums.Category;
+import com.example.PayAll_BE.customer.enums.PaymentType;
 import com.example.PayAll_BE.exception.BadRequestException;
 import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.mydata.controller.MydataController;
@@ -21,9 +21,9 @@ import com.example.PayAll_BE.mydata.dto.AccountRequestDto;
 import com.example.PayAll_BE.mydata.dto.AccountResponseDto;
 import com.example.PayAll_BE.mydata.dto.TransactionRequestDto;
 import com.example.PayAll_BE.mydata.dto.TransactionResponseDto;
-import com.example.PayAll_BE.repository.AccountRepository;
-import com.example.PayAll_BE.repository.PaymentRepository;
-import com.example.PayAll_BE.repository.UserRepository;
+import com.example.PayAll_BE.customer.account.AccountRepository;
+import com.example.PayAll_BE.customer.payment.PaymentRepository;
+import com.example.PayAll_BE.customer.user.UserRepository;
 import com.example.PayAll_BE.service.CategoryService;
 import com.example.PayAll_BE.service.JwtService;
 
@@ -43,7 +43,7 @@ public class MydataService {
 		String searchTimestamp, String nextPage, int limit) {
 		return null;
 	}
-
+//
 	public void syncMydataInfo(String token) {
 		Long userId = jwtService.extractUserId(token);
 
