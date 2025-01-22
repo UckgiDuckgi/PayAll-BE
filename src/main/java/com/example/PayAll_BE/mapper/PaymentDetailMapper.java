@@ -15,6 +15,7 @@ public class PaymentDetailMapper {
 			.lowestPricePlace(productDto.getShopName())
 			.lowestPrice(productDto.getPrice())
 			.link(productDto.getShopUrl())
+			.productId(productDto.getPCode())
 			.build();
 	}
 }
