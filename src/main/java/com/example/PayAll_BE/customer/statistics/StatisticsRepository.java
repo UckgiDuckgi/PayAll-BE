@@ -23,4 +23,8 @@ public interface StatisticsRepository extends JpaRepository<Statistics, Long> {
 
 	Optional<Statistics> findByUserIdAndCategoryAndStatisticsDate(Long userId, Category category,
 		LocalDateTime statisticsDate);
+
+	@Query("SELECT s FROM Statistics s WHERE s.user.id = :userId AND s.category = 'DISCOUNT' AND s.statisticsDate = :date")
+	Optional<Statistics> findByUserIdAndDiscountAndCurrentMonth(@Param("userId") Long userId,
+		@Param("date") LocalDateTime date);
 }

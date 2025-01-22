@@ -79,13 +79,16 @@ public class LimitService {
 		// 현재 소비 목표 조회
 		Limits currentLimit = limitRepository.findTopByUser_IdOrderByLimitDateDesc(userId).orElse(null);
 
+		long savedAmount = statisticsRepository.findByUserIdAndDiscountAndCurrentMonth(userId, startOfMonth)
+			.map(Statistics::getStatisticsAmount) // 존재하면 값 가져오기
+			.orElse(0L);
 		// 소비 목표를 등록한 적이 없는 경우
 		if (currentLimit == null) {
 			return LimitResponseDto.builder()
 				.userId(userId)
 				.limitPrice(null)
 				.spentAmount(spentAmount)
-				.savedAmount(null)
+				.savedAmount(savedAmount)
 				.averageSpent(averageSpent)
 				.lastMonthLimit(lastMonthLimitPrice)
 				.startDate(startOfMonth.toLocalDate())
@@ -93,7 +96,6 @@ public class LimitService {
 				.build();
 		} else {
 			// 소비 목표가 있는 경우
-			long savedAmount = currentLimit.getLimitPrice() - spentAmount;
 			return LimitResponseDto.builder()
 				.limitId(currentLimit.getLimitId())
 				.userId(currentLimit.getUser().getId())
