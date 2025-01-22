@@ -117,6 +117,7 @@ public class PaymentService {
 			.sum();
 
 		return TotalPaymentResponseDto.builder()
+			.userName(user.getName())
 			.totalBalance(totalBalance)
 			.monthPaymentPrice(totalPaymentPrice)
 			.paymentList(dayPaymentList)
