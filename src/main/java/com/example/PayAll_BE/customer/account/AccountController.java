@@ -9,9 +9,14 @@ import com.example.PayAll_BE.global.api.ApiResult;
 import com.example.PayAll_BE.global.exception.UnauthorizedException;
 import com.example.PayAll_BE.global.auth.service.AuthService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "Account", description = "계좌 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/accounts")
@@ -19,6 +24,10 @@ public class AccountController {
 	private final AccountService accountService;
 	private final AuthService authService;
 
+	@Operation(
+		summary = "전체 계좌 목록 정보 조회",
+		description = "사용자의 계좌 목록을 조회합니다."
+	)
 	@GetMapping
 	public ResponseEntity<ApiResult> getAccounts(HttpServletRequest request){
 		String accessToken = authService.getCookieValue(request, "accessToken");

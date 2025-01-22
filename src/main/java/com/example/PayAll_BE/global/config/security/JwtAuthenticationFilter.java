@@ -32,6 +32,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final AuthService authService;
 
 	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+		String path = request.getRequestURI();
+
+		// Swagger 관련 경로와 OpenAPI 경로를 제외
+		return path.startsWith("/swagger-ui/") ||
+			path.startsWith("/v3/api-docs") ||
+			path.startsWith("/swagger-resources") ||
+			path.startsWith("/webjars/") ||
+			path.equals("/");
+	}
+
+	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		// 쿠키에서 accessToken을 추출

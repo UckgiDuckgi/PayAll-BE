@@ -21,9 +21,12 @@ import com.example.PayAll_BE.global.exception.NotFoundException;
 import com.example.PayAll_BE.global.exception.UnauthorizedException;
 import com.example.PayAll_BE.global.auth.service.AuthService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Payment", description = "소비 내역 API")
 @RestController
 @RequestMapping("/api/accounts/payments")
 @RequiredArgsConstructor
@@ -32,6 +35,10 @@ public class PaymentController {
 	private final PaymentService paymentService;
 	private final AuthService authService;
 
+	@Operation(
+		summary = "전체 계좌 거래 내역 조회",
+		description = "사용자의 전체 계좌 거래 내역을 조회합니다."
+	)
 	@GetMapping
 	public ResponseEntity<ApiResult> getPayments(
 		HttpServletRequest request,
@@ -47,6 +54,10 @@ public class PaymentController {
 		return ResponseEntity.ok(new ApiResult(200, "OK", "통합 계좌 거래 내역 조회 성공", response));
 	}
 
+	@Operation(
+		summary = "결제 내역 상세 조회",
+		description = "사용자의 결제 내역 상세를 조회합니다."
+	)
 	@GetMapping("/{paymentId}")
 	public ResponseEntity<ApiResult> getPaymentDetail(
 		HttpServletRequest request,
@@ -60,6 +71,10 @@ public class PaymentController {
 		return ResponseEntity.ok(new ApiResult(200, "OK", "결제 상세 조회 성공", paymentResponseDto));
 	}
 
+	@Operation(
+		summary = "결제 내역 상세 등록",
+		description = "사용자의 결제 내역 상세를 등록합니다."
+	)
 	@PostMapping("/details")
 	public ResponseEntity<ApiResult> uploadPaymentDetail(
 		HttpServletRequest request,
@@ -72,6 +87,10 @@ public class PaymentController {
 		return ResponseEntity.ok(new ApiResult(200,"OK", "결제 내역 상세 업로드 성공", null));
 	}
 
+	@Operation(
+		summary = "결제처 정보 업데이트",
+		description = "사용자가 등록한 결제 내역의 결제처 정보를 업데이트합니다."
+	)
 	@PatchMapping
 	public ResponseEntity<ApiResult> uploadPayments(
 		HttpServletRequest request,
