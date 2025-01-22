@@ -14,13 +14,13 @@ import com.example.PayAll_BE.dto.AuthResponseDto;
 import com.example.PayAll_BE.dto.PlatformRequestDto;
 import com.example.PayAll_BE.dto.PlatformResponseDto;
 import com.example.PayAll_BE.dto.RegisterRequestDto;
-import com.example.PayAll_BE.entity.User;
+import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.exception.BadRequestException;
 import com.example.PayAll_BE.exception.ForbiddenException;
 import com.example.PayAll_BE.exception.NotFoundException;
 import com.example.PayAll_BE.exception.UnauthorizedException;
 import com.example.PayAll_BE.mydata.service.MydataService;
-import com.example.PayAll_BE.repository.UserRepository;
+import com.example.PayAll_BE.customer.user.UserRepository;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

@@ -2,7 +2,7 @@ package com.example.PayAll_BE.mydata.dto;
 
 import java.util.List;
 
-import com.example.PayAll_BE.dto.AccountDto;
+import com.example.PayAll_BE.customer.account.dto.AccountDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

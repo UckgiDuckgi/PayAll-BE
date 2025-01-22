@@ -1,7 +1,7 @@
 package com.example.PayAll_BE.mapper;
 
-import com.example.PayAll_BE.dto.Cart.CartResponseDto;
-import com.example.PayAll_BE.entity.Cart;
+import com.example.PayAll_BE.customer.cart.dto.CartResponseDto;
+import com.example.PayAll_BE.customer.cart.Cart;
 
 public class CartMapper {
 	public static CartResponseDto toDto(Cart cart) {

@@ -1,13 +1,13 @@
 package com.example.PayAll_BE.mapper;
 
-import com.example.PayAll_BE.dto.Payment.DayPaymentResponseDto;
-import com.example.PayAll_BE.dto.Payment.PaymentDetailResponseDto;
-import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
-import com.example.PayAll_BE.dto.Payment.PaymentResponseDto;
-import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailDto;
-import com.example.PayAll_BE.dto.PaymentDetail.PaymentListRequestDto;
-import com.example.PayAll_BE.entity.Payment;
-import com.example.PayAll_BE.entity.PaymentDetail;
+import com.example.PayAll_BE.customer.payment.dto.DayPaymentResponseDto;
+import com.example.PayAll_BE.customer.payment.dto.PaymentDetailResponseDto;
+import com.example.PayAll_BE.customer.payment.dto.TotalPaymentResponseDto;
+import com.example.PayAll_BE.customer.payment.dto.PaymentResponseDto;
+import com.example.PayAll_BE.customer.paymentDetails.dto.PaymentDetailDto;
+import com.example.PayAll_BE.customer.paymentDetails.dto.PaymentListRequestDto;
+import com.example.PayAll_BE.customer.payment.Payment;
+import com.example.PayAll_BE.customer.paymentDetails.PaymentDetail;
 
 import java.time.LocalDateTime;
 import java.util.List;
