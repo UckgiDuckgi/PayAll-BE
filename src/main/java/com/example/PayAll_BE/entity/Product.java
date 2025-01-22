@@ -32,13 +32,16 @@ public class Product {
 	@Column(name = "product_id")
 	private Long id;
 
+	@Column(name = "product_name")
 	private String productName;
 
+	@Column(name = "product_description")
 	private String productDescription;
 
+	@Column(name = "benefit_description")
 	private String benefitDescription;
 
-	@Column(nullable = false)
+	@Column(name = "product_type", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private ProductType productType;
 
