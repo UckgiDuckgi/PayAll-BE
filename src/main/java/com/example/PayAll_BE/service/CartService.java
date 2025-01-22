@@ -52,6 +52,7 @@ public class CartService {
 			.link(productDto.getShopUrl())
 			.image(productDto.getProductImage())
 			.storeName(productDto.getShopName())
+			.prevPrice(cartRequestDto.getPrevPrice())
 			.build();
 
 		return CartMapper.toDto(cartRepository.save(cart));

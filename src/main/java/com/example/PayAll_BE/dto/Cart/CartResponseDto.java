@@ -18,5 +18,5 @@ public class CartResponseDto {
 	private int quantity;
 	private String storeName;
 	private String link;
-	private Long totalPrice;
+	private Long prevPrice;
 }

@@ -48,4 +48,7 @@ public class Cart {
 	@Column(nullable = false, columnDefinition = "TEXT")
 	private String image;
 
+	@Column
+	private Long prevPrice;
+
 }

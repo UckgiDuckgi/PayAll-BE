@@ -14,7 +14,7 @@ public class CartMapper {
 			.quantity(cart.getQuantity())
 			.storeName(cart.getStoreName())
 			.link(cart.getLink())
-			.totalPrice(cart.getQuantity() * cart.getProductPrice())
+			.prevPrice(cart.getPrevPrice())
 			.build();
 
 	}

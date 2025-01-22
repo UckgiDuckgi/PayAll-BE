@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class CartRequestDto {
 	private Long productId;
 	private int quantity;
+	private Long prevPrice;
 }
