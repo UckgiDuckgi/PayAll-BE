@@ -71,8 +71,8 @@ public class MydataController {
 	}
 
 	@Operation(
-		summary = "사용자 계좌 정보 조회",
-		description = "Mydata를 통해 사용자의 계좌 정보들을 불러옵니다."
+		summary = "사용자 계좌 정보 조회 및 등록",
+		description = "Mydata를 통해 사용자의 계좌 정보들을 불러와 등록합니다."
 	)
 	@PostMapping("/basic")
 	public ResponseEntity<AccountResponseDto> getAccountBasicInfo(
@@ -99,8 +99,8 @@ public class MydataController {
 	}
 
 	@Operation(
-		summary = "사용자 계좌 거래 내역 조회",
-		description = "Mydata를 통해 사용자의 계좌 거래내역을 조회합니다."
+		summary = "사용자 계좌 거래 내역 조회 및 등록",
+		description = "Mydata를 통해 사용자의 계좌 거래내역을 불러와 등록합니다."
 	)
 	@PostMapping("/transactions")
 	public ResponseEntity<TransactionResponseDto> getAccountTransactions(

@@ -49,6 +49,11 @@ public class RecommendationController {
 
 		return ResponseEntity.ok(new ApiResult(200,"OK","추천 데이터 응답 성공", recommendations));
 	}
+
+	@Operation(
+		summary = "지출 내역 기반 최저가 상품 추천",
+		description = "사용자의 최근 지출 내역 중 최저가 상품을 추천합니다."
+	)
 	@GetMapping("/products")
 	public ResponseEntity<ApiResult> getRecommendProducts(HttpServletRequest request) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
