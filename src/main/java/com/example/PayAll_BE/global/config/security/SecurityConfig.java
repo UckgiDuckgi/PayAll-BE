@@ -47,7 +47,8 @@ public class SecurityConfig {
 					"/swagger-ui/**",
 					"/v3/api-docs/**",
 					"/swagger-ui.html",
-					"/swagger-resources/**"
+					"/swagger-resources/**",
+					"/swagger-ui/index.html"
 				).permitAll()
 				.requestMatchers(
 					"/",
@@ -76,7 +77,6 @@ public class SecurityConfig {
 		configuration.addExposedHeader("Authorization");
 
 		configuration.addExposedHeader("Set-Cookie");
-
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
