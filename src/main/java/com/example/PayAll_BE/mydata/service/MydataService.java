@@ -43,7 +43,7 @@ public class MydataService {
 		String searchTimestamp, String nextPage, int limit) {
 		return null;
 	}
-
+//
 	public void syncMydataInfo(String token) {
 		Long userId = jwtService.extractUserId(token);
 
