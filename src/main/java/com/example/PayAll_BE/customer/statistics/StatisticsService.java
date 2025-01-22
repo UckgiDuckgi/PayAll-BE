@@ -2,6 +2,8 @@ package com.example.PayAll_BE.customer.statistics;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.example.PayAll_BE.customer.account.Account;
+import com.example.PayAll_BE.customer.account.AccountRepository;
+import com.example.PayAll_BE.customer.statistics.dto.StaticsDiffResponseDto;
 import com.example.PayAll_BE.customer.statistics.dto.StatisticsDetailResponseDto;
 import com.example.PayAll_BE.customer.statistics.dto.StatisticsResponseDto;
 import com.example.PayAll_BE.customer.payment.Payment;
@@ -17,6 +22,7 @@ import com.example.PayAll_BE.customer.enums.Category;
 import com.example.PayAll_BE.customer.payment.PaymentRepository;
 import com.example.PayAll_BE.customer.user.UserRepository;
 import com.example.PayAll_BE.global.auth.service.JwtService;
+import com.example.PayAll_BE.global.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +32,7 @@ public class StatisticsService {
 	private final StatisticsRepository statisticsRepository;
 	private final PaymentRepository paymentRepository;
 	private final UserRepository userRepository;
+	private final AccountRepository accountRepository;
 	private final JwtService jwtService;
 
 	public void setStatistics(User user){
@@ -211,6 +218,34 @@ public class StatisticsService {
 			.categoryName(category.name())
 			.totalSpent(totalSpent)
 			.transactions(transactionDetails)
+			.build();
+	}
+	public StaticsDiffResponseDto getDiffStatistics(Long userId){
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
+		List<Account> accounts = accountRepository.findAllByUserId(userId);
+		List<Long> accountIds = accounts.stream()
+			.map(Account::getId)
+			.toList();
+
+		YearMonth thisMonth = YearMonth.now();
+		LocalDateTime thisMonthStart = thisMonth.atDay(1).atStartOfDay();
+		LocalDateTime thisMonthEnd = thisMonth.atEndOfMonth().atTime(23, 59, 59);
+
+		YearMonth lastMonth = thisMonth.minusMonths(1);
+		LocalDateTime lastMonthStart = lastMonth.atDay(1).atStartOfDay();
+		LocalDateTime lastMonthEnd = lastMonth.atEndOfMonth().atTime(23, 59, 59);
+
+		Long lastMonthTotalPaymentPrice = paymentRepository.findTotalPaymentByAccountIdsAndDateRange(accountIds, lastMonthStart, lastMonthEnd);
+		Long thisMonthTotalPaymentPrice = paymentRepository.findTotalPaymentByAccountIdsAndDateRange(accountIds, thisMonthStart, thisMonthEnd);
+
+		Long totalPaymentPriceDiff = thisMonthTotalPaymentPrice - lastMonthTotalPaymentPrice;
+		Long totalSavingAmount = statisticsRepository.findTotalDiscountAmountByUserId(userId);
+
+		return StaticsDiffResponseDto.builder()
+			.userName(user.getName())
+			.yearlySavingAmount(totalSavingAmount)
+			.monthlyPaymentDifference(totalPaymentPriceDiff)
 			.build();
 	}
 }
