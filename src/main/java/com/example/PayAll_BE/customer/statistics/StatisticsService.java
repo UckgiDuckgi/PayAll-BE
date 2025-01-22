@@ -94,13 +94,13 @@ public class StatisticsService {
 
 		// 총 지출 계산
 		long totalSpent = statistics.stream()
-			.filter(stat -> !stat.getCategory().equals(Category.TOTAL)) // TOTAL인 항목 제외
+			.filter(stat -> !stat.getCategory().equals(Category.TOTAL) && !stat.getCategory().equals(Category.DISCOUNT))
 			.mapToLong(Statistics::getStatisticsAmount)
 			.sum();
 
 		// 카테고리별 지출 계산
 		List<StatisticsResponseDto.CategoryExpense> categoryExpenses = statistics.stream()
-			.filter(stat -> !stat.getCategory().equals(Category.TOTAL))
+			.filter(stat -> !stat.getCategory().equals(Category.TOTAL) && !stat.getCategory().equals(Category.DISCOUNT))
 			.collect(Collectors.groupingBy(
 				Statistics::getCategory,
 				Collectors.summingLong(Statistics::getStatisticsAmount)
