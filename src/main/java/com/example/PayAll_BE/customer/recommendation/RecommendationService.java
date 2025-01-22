@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import com.example.PayAll_BE.dto.ProductDto;
+import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductDto;
 import com.example.PayAll_BE.customer.product.dto.ProductResponseDto;
 import com.example.PayAll_BE.customer.recommendation.dto.RecommendProductDto;
 import com.example.PayAll_BE.customer.recommendation.dto.RecommendationResponseDto;
@@ -27,8 +27,8 @@ import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.customer.enums.Category;
 import com.example.PayAll_BE.customer.benefit.BenefitRepository;
 import com.example.PayAll_BE.customer.payment.PaymentRepository;
-import com.example.PayAll_BE.exception.UnauthorizedException;
-import com.example.PayAll_BE.product.ProductApiClient;
+import com.example.PayAll_BE.global.exception.UnauthorizedException;
+import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductApiClient;
 import com.example.PayAll_BE.customer.paymentDetails.PaymentDetailRepository;
 import com.example.PayAll_BE.customer.statistics.StatisticsRepository;
 import com.example.PayAll_BE.customer.user.UserRepository;
@@ -44,7 +44,7 @@ public class RecommendationService {
 	private final RecommendationRepository recommendationRepository;
 	private final StatisticsRepository statisticsRepository;
 	private final PaymentDetailRepository paymentDetailRepository;
-	private final ProductApiClient productApiClient;
+	private final CrawlingProductApiClient crawlingProductApiClient;
 	private final UserRepository userRepository;
 
 	private static final Logger logger = LoggerFactory.getLogger(RecommendationService.class);
@@ -207,11 +207,11 @@ public class RecommendationService {
 
 	private RecommendProductDto getProductFromRedis(PaymentDetail paymentDetail) {
 		Long productId = paymentDetail.getProductId();
-		ProductDto productDto = productApiClient.fetchProduct(String.valueOf(productId));
+		CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProduct(String.valueOf(productId));
 
 		// 할인율 계산
 		Long prevPrice = paymentDetail.getProductPrice();
-		Long currPrice = productDto.getPrice();
+		Long currPrice = crawlingProductDto.getPrice();
 		if (prevPrice <= currPrice) {
 			return null;
 		}
@@ -219,11 +219,11 @@ public class RecommendationService {
 
 		return RecommendProductDto.builder()
 			.productId(productId)
-			.productName(productDto.getProductName())
-			.productImage(productDto.getProductImage())
-			.price(productDto.getPrice())
-			.storeName(productDto.getShopName())
-			.link(productDto.getShopUrl())
+			.productName(crawlingProductDto.getProductName())
+			.productImage(crawlingProductDto.getProductImage())
+			.price(crawlingProductDto.getPrice())
+			.storeName(crawlingProductDto.getShopName())
+			.link(crawlingProductDto.getShopUrl())
 			.discountRate(discountRate)
 			.build();
 

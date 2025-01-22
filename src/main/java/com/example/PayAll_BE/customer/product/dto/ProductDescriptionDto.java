@@ -8,12 +8,8 @@ import lombok.Data;
 @Data
 @Builder
 public class ProductDescriptionDto {
-	@JsonProperty("product_name")
+	private Long productId;
 	private String productName;
-
-	@JsonProperty("product_description")
 	private String productDescription;
-
-	@JsonProperty("benefit_description")
 	private String benefitDescription;
 }

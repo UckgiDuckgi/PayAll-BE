@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.PayAll_BE.customer.limit.dto.LimitRegisterRequestDto;
 import com.example.PayAll_BE.customer.limit.dto.LimitResponseDto;
-import com.example.PayAll_BE.dto.ApiResult;
-import com.example.PayAll_BE.service.AuthService;
-import com.example.PayAll_BE.service.JwtService;
+import com.example.PayAll_BE.global.api.ApiResult;
+import com.example.PayAll_BE.global.auth.service.AuthService;
+import com.example.PayAll_BE.global.auth.service.JwtService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
