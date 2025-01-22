@@ -39,7 +39,7 @@ public class RecommendationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(RecommendationService.class);
 
-	public void generateBenefits(User user, LocalDateTime startDate,LocalDateTime endDate) {
+	public void generateBenefits(User user, LocalDateTime startDate, LocalDateTime endDate) {
 
 		List<StoreStatisticsDto> storeStatisticsDtos = paymentRepository.getCategoryStoreStats(user.getId(),
 			startDate, endDate);
@@ -105,49 +105,58 @@ public class RecommendationService {
 		return recommendationDtos;
 	}
 
-	public List<ProductResponseDto> calculateDiscount(User user, Long productId) {
+	public ProductResponseDto calculateDiscount(User user, Long productId) {
 		LocalDateTime startDate = getStartOfLastMonth();
 		LocalDateTime endDate = getEndOfLastMonth();
 
 		List<Object[]> benefitsWithStores = benefitRepository.findBenefitsWithStoresByProductId(productId);
-
-		List<ProductResponseDto> responseList = new ArrayList<>();
+		List<ProductResponseDto.StoreDetailDto> storeDetailList = new ArrayList<>();
 
 		Long totalDiscount = 0L;
+		Benefit benefit = null;
 
 		for (Object[] result : benefitsWithStores) {
-			Benefit benefit = (Benefit)result[0];
+			benefit = (Benefit)result[0];
 			Store store = (Store)result[1];
 
+			// 유저와 매장 이름에 기반하여 결제 내역 조회
 			List<Payment> payments = paymentRepository.findByUserAndPaymentPlace(user.getId(), store.getStoreName(),
 				startDate, endDate);
 
 			if (payments.isEmpty()) {
-				continue;
+				continue; // 결제 내역이 없으면 스킵
 			}
 
+			// 총 지출 계산
 			Long totalSpent = payments.stream()
 				.mapToLong(Payment::getPrice)
 				.sum();
 
+			// 할인 금액 계산
 			Long discountAmount = totalSpent * benefit.getBenefitValue() / 100;
-			totalDiscount += discountAmount;
 
-			ProductResponseDto responseDto = ProductResponseDto.builder()
-				.productName(benefit.getProduct().getProductName())
-				.benefitDescription(benefit.getProduct().getBenefitDescription())
+			// StoreDetailDto 생성 및 추가
+			ProductResponseDto.StoreDetailDto storeDetail = ProductResponseDto.StoreDetailDto.builder()
 				.category(store.getCategory())
 				.storeName(store.getStoreName())
 				.discountAmount(discountAmount)
 				.visitCount(payments.size())
 				.build();
 
-			responseList.add(responseDto);
+			storeDetailList.add(storeDetail);
 		}
-		return responseList;
+
+		// ProductResponseDto 생성
+		ProductResponseDto responseDto = ProductResponseDto.builder()
+			.productName(benefit.getProduct().getProductName())
+			.benefitDescription(benefit.getProduct().getBenefitDescription())
+			.storeDetails(storeDetailList)
+			.build();
+
+		return responseDto;
 	}
 
-	public void flagSetRecommendation(User user){
+	public void flagSetRecommendation(User user) {
 		// 현재 날짜에서 저번 달의 1일 00:00:00 계산
 		LocalDateTime startOfLastMonth = LocalDate.now()
 			.minusMonths(1)
@@ -158,8 +167,8 @@ public class RecommendationService {
 			.withDayOfMonth(1)
 			.atStartOfDay();
 
-		if (!recommendationRepository.existsRecommendationByDateTimeAndUser(startOfLastMonth,user)){
-			generateBenefits(user,startOfLastMonth,startOfThisMonth);
+		if (!recommendationRepository.existsRecommendationByDateTimeAndUser(startOfLastMonth, user)) {
+			generateBenefits(user, startOfLastMonth, startOfThisMonth);
 		}
 	}
 

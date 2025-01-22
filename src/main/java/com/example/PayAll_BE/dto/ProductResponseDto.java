@@ -1,5 +1,7 @@
 package com.example.PayAll_BE.dto;
 
+import java.util.List;
+
 import com.example.PayAll_BE.entity.enums.Category;
 
 import lombok.Builder;
@@ -10,8 +12,14 @@ import lombok.Data;
 public class ProductResponseDto {
 	private String productName;
 	private String benefitDescription;
-	private Category category;
-	private String storeName;
-	private Long discountAmount;
-	private int visitCount;
+	private List<StoreDetailDto> storeDetails;
+
+	@Data
+	@Builder
+	public static class StoreDetailDto {
+		private Category category;
+		private String storeName;
+		private Long discountAmount;
+		private int visitCount;
+	}
 }

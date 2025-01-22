@@ -42,7 +42,7 @@ public class ProductController {
 		String authId = jwtService.extractAuthId(accessToken);
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
-		List<ProductResponseDto> discountResult = recommendationService.calculateDiscount(user,productId);
+		ProductResponseDto discountResult = recommendationService.calculateDiscount(user,productId);
 
 		return ResponseEntity.ok(new ApiResult(200,"OK","추천 데이터 응답 성공", discountResult));
 	}
