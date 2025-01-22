@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Category {
+	TOTAL("전체"),
 	SHOPPING("쇼핑"),
 	EDUCATION("교육"),
 	LIVING("생활비"),
