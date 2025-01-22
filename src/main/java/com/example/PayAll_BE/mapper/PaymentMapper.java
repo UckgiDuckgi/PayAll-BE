@@ -5,8 +5,7 @@ import com.example.PayAll_BE.dto.Payment.PaymentDetailResponseDto;
 import com.example.PayAll_BE.dto.Payment.TotalPaymentResponseDto;
 import com.example.PayAll_BE.dto.Payment.PaymentResponseDto;
 import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailDto;
-import com.example.PayAll_BE.dto.PaymentDetail.PaymentDetailInfoRequestDto;
-import com.example.PayAll_BE.dto.ProductDto;
+import com.example.PayAll_BE.dto.PaymentDetail.PaymentListRequestDto;
 import com.example.PayAll_BE.entity.Payment;
 import com.example.PayAll_BE.entity.PaymentDetail;
 
@@ -67,7 +66,7 @@ public class PaymentMapper {
 			.build();
 	}
 
-	public static PaymentDetail toPaymentDetailEntity(Payment payment, PaymentDetailInfoRequestDto.PurchaseProductRequestDto requestDto, Long productId) {
+	public static PaymentDetail toPaymentDetailEntity(Payment payment, PaymentListRequestDto.PaymentDetailInfoRequestDto.PurchaseProductRequestDto requestDto, Long productId) {
 		return PaymentDetail.builder()
 			.payment(payment)
 			.productName(requestDto.getProductName())
