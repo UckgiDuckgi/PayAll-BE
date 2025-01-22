@@ -16,7 +16,7 @@ import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.customer.enums.Category;
 import com.example.PayAll_BE.customer.payment.PaymentRepository;
 import com.example.PayAll_BE.customer.user.UserRepository;
-import com.example.PayAll_BE.service.JwtService;
+import com.example.PayAll_BE.global.auth.service.JwtService;
 
 import lombok.RequiredArgsConstructor;
 

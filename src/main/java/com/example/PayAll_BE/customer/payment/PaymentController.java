@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.PayAll_BE.customer.payment.dto.PaymentUpdateRequest;
 import com.example.PayAll_BE.customer.payment.dto.TotalPaymentResponseDto;
-import com.example.PayAll_BE.dto.ApiResult;
+import com.example.PayAll_BE.global.api.ApiResult;
 import com.example.PayAll_BE.customer.payment.dto.PaymentResponseDto;
 import com.example.PayAll_BE.customer.paymentDetails.dto.PaymentListRequestDto;
 import com.example.PayAll_BE.customer.enums.Category;
-import com.example.PayAll_BE.exception.NotFoundException;
-import com.example.PayAll_BE.exception.UnauthorizedException;
-import com.example.PayAll_BE.service.AuthService;
+import com.example.PayAll_BE.global.exception.NotFoundException;
+import com.example.PayAll_BE.global.exception.UnauthorizedException;
+import com.example.PayAll_BE.global.auth.service.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

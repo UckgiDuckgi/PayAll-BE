@@ -4,16 +4,16 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.PayAll_BE.customer.cart.dto.CartMapper;
 import com.example.PayAll_BE.customer.cart.dto.CartRequestDto;
 import com.example.PayAll_BE.customer.cart.dto.CartResponseDto;
-import com.example.PayAll_BE.dto.ProductDto;
+import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductDto;
 import com.example.PayAll_BE.customer.user.User;
-import com.example.PayAll_BE.exception.BadRequestException;
-import com.example.PayAll_BE.exception.ForbiddenException;
-import com.example.PayAll_BE.exception.NotFoundException;
-import com.example.PayAll_BE.exception.UnauthorizedException;
-import com.example.PayAll_BE.mapper.CartMapper;
-import com.example.PayAll_BE.product.ProductApiClient;
+import com.example.PayAll_BE.global.exception.BadRequestException;
+import com.example.PayAll_BE.global.exception.ForbiddenException;
+import com.example.PayAll_BE.global.exception.NotFoundException;
+import com.example.PayAll_BE.global.exception.UnauthorizedException;
+import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductApiClient;
 import com.example.PayAll_BE.customer.user.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CartService {
 	private final CartRepository cartRepository;
-	private final ProductApiClient productApiClient;
+	private final CrawlingProductApiClient crawlingProductApiClient;
 	private final UserRepository userRepository;
 
 	public CartResponseDto addCart(String authId, CartRequestDto cartRequestDto) {
@@ -31,7 +31,7 @@ public class CartService {
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
 
-		ProductDto productDto = productApiClient.fetchProduct(String.valueOf(cartRequestDto.getProductId()));
+		CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProduct(String.valueOf(cartRequestDto.getProductId()));
 
 		// 장바구니에 같은 상품 있으면 수량 +1
 		Cart existingCart = cartRepository.findByUserIdAndProductId(user.getId(),
@@ -44,12 +44,12 @@ public class CartService {
 		Cart cart = Cart.builder()
 			.user(user)
 			.productId(cartRequestDto.getProductId())
-			.productName(productDto.getProductName())
-			.productPrice(productDto.getPrice())
+			.productName(crawlingProductDto.getProductName())
+			.productPrice(crawlingProductDto.getPrice())
 			.quantity(cartRequestDto.getQuantity())
-			.link(productDto.getShopUrl())
-			.image(productDto.getProductImage())
-			.storeName(productDto.getShopName())
+			.link(crawlingProductDto.getShopUrl())
+			.image(crawlingProductDto.getProductImage())
+			.storeName(crawlingProductDto.getShopName())
 			.prevPrice(cartRequestDto.getPrevPrice())
 			.build();
 

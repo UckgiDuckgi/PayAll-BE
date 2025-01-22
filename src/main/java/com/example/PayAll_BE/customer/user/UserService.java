@@ -3,10 +3,8 @@ package com.example.PayAll_BE.customer.user;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.customer.user.dto.UserResponseDto;
-import com.example.PayAll_BE.customer.user.User;
-import com.example.PayAll_BE.customer.user.UserRepository;
-import com.example.PayAll_BE.exception.NotFoundException;
-import com.example.PayAll_BE.service.JwtService;
+import com.example.PayAll_BE.global.exception.NotFoundException;
+import com.example.PayAll_BE.global.auth.service.JwtService;
 
 import lombok.RequiredArgsConstructor;
 

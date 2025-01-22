@@ -15,24 +15,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.PayAll_BE.customer.payment.dto.DayPaymentResponseDto;
 import com.example.PayAll_BE.customer.payment.dto.PaymentDetailResponseDto;
+import com.example.PayAll_BE.customer.payment.dto.PaymentMapper;
 import com.example.PayAll_BE.customer.payment.dto.PaymentResponseDto;
 import com.example.PayAll_BE.customer.payment.dto.PaymentUpdateRequestDto;
 import com.example.PayAll_BE.customer.payment.dto.TotalPaymentResponseDto;
 import com.example.PayAll_BE.customer.paymentDetails.dto.PaymentDetailDto;
 import com.example.PayAll_BE.customer.paymentDetails.dto.PaymentListRequestDto;
-import com.example.PayAll_BE.dto.ProductDto;
+import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductDto;
 import com.example.PayAll_BE.customer.account.Account;
 import com.example.PayAll_BE.customer.paymentDetails.PaymentDetail;
 import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.customer.enums.Category;
-import com.example.PayAll_BE.exception.NotFoundException;
-import com.example.PayAll_BE.mapper.PaymentDetailMapper;
-import com.example.PayAll_BE.mapper.PaymentMapper;
-import com.example.PayAll_BE.product.ProductApiClient;
+import com.example.PayAll_BE.global.exception.NotFoundException;
+import com.example.PayAll_BE.customer.paymentDetails.dto.PaymentDetailMapper;
+import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductApiClient;
 import com.example.PayAll_BE.customer.account.AccountRepository;
 import com.example.PayAll_BE.customer.paymentDetails.PaymentDetailRepository;
 import com.example.PayAll_BE.customer.user.UserRepository;
-import com.example.PayAll_BE.service.JwtService;
+import com.example.PayAll_BE.global.auth.service.JwtService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,7 +42,7 @@ public class PaymentService {
 
 	private final PaymentRepository paymentRepository;
 	private final PaymentDetailRepository paymentDetailRepository;
-	private final ProductApiClient productApiClient;
+	private final CrawlingProductApiClient crawlingProductApiClient;
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
 	private final AccountRepository accountRepository;
@@ -136,8 +136,8 @@ public class PaymentService {
 
 		List<PaymentDetail> paymentDetails = paymentDetailRepository.findByPaymentId(paymentId);
 		List<PaymentDetailDto> paymentDetailDtos = paymentDetails.stream().map(paymentDetail -> {
-			ProductDto productDto = productApiClient.fetchProduct(String.valueOf(paymentDetail.getProductId()));
-			return PaymentDetailMapper.toDto(paymentDetail, productDto);
+			CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProduct(String.valueOf(paymentDetail.getProductId()));
+			return PaymentDetailMapper.toDto(paymentDetail, crawlingProductDto);
 		}).collect(Collectors.toList());
 
 		return PaymentMapper.toPaymentDto(payment, paymentDetailDtos);
@@ -159,8 +159,8 @@ public class PaymentService {
 
 			List<PaymentDetail> paymentDetails = paymentDetail.getPurchaseProductList().stream()
 				.map(product -> {
-					ProductDto productDto = productApiClient.fetchProductByName(product.getProductName());
-					Long productId = productDto.getPCode();
+					CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProductByName(product.getProductName());
+					Long productId = crawlingProductDto.getPCode();
 					return PaymentMapper.toPaymentDetailEntity(payment, product, productId);
 				})
 				.collect(Collectors.toList());

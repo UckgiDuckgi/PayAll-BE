@@ -7,13 +7,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.PayAll_BE.dto.ApiResult;
+import com.example.PayAll_BE.global.api.ApiResult;
 import com.example.PayAll_BE.customer.recommendation.dto.RecommendationResponseDto;
 import com.example.PayAll_BE.customer.user.User;
-import com.example.PayAll_BE.exception.UnauthorizedException;
+import com.example.PayAll_BE.global.exception.UnauthorizedException;
 import com.example.PayAll_BE.customer.user.UserRepository;
-import com.example.PayAll_BE.service.AuthService;
-import com.example.PayAll_BE.service.JwtService;
+import com.example.PayAll_BE.global.auth.service.AuthService;
+import com.example.PayAll_BE.global.auth.service.JwtService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

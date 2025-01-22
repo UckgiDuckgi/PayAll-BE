@@ -6,9 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.customer.product.dto.ProductDescriptionDto;
-import com.example.PayAll_BE.customer.product.Product;
-import com.example.PayAll_BE.mapper.ProductMapper;
-import com.example.PayAll_BE.customer.product.ProductRepository;
+import com.example.PayAll_BE.customer.product.dto.ProductMapper;
 
 import lombok.RequiredArgsConstructor;
 

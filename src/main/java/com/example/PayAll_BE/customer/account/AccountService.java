@@ -8,11 +8,10 @@ import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.customer.account.dto.AccountListResponseDto;
 import com.example.PayAll_BE.customer.user.User;
-import com.example.PayAll_BE.exception.NotFoundException;
-import com.example.PayAll_BE.mapper.AccountMapper;
+import com.example.PayAll_BE.global.exception.NotFoundException;
 import com.example.PayAll_BE.customer.payment.PaymentRepository;
 import com.example.PayAll_BE.customer.user.UserRepository;
-import com.example.PayAll_BE.service.JwtService;
+import com.example.PayAll_BE.global.auth.service.JwtService;
 
 import lombok.RequiredArgsConstructor;
 

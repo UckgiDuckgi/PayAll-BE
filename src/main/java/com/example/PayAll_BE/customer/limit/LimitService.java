@@ -11,7 +11,7 @@ import com.example.PayAll_BE.customer.limit.dto.LimitResponseDto;
 import com.example.PayAll_BE.customer.payment.Payment;
 import com.example.PayAll_BE.customer.statistics.Statistics;
 import com.example.PayAll_BE.customer.user.User;
-import com.example.PayAll_BE.exception.NotFoundException;
+import com.example.PayAll_BE.global.exception.NotFoundException;
 import com.example.PayAll_BE.customer.payment.PaymentRepository;
 import com.example.PayAll_BE.customer.statistics.StatisticsRepository;
 import com.example.PayAll_BE.customer.user.UserRepository;
