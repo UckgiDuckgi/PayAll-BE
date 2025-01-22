@@ -5,12 +5,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.PayAll_BE.dto.ReceiptRequestDto;
-import com.example.PayAll_BE.entity.Payment;
-import com.example.PayAll_BE.entity.PaymentDetail;
+import com.example.PayAll_BE.customer.payment.Payment;
+import com.example.PayAll_BE.customer.paymentDetails.PaymentDetail;
 import com.example.PayAll_BE.exception.BadRequestException;
 import com.example.PayAll_BE.exception.NotFoundException;
-import com.example.PayAll_BE.repository.PaymentDetailRepository;
-import com.example.PayAll_BE.repository.PaymentRepository;
+import com.example.PayAll_BE.customer.paymentDetails.PaymentDetailRepository;
+import com.example.PayAll_BE.customer.payment.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
 

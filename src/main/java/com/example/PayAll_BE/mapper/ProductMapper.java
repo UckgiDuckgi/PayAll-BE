@@ -1,7 +1,7 @@
 package com.example.PayAll_BE.mapper;
 
-import com.example.PayAll_BE.dto.ProductDescriptionDto;
-import com.example.PayAll_BE.entity.Product;
+import com.example.PayAll_BE.customer.product.dto.ProductDescriptionDto;
+import com.example.PayAll_BE.customer.product.Product;
 
 public class ProductMapper {
 
