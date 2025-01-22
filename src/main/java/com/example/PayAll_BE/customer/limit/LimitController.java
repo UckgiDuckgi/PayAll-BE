@@ -13,9 +13,12 @@ import com.example.PayAll_BE.global.api.ApiResult;
 import com.example.PayAll_BE.global.auth.service.AuthService;
 import com.example.PayAll_BE.global.auth.service.JwtService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Limits", description = "소비 목표 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/limit")
@@ -24,7 +27,11 @@ public class LimitController {
 	private final AuthService authService;
 	private final JwtService jwtService;
 
-	// 소비목표 등록
+
+	@Operation(
+		summary = "소비 목표 등록",
+		description = "사용자가 소비 목표를 등록합니다."
+	)
 	@PostMapping
 	public ResponseEntity<ApiResult> registerLimit(
 		HttpServletRequest request,
@@ -41,7 +48,10 @@ public class LimitController {
 		}
 	}
 
-	// 소비목표 조회
+	@Operation(
+		summary = "소비 목표 조회",
+		description = "사용자가 소비 목표를 조회합니다."
+	)
 	@GetMapping
 	public ResponseEntity<ApiResult> getLimit(HttpServletRequest request) {
 		String token = authService.getCookieValue(request, "accessToken");

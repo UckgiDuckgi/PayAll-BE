@@ -10,9 +10,12 @@ import com.example.PayAll_BE.customer.user.dto.UserResponseDto;
 import com.example.PayAll_BE.global.auth.service.AuthService;
 import com.example.PayAll_BE.global.exception.UnauthorizedException;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "User", description = "사용자 정보 API")
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -20,6 +23,10 @@ public class UserController {
 	private final UserService userService;
 	private final AuthService authService;
 
+	@Operation(
+		summary = "사용자 정보 조회",
+		description = "사용자의 정보를 조회합니다."
+	)
 	@GetMapping
 	public ResponseEntity<ApiResult> getUserInfo(HttpServletRequest request) {
 		String accessToken = authService.getCookieValue(request, "accessToken");

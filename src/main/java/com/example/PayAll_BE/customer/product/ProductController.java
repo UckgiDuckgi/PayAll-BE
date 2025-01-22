@@ -18,9 +18,12 @@ import com.example.PayAll_BE.global.auth.service.AuthService;
 import com.example.PayAll_BE.global.auth.service.JwtService;
 import com.example.PayAll_BE.customer.recommendation.RecommendationService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Product", description = "카드/ / 구독 상품API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/product")
@@ -31,6 +34,10 @@ public class ProductController {
 	private final AuthService authService;
 	private final ProductService productService;
 
+	@Operation(
+		summary = "카드 / 구독 상품 혜택 상세 적용 내역 조회",
+		description = "사용자의 소비내역을 기반으로 카드 또는 구독 상품의 상세 혜택 내용을 조회합니다."
+	)
 	@GetMapping("{productId}")
 	public ResponseEntity<?> calculateBenefit(HttpServletRequest request,@PathVariable("productId") Long productId){
 		String accessToken = authService.getCookieValue(request, "accessToken");
@@ -45,6 +52,10 @@ public class ProductController {
 		return ResponseEntity.ok(new ApiResult(200,"OK","추천 데이터 응답 성공", discountResult));
 	}
 
+	@Operation(
+		summary = "전체 카드 상품 조회",
+		description = "전체 카드 상품 목록을 조회합니다."
+	)
 	@GetMapping("/cards")
 	public ResponseEntity<ApiResult> getAllCards(HttpServletRequest request) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
@@ -55,6 +66,10 @@ public class ProductController {
 		return ResponseEntity.ok(new ApiResult(200, "OK", "전체 카드 조회 성공", cards));
 	}
 
+	@Operation(
+		summary = "전체 구독 상품 조회",
+		description = "전체 구독 상품 목록을 조회합니다."
+	)
 	@GetMapping("/subscribes")
 	public ResponseEntity<ApiResult> getAllSubscribes(HttpServletRequest request) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
