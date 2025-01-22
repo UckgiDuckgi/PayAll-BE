@@ -86,10 +86,14 @@ public class StatisticsService {
 		List<Statistics> statistics = statisticsRepository.findByUserIdAndStatisticsDateBetween(user.getId(), startDateTime, endDateTime);
 
 		// 총 지출 계산
-		long totalSpent = statistics.stream().mapToLong(Statistics::getStatisticsAmount).sum();
+		long totalSpent = statistics.stream()
+			.filter(stat -> !stat.getCategory().equals(Category.TOTAL)) // TOTAL인 항목 제외
+			.mapToLong(Statistics::getStatisticsAmount)
+			.sum();
 
 		// 카테고리별 지출 계산
 		List<StatisticsResponseDto.CategoryExpense> categoryExpenses = statistics.stream()
+			.filter(stat -> !stat.getCategory().equals(Category.TOTAL))
 			.collect(Collectors.groupingBy(
 				Statistics::getCategory,
 				Collectors.summingLong(Statistics::getStatisticsAmount)
