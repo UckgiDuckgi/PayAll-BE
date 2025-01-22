@@ -44,7 +44,6 @@ public class AuthService {
 	private final UserRepository userRepository;
 	private final JwtService jwtService;
 	private final RedisService redisService;
-	private final MydataService mydataService;
 
 	public AuthResponseDto login(AuthRequestDto request) throws Exception {
 		User user = userRepository.findByAuthId(request.getAuthId())
