@@ -55,8 +55,16 @@ public class LimitService {
 	}
 
 	// 소비 목표 조회
-	public LimitResponseDto getLimit(Long userId) {
+	public LimitResponseDto getLimit(Long userId, String yearMonth) {
+
 		LocalDateTime now = LocalDateTime.now();
+		if (yearMonth != null && !yearMonth.isEmpty()) {
+			String[] parts = yearMonth.split("-");
+			int year = Integer.parseInt(parts[0]);
+			int month = Integer.parseInt(parts[1]);
+			now = LocalDateTime.of(year, month, 1, 0, 0);
+		}
+
 		LocalDateTime startOfMonth = now.toLocalDate().withDayOfMonth(1).atStartOfDay();
 
 		// 현재 달의 소비 금액 계산
@@ -67,21 +75,23 @@ public class LimitService {
 		long averageSpent = calculateAverageSpent(userId, threeMonthsAgo, now);
 
 		// 이전 달 소비 목표 조회
-		int lastMonth = now.minusMonths(1).getMonthValue();
-		int lastMonthYear = now.minusMonths(1).getYear();
+		LocalDateTime lastMonthStart = startOfMonth.minusMonths(1);
+		LocalDateTime lastMonthEnd = lastMonthStart.plusMonths(1).minusSeconds(1);
 		Limits lastMonthLimit = limitRepository.findFirstByUserIdAndLimitDateBetweenOrderByLimitDateDesc(
-			userId,
-			LocalDateTime.of(lastMonthYear, lastMonth, 1, 0, 0),
-			LocalDateTime.of(lastMonthYear, lastMonth, 1, 0, 0).plusMonths(1).minusSeconds(1)
+			userId, lastMonthStart, lastMonthEnd
 		).orElse(null);
+
 		Long lastMonthLimitPrice = lastMonthLimit != null ? lastMonthLimit.getLimitPrice() : null;
 
 		// 현재 소비 목표 조회
-		Limits currentLimit = limitRepository.findTopByUser_IdOrderByLimitDateDesc(userId).orElse(null);
+		Limits currentLimit = limitRepository.findFirstByUserIdAndLimitDateBetweenOrderByLimitDateDesc(
+			userId, startOfMonth, startOfMonth.plusMonths(1).minusSeconds(1)
+		).orElse(null);
 
 		long savedAmount = statisticsRepository.findByUserIdAndDiscountAndCurrentMonth(userId, startOfMonth)
 			.map(Statistics::getStatisticsAmount) // 존재하면 값 가져오기
 			.orElse(0L);
+
 		// 소비 목표를 등록한 적이 없는 경우
 		if (currentLimit == null) {
 			return LimitResponseDto.builder()
