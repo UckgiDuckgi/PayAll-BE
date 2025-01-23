@@ -45,9 +45,18 @@ public class JwtService {
 		return token;
 	}
 
+	public String generateAccessTestToken(String authId, Long userId) {
+		String token = buildToken(authId, userId, accessTokenExpiration);
+		return token;
+	}
+
 	public String generateRefreshToken(String authId, Long userId) {
 		String token = buildToken(authId, userId, refreshTokenExpiration);
 		syncMyData(token);
+		return token;
+	}
+	public String generateRefreshTestToken(String authId, Long userId) {
+		String token = buildToken(authId, userId, refreshTokenExpiration);
 		return token;
 	}
 
