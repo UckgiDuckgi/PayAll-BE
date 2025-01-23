@@ -1,7 +1,5 @@
 package com.example.PayAll_BE.customer.cart;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,10 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.PayAll_BE.customer.cart.dto.CartRequestDto;
 import com.example.PayAll_BE.customer.cart.dto.UpdateQuantityRequestDto;
+import com.example.PayAll_BE.customer.search.SearchService;
 import com.example.PayAll_BE.global.api.ApiResult;
-import com.example.PayAll_BE.global.exception.UnauthorizedException;
 import com.example.PayAll_BE.global.auth.service.AuthService;
 import com.example.PayAll_BE.global.auth.service.JwtService;
+import com.example.PayAll_BE.global.exception.UnauthorizedException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +31,7 @@ public class CartController {
 	private final CartService cartService;
 	private final JwtService jwtService;
 	private final AuthService authService;
+	private final SearchService searchService;
 
 	@Operation(
 		summary = "장바구니 상품 추가",
@@ -41,10 +41,13 @@ public class CartController {
 	public ResponseEntity<ApiResult> addCart(HttpServletRequest request,
 		@RequestBody CartRequestDto cartRequestDto) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
-		if(accessToken == null){
+		if (accessToken == null) {
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
 		String authId = jwtService.extractAuthId(accessToken);
+
+		searchService.productInfoToRedis(cartRequestDto.getProductId());
+
 		return ResponseEntity.ok(
 			new ApiResult(200, "OK", "장바구니 추가 성공", cartService.addCart(authId, cartRequestDto)));
 	}
@@ -56,7 +59,7 @@ public class CartController {
 	@GetMapping
 	public ResponseEntity<ApiResult> getCarts(HttpServletRequest request) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
-		if(accessToken == null){
+		if (accessToken == null) {
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
 		String authId = jwtService.extractAuthId(accessToken);
@@ -73,7 +76,7 @@ public class CartController {
 		@PathVariable Long cartId,
 		@RequestBody UpdateQuantityRequestDto requestDto) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
-		if(accessToken == null){
+		if (accessToken == null) {
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
 		String authId = jwtService.extractAuthId(accessToken);
@@ -89,7 +92,7 @@ public class CartController {
 	public ResponseEntity<ApiResult> deleteCart(HttpServletRequest request,
 		@PathVariable Long cartId) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
-		if(accessToken == null){
+		if (accessToken == null) {
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
 		String authId = jwtService.extractAuthId(accessToken);

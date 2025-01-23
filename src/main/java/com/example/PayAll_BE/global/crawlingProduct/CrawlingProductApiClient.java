@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.PayAll_BE.customer.search.SearchProductDto;
 import com.example.PayAll_BE.global.exception.NotFoundException;
@@ -36,6 +37,7 @@ public class CrawlingProductApiClient {
 
 		return response.getBody();
 	}
+
 	public CrawlingProductDto fetchProductByName(String productName) {
 		String url = baseUrl + "redis/product/by-name/" + productName;
 		ResponseEntity<CrawlingProductDto> response = restTemplate.getForEntity(url, CrawlingProductDto.class);
@@ -60,5 +62,21 @@ public class CrawlingProductApiClient {
 		}
 
 		return Collections.emptyList();
+	}
+
+	public CrawlingProductDto requestCrawling(String productId) {
+		String productApiUrl = baseUrl + "/redis/product";
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(productApiUrl)
+			.queryParam("pcode", productId);
+
+		ResponseEntity<CrawlingProductDto> response = restTemplate.getForEntity(
+			builder.toUriString(), CrawlingProductDto.class);
+
+		if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+			return response.getBody();
+		} else {
+			throw new RuntimeException("크롤링 요청 중 오류 발생");
+		}
+
 	}
 }
