@@ -53,10 +53,10 @@ public class LimitController {
 		description = "사용자가 소비 목표를 조회합니다."
 	)
 	@GetMapping
-	public ResponseEntity<ApiResult> getLimit(HttpServletRequest request) {
+	public ResponseEntity<ApiResult> getLimit(HttpServletRequest request, String yearMonth) {
 		String token = authService.getCookieValue(request, "accessToken");
 		Long userId = jwtService.extractUserId(token);
-		LimitResponseDto responseDto = limitService.getLimit(userId);
+		LimitResponseDto responseDto = limitService.getLimit(userId, yearMonth);
 		return ResponseEntity.ok(
 			new ApiResult(200, "OK", "소비 목표 조회 성공", responseDto)
 		);
