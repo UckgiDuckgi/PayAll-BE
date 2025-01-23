@@ -103,7 +103,7 @@ public class LimitService {
 				.spentAmount(spentAmount)
 				.savedAmount(savedAmount)
 				.averageSpent(averageSpent)
-				.lastMonthLimit(null)
+				.lastMonthLimit(lastMonthLimitPrice)
 				.startDate(currentLimit.getLimitDate().toLocalDate().withDayOfMonth(1))
 				.endDate(currentLimit.getLimitDate().toLocalDate().withDayOfMonth(1).plusMonths(1).minusDays(1))
 				.build();
