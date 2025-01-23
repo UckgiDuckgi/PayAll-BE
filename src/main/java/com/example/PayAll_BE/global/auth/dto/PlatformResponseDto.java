@@ -15,6 +15,7 @@ public class PlatformResponseDto {
 	public static class PlatformInfo {
 		private String platformName;
 		private String id;
+		private String password;
 	}
 
 }
