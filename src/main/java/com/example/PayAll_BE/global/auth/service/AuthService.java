@@ -8,18 +8,18 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.example.PayAll_BE.customer.user.User;
+import com.example.PayAll_BE.customer.user.UserRepository;
 import com.example.PayAll_BE.global.auth.dto.AuthRequestDto;
 import com.example.PayAll_BE.global.auth.dto.AuthResponseDto;
 import com.example.PayAll_BE.global.auth.dto.PlatformRequestDto;
 import com.example.PayAll_BE.global.auth.dto.PlatformResponseDto;
 import com.example.PayAll_BE.global.auth.dto.RegisterRequestDto;
 import com.example.PayAll_BE.global.config.security.CryptoUtil;
-import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.global.exception.BadRequestException;
 import com.example.PayAll_BE.global.exception.ForbiddenException;
 import com.example.PayAll_BE.global.exception.NotFoundException;
 import com.example.PayAll_BE.global.exception.UnauthorizedException;
-import com.example.PayAll_BE.customer.user.UserRepository;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -87,7 +87,8 @@ public class AuthService {
 	public void register(RegisterRequestDto request) {
 		try {
 			// Validate simple password
-			if (request.getPassword() == null || request.getPassword().length() < 6 || request.getPassword().length() > 12) {
+			if (request.getPassword() == null || request.getPassword().length() < 6
+				|| request.getPassword().length() > 12) {
 				throw new BadRequestException("올바른 비밀번호를 입력해주세요.");
 			}
 
@@ -174,6 +175,7 @@ public class AuthService {
 			platformInfos.add(PlatformResponseDto.PlatformInfo.builder()
 				.platformName("COUPANG")
 				.id(CryptoUtil.decrypt(user.getCoupangId()))
+				.password(CryptoUtil.decrypt(user.getCoupangPassword()))
 				.build());
 		}
 
@@ -181,6 +183,7 @@ public class AuthService {
 			platformInfos.add(PlatformResponseDto.PlatformInfo.builder()
 				.platformName("11ST")
 				.id(CryptoUtil.decrypt(user.getElevenstId()))
+				.password(CryptoUtil.decrypt(user.getElevenstPassword()))
 				.build());
 		}
 
@@ -188,6 +191,7 @@ public class AuthService {
 			platformInfos.add(PlatformResponseDto.PlatformInfo.builder()
 				.platformName("NAVER")
 				.id(CryptoUtil.decrypt(user.getNaverId()))
+				.password(CryptoUtil.decrypt(user.getNaverPassword()))
 				.build());
 		}
 
