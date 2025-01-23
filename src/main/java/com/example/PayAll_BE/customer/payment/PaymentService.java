@@ -139,9 +139,13 @@ public class PaymentService {
 
 		List<PaymentDetail> paymentDetails = paymentDetailRepository.findByPaymentId(paymentId);
 		List<PaymentDetailDto> paymentDetailDtos = paymentDetails.stream().map(paymentDetail -> {
-			CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProduct(
-				String.valueOf(paymentDetail.getProductId()));
-			return PaymentDetailMapper.toDto(paymentDetail, crawlingProductDto);
+			if(paymentDetail.getProductId() != null){
+				CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProduct(
+					String.valueOf(paymentDetail.getProductId()));
+				return PaymentDetailMapper.toDto(paymentDetail, crawlingProductDto);
+			} else {
+				return PaymentDetailMapper.toDto(paymentDetail);
+			}
 		}).collect(Collectors.toList());
 
 		return PaymentMapper.toPaymentDto(payment, paymentDetailDtos);
