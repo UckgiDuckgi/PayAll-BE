@@ -4,16 +4,13 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class PaymentUpdateRequestDto {
-	@JsonProperty("account_id")
 	private Long accountId;
-
-	@JsonProperty("payment_place")
 	private String paymentPlace;
-
-	@JsonProperty("payment_time")
 	private LocalDateTime paymentTime;
 }
