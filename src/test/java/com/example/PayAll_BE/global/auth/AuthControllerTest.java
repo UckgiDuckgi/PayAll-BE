@@ -54,10 +54,10 @@ class AuthControllerTest {
 
 		mockMvc.perform(post("/api/auth/sign-up")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(requestDto)))  // DTO를 JSON으로 변환하여 요청 본문에 담기
-			.andExpect(status().isOk())  // HTTP 상태 코드가 200 OK인지 확인
-			.andExpect(jsonPath("$.status").value("OK"))  // status가 "OK"인지 확인
-			.andExpect(jsonPath("$.message").value("회원가입이 완료되었습니다."));  // message가 올바른지 확인
+				.content(objectMapper.writeValueAsString(requestDto)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("OK"))
+			.andExpect(jsonPath("$.message").value("회원가입이 완료되었습니다."));
 	}
 
 	@Test
@@ -75,10 +75,10 @@ class AuthControllerTest {
 
 		mockMvc.perform(post("/api/auth/sign-up")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(requestDto)))  // DTO를 JSON으로 변환하여 요청 본문에 담기
-			.andExpect(status().isBadRequest())  // HTTP 상태 코드가 400 BadRequest인지 확인
-			.andExpect(jsonPath("$.status").value("BAD_REQUEST"))  // status가 "BAD_REQUEST"인지 확인
-			.andExpect(jsonPath("$.message").value("올바른 비밀번호를 입력해주세요."));  // message가 올바른지 확인
+				.content(objectMapper.writeValueAsString(requestDto)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+			.andExpect(jsonPath("$.message").value("올바른 비밀번호를 입력해주세요."));
 	}
 
 	@Test
