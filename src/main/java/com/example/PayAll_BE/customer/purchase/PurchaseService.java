@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.example.PayAll_BE.customer.cart.Cart;
+import com.example.PayAll_BE.customer.cart.CartRepository;
 import com.example.PayAll_BE.customer.cart.CartService;
 import com.example.PayAll_BE.customer.enums.Category;
 import com.example.PayAll_BE.customer.payment.PaymentService;
@@ -14,6 +16,7 @@ import com.example.PayAll_BE.customer.statistics.StatisticsRepository;
 import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.customer.user.UserRepository;
 import com.example.PayAll_BE.global.auth.service.JwtService;
+import com.example.PayAll_BE.global.exception.ForbiddenException;
 import com.example.PayAll_BE.global.exception.NotFoundException;
 import com.example.PayAll_BE.global.mydata.service.MydataService;
 
@@ -30,6 +33,7 @@ public class PurchaseService {
 	private final PaymentService paymentService;
 	private final StatisticsRepository statisticsRepository;
 	private final UserRepository userRepository;
+	private final CartRepository cartRepository;
 
 	@Value("${server1.base-url}")
 	private String baseUrl;
@@ -38,6 +42,15 @@ public class PurchaseService {
 		Long userId = jwtService.extractUserId(token);
 		String authId = jwtService.extractAuthId(token);
 		User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+
+		purchaseRequestDto.getPurchaseList().forEach(product -> {
+			Cart cart = cartRepository.findById(product.getCartId())
+				.orElseThrow(() -> new NotFoundException("장바구니 항목을 찾을 수 없습니다."));
+
+			if (!cart.getUser().getId().equals(userId)) {
+				throw new ForbiddenException("유효하지 않은 장바구니 접근입니다.");
+			}
+		});
 
 		// 1. 마이데이터에 구매 내역 반영
 		String accountNum = mydataService.syncPurchaseData(token, purchaseRequestDto);
