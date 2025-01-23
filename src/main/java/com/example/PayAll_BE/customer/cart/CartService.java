@@ -31,20 +31,30 @@ public class CartService {
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
 
-		// 장바구니에 같은 상품 있으면 수량 +1
-		Cart existingCart = cartRepository.findByUserIdAndProductIdAndProductPriceAndStoreName(user.getId(),
-			cartRequestDto.getProductId(), cartRequestDto.getPrice(), cartRequestDto.getShopName()).orElse(null);
-		if (existingCart != null) {
-			existingCart.setQuantity(existingCart.getQuantity() + cartRequestDto.getQuantity());
-			return CartMapper.toDto(cartRepository.save(existingCart));
-		}
-
 		Cart cart;
 		if (cartRequestDto.isSearch()) {
+			// 장바구니에 같은 상품 있는지 확인
+			Cart existingCart = cartRepository.findByUserIdAndProductIdAndProductPriceAndStoreName(user.getId(),
+				cartRequestDto.getProductId(), cartRequestDto.getPrice(), cartRequestDto.getShopName()).orElse(null);
+			if (existingCart != null) {
+				existingCart.setQuantity(existingCart.getQuantity() + cartRequestDto.getQuantity());
+				return CartMapper.toDto(cartRepository.save(existingCart));
+			}
+
 			cart = CartMapper.toCart(user, cartRequestDto);
 		} else {
 			CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProduct(
 				String.valueOf(cartRequestDto.getProductId()));
+
+			// 장바구니에 같은 상품 있는지 확인
+			Cart existingCart = cartRepository.findByUserIdAndProductIdAndProductPriceAndStoreName(user.getId(),
+					cartRequestDto.getProductId(), crawlingProductDto.getPrice(), crawlingProductDto.getShopName())
+				.orElse(null);
+			if (existingCart != null) {
+				existingCart.setQuantity(existingCart.getQuantity() + cartRequestDto.getQuantity());
+				return CartMapper.toDto(cartRepository.save(existingCart));
+			}
+
 			cart = CartMapper.toCart(user, cartRequestDto, crawlingProductDto);
 		}
 
