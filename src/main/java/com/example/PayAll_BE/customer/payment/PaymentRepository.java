@@ -177,7 +177,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	List<Payment> findByAccount_User_IdAndPaymentTimeBetween(Long userId, LocalDateTime startDate,
 		LocalDateTime endDate);
 
-	@Query("SELECT SUM(p.price) FROM Payment p WHERE p.account.id IN :accountIds AND p.paymentTime BETWEEN :startDate AND :endDate")
+	@Query("SELECT COALESCE(SUM(p.price), 0) FROM Payment p WHERE p.account.id IN :accountIds AND p.paymentTime BETWEEN :startDate AND :endDate")
 	Long findTotalPaymentByAccountIdsAndDateRange(@Param("accountIds") List<Long> accountIds,
 		@Param("startDate") LocalDateTime startDate,
 		@Param("endDate") LocalDateTime endDate);
@@ -197,4 +197,12 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
 	// 특정 계정 ID와 날짜 범위로 Payment 조회
 	List<Payment> findByAccount_IdInAndPaymentTimeBetween(List<Long> accountIds, LocalDateTime startDate, LocalDateTime endDate);
+
+	@Query("SELECT p FROM Payment p WHERE p.account.user.id = :userId " +
+		"ORDER BY p.paymentTime DESC")
+	Page<Payment> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
+
+	@Query("SELECT p FROM Payment p WHERE p.account.id = :accountId " +
+		"ORDER BY p.paymentTime DESC")
+	Page<Payment> findAllByAccountId(@Param("accountId") Long accountId, Pageable pageable);
 }

@@ -17,4 +17,17 @@ public class PaymentDetailMapper {
 			.productId(crawlingProductDto.getPCode())
 			.build();
 	}
+
+	public static PaymentDetailDto toDto(PaymentDetail paymentDetail) {
+		return PaymentDetailDto.builder()
+			.paymentDetailId(paymentDetail.getId())
+			.productName(paymentDetail.getProductName())
+			.price(paymentDetail.getProductPrice())
+			.quantity(paymentDetail.getQuantity())
+			.lowestPricePlace(null)
+			.lowestPrice(null)
+			.link(null)
+			.productId(null)
+			.build();
+	}
 }
