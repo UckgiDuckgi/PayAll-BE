@@ -177,7 +177,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	List<Payment> findByAccount_User_IdAndPaymentTimeBetween(Long userId, LocalDateTime startDate,
 		LocalDateTime endDate);
 
-	@Query("SELECT SUM(p.price) FROM Payment p WHERE p.account.id IN :accountIds AND p.paymentTime BETWEEN :startDate AND :endDate")
+	@Query("SELECT COALESCE(SUM(p.price), 0) FROM Payment p WHERE p.account.id IN :accountIds AND p.paymentTime BETWEEN :startDate AND :endDate")
 	Long findTotalPaymentByAccountIdsAndDateRange(@Param("accountIds") List<Long> accountIds,
 		@Param("startDate") LocalDateTime startDate,
 		@Param("endDate") LocalDateTime endDate);
