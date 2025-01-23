@@ -243,7 +243,13 @@ public class StatisticsService {
 		Long lastMonthTotalPaymentPrice = paymentRepository.findTotalPaymentByAccountIdsAndDateRange(accountIds, lastMonthStart, lastMonthEnd);
 		Long thisMonthTotalPaymentPrice = paymentRepository.findTotalPaymentByAccountIdsAndDateRange(accountIds, thisMonthStart, thisMonthEnd);
 
-		Long totalPaymentPriceDiff = thisMonthTotalPaymentPrice - lastMonthTotalPaymentPrice;
+
+		Long totalPaymentPriceDiff;
+		if (lastMonthTotalPaymentPrice == null || lastMonthTotalPaymentPrice == 0L) {
+			totalPaymentPriceDiff = thisMonthTotalPaymentPrice;
+		} else {
+			totalPaymentPriceDiff = thisMonthTotalPaymentPrice - lastMonthTotalPaymentPrice;
+		}
 		Long totalSavingAmount = statisticsRepository.findTotalDiscountAmountByUserId(userId);
 
 		return StaticsDiffResponseDto.builder()
