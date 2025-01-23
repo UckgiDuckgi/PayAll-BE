@@ -90,57 +90,33 @@ public class StatisticsService {
 		LocalDateTime startDateTime = startDate.atStartOfDay();
 		LocalDateTime endDateTime = startDate.plusMonths(1).atStartOfDay().minusSeconds(1);
 
-		List<Statistics> statistics = statisticsRepository.findByUserIdAndStatisticsDateBetween(user.getId(), startDateTime, endDateTime);
-
-		// 총 지출 계산
-		long totalSpent = statistics.stream()
-			.filter(stat -> !stat.getCategory().equals(Category.TOTAL) && !stat.getCategory().equals(Category.DISCOUNT))
-			.mapToLong(Statistics::getStatisticsAmount)
-			.sum();
-
-		// 카테고리별 지출 계산
-		List<StatisticsResponseDto.CategoryExpense> categoryExpenses = statistics.stream()
-			.filter(stat -> !stat.getCategory().equals(Category.TOTAL) && !stat.getCategory().equals(Category.DISCOUNT))
-			.collect(Collectors.groupingBy(
-				Statistics::getCategory,
-				Collectors.summingLong(Statistics::getStatisticsAmount)
-			))
-			.entrySet().stream()
-			.map(entry -> new StatisticsResponseDto.CategoryExpense(
-				entry.getKey().ordinal(), // 카테고리 ID
-				entry.getKey().name(), // 카테고리 이름
-				entry.getValue() // 지출 금액
-			))
+		// 사용자의 모든 계정 조회
+		List<Account> accounts = accountRepository.findAllByUserId(user.getId());
+		List<Long> accountIds = accounts.stream()
+			.map(Account::getId)
 			.collect(Collectors.toList());
 
-		int daysInMonth = startDate.lengthOfMonth(); // 월별 일수
-		long dateAverage = totalSpent / daysInMonth; // 하루 평균 지출
+		// 현재 월 소비 금액 계산
+		long totalSpent = paymentRepository.findTotalPaymentByAccountIdsAndDateRange(accountIds, startDateTime, endDateTime);
 
-		// 전월 대비 차이 계산
-		LocalDate previousMonthStart = startDate.minusMonths(1);
-		LocalDateTime previousStartDateTime = previousMonthStart.atStartOfDay();
-		LocalDateTime previousEndDateTime = previousMonthStart.plusMonths(1).atStartOfDay().minusSeconds(1);
+		// 카테고리별 지출 계산
+		List<StatisticsResponseDto.CategoryExpense> categoryExpenses = calculateCategoryExpenses(accountIds, startDateTime, endDateTime);
 
-		List<Statistics> previousStatistics = statisticsRepository.findByUserIdAndStatisticsDateBetween(
-			user.getId(), previousStartDateTime, previousEndDateTime);
-		long previousTotalSpent = previousStatistics.stream().mapToLong(Statistics::getStatisticsAmount).sum();
-		long difference = totalSpent - previousTotalSpent;
+		// 하루 평균 지출 계산
+		int daysInMonth = startDate.lengthOfMonth();
+		long dateAverage = daysInMonth > 0 ? totalSpent / daysInMonth : 0;
+
+		// 전월 소비 금액 계산
+		YearMonth currentMonth = YearMonth.parse(date);
+		LocalDateTime previousMonthStart = currentMonth.minusMonths(1).atDay(1).atStartOfDay();
+		LocalDateTime previousMonthEnd = currentMonth.minusMonths(1).atEndOfMonth().atTime(23, 59, 59);
+
+		long lastMonthTotalSpent = paymentRepository.findTotalPaymentByAccountIdsAndDateRange(accountIds, previousMonthStart, previousMonthEnd);
+
+		long spendingDifference = totalSpent - lastMonthTotalSpent;
 
 		// 고정 지출 데이터 조회
-		LocalDateTime lastMonthStart = startDate.minusMonths(1).atStartOfDay();
-		LocalDateTime lastMonthEnd = lastMonthStart.plusMonths(1).minusSeconds(1);
-		LocalDateTime twoMonthsAgoStart = startDate.minusMonths(2).atStartOfDay();
-		LocalDateTime twoMonthsAgoEnd = twoMonthsAgoStart.plusMonths(1).minusSeconds(1);
-
-		List<Payment> fixedPayments = paymentRepository.findFixedExpenses(
-			user.getId(),
-			startDateTime,
-			endDateTime,
-			lastMonthStart,
-			lastMonthEnd,
-			twoMonthsAgoStart,
-			twoMonthsAgoEnd
-		);
+		List<Payment> fixedPayments = calculateFixedExpenses(accountIds, startDateTime, endDateTime);
 
 		List<StatisticsResponseDto.FixedExpense> fixedExpenses = fixedPayments.stream()
 			.map(payment -> new StatisticsResponseDto.FixedExpense(
@@ -156,11 +132,12 @@ public class StatisticsService {
 			.date(date)
 			.totalSpent(totalSpent)
 			.dateAverage(dateAverage) // 하루 평균 지출
-			.difference(difference) // 전월 대비 차이
+			.difference(spendingDifference) // 전월 대비 차이
 			.categoryExpenses(categoryExpenses)
 			.fixedExpenses(fixedExpenses) // 고정 지출
 			.build();
 	}
+
 
 	public StatisticsDetailResponseDto getCategoryDetails(Long userId, Category category, String date) {
 
@@ -257,5 +234,40 @@ public class StatisticsService {
 			.yearlySavingAmount(totalSavingAmount)
 			.monthlyPaymentDifference(totalPaymentPriceDiff)
 			.build();
+	}
+	// 카테고리별 소비 금액 계산
+	private List<StatisticsResponseDto.CategoryExpense> calculateCategoryExpenses(List<Long> accountIds, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+		List<Payment> payments = paymentRepository.findByAccount_IdInAndPaymentTimeBetween(accountIds, startDateTime, endDateTime);
+
+		return payments.stream()
+			.collect(Collectors.groupingBy(
+				Payment::getCategory, // 카테고리별로 그룹화
+				Collectors.summingLong(Payment::getPrice) // 금액 합산
+			))
+			.entrySet().stream()
+			.map(entry -> new StatisticsResponseDto.CategoryExpense(
+				entry.getKey().ordinal(), // 카테고리 ID
+				entry.getKey().name(),    // 카테고리 이름
+				entry.getValue()          // 소비 금액
+			))
+			.collect(Collectors.toList());
+	}
+
+	// 고정 지출 데이터 계산
+	private List<Payment> calculateFixedExpenses(List<Long> accountIds, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+		LocalDateTime lastMonthStart = startDateTime.minusMonths(1);
+		LocalDateTime lastMonthEnd = lastMonthStart.plusMonths(1).minusSeconds(1);
+		LocalDateTime twoMonthsAgoStart = startDateTime.minusMonths(2);
+		LocalDateTime twoMonthsAgoEnd = twoMonthsAgoStart.plusMonths(1).minusSeconds(1);
+
+		return paymentRepository.findFixedExpensesByAccountIds(
+			accountIds,
+			startDateTime,
+			endDateTime,
+			lastMonthStart,
+			lastMonthEnd,
+			twoMonthsAgoStart,
+			twoMonthsAgoEnd
+		);
 	}
 }

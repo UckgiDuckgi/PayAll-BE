@@ -181,4 +181,20 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	Long findTotalPaymentByAccountIdsAndDateRange(@Param("accountIds") List<Long> accountIds,
 		@Param("startDate") LocalDateTime startDate,
 		@Param("endDate") LocalDateTime endDate);
+
+	// 특정 계정 ID와 날짜 범위로 고정 지출 데이터 조회
+	@Query("SELECT p FROM Payment p WHERE p.account.id IN :accountIds " +
+		"AND (p.paymentTime BETWEEN :startDate AND :endDate OR " +
+		"p.paymentTime BETWEEN :lastMonthStart AND :lastMonthEnd OR " +
+		"p.paymentTime BETWEEN :twoMonthsAgoStart AND :twoMonthsAgoEnd)")
+	List<Payment> findFixedExpensesByAccountIds(@Param("accountIds") List<Long> accountIds,
+		@Param("startDate") LocalDateTime startDate,
+		@Param("endDate") LocalDateTime endDate,
+		@Param("lastMonthStart") LocalDateTime lastMonthStart,
+		@Param("lastMonthEnd") LocalDateTime lastMonthEnd,
+		@Param("twoMonthsAgoStart") LocalDateTime twoMonthsAgoStart,
+		@Param("twoMonthsAgoEnd") LocalDateTime twoMonthsAgoEnd);
+
+	// 특정 계정 ID와 날짜 범위로 Payment 조회
+	List<Payment> findByAccount_IdInAndPaymentTimeBetween(List<Long> accountIds, LocalDateTime startDate, LocalDateTime endDate);
 }
