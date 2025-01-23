@@ -20,6 +20,7 @@ public class PaymentMapper {
 			.paymentTime(payment.getPaymentTime())
 			.bankName(payment.getAccount().getBankName())
 			.accountName(payment.getAccount().getAccountName())
+			.shootNeed(true)
 			.build();
 	}
 
