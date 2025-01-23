@@ -116,7 +116,20 @@ public class StatisticsService {
 		long spendingDifference = totalSpent - lastMonthTotalSpent;
 
 		// 고정 지출 데이터 조회
-		List<Payment> fixedPayments = calculateFixedExpenses(accountIds, startDateTime, endDateTime);
+		LocalDateTime lastMonthStart = startDate.minusMonths(1).atStartOfDay();
+		LocalDateTime lastMonthEnd = lastMonthStart.plusMonths(1).minusSeconds(1);
+		LocalDateTime twoMonthsAgoStart = startDate.minusMonths(2).atStartOfDay();
+		LocalDateTime twoMonthsAgoEnd = twoMonthsAgoStart.plusMonths(1).minusSeconds(1);
+
+		List<Payment> fixedPayments = paymentRepository.findFixedExpenses(
+			user.getId(),
+			startDateTime,
+			endDateTime,
+			lastMonthStart,
+			lastMonthEnd,
+			twoMonthsAgoStart,
+			twoMonthsAgoEnd
+		);
 
 		List<StatisticsResponseDto.FixedExpense> fixedExpenses = fixedPayments.stream()
 			.map(payment -> new StatisticsResponseDto.FixedExpense(
@@ -253,21 +266,4 @@ public class StatisticsService {
 			.collect(Collectors.toList());
 	}
 
-	// 고정 지출 데이터 계산
-	private List<Payment> calculateFixedExpenses(List<Long> accountIds, LocalDateTime startDateTime, LocalDateTime endDateTime) {
-		LocalDateTime lastMonthStart = startDateTime.minusMonths(1);
-		LocalDateTime lastMonthEnd = lastMonthStart.plusMonths(1).minusSeconds(1);
-		LocalDateTime twoMonthsAgoStart = startDateTime.minusMonths(2);
-		LocalDateTime twoMonthsAgoEnd = twoMonthsAgoStart.plusMonths(1).minusSeconds(1);
-
-		return paymentRepository.findFixedExpensesByAccountIds(
-			accountIds,
-			startDateTime,
-			endDateTime,
-			lastMonthStart,
-			lastMonthEnd,
-			twoMonthsAgoStart,
-			twoMonthsAgoEnd
-		);
-	}
 }
