@@ -56,11 +56,19 @@ public class PaymentService {
 		Page<Payment> paymentPage;
 
 		if (accountId == null) {
-			paymentPage = paymentRepository.findAllByUserIdAndCategory(user.getId(), category, pageable);
+			// 통합 계좌: 모든 계좌의 Payment 조회
+			if (category == null) {
+				paymentPage = paymentRepository.findAllByUserId(user.getId(), pageable);
+			} else {
+				paymentPage = paymentRepository.findAllByUserIdAndCategory(user.getId(), category, pageable);
+			}
 		} else {
-			Account account = accountRepository.findById(accountId)
-				.orElseThrow(() -> new NotFoundException("해당 계좌를 찾을 수 없습니다."));
-			paymentPage = paymentRepository.findAllByAccountIdAndCategory(accountId, category, pageable);
+			// 특정 계좌의 Payment 조회
+			if (category == null) {
+				paymentPage = paymentRepository.findAllByAccountId(accountId, pageable);
+			} else {
+				paymentPage = paymentRepository.findAllByAccountIdAndCategory(accountId, category, pageable);
+			}
 		}
 
 		if (paymentPage.isEmpty()) {
@@ -98,13 +106,14 @@ public class PaymentService {
 			.collect(Collectors.groupingBy(payment -> payment.getPaymentTime().toLocalDate().atStartOfDay()));
 
 		List<DayPaymentResponseDto> dayPaymentList = groupedPayments.entrySet().stream()
+			.sorted(Map.Entry.<LocalDateTime, List<Payment>>comparingByKey().reversed())
 			.map(entry -> DayPaymentResponseDto.builder()
 				.paymentDate(entry.getKey().toLocalDate().atStartOfDay())
 				.dayPaymentPrice(entry.getValue().stream().mapToLong(Payment::getPrice).sum())
 				.paymentDetail(entry.getValue().stream().map(payment -> PaymentDetailResponseDto.builder()
 						.paymentId(payment.getId())
 						.paymentPlace(payment.getPaymentPlace())
-						.category(payment.getCategory().name())
+						.category(payment.getCategory() != null ? payment.getCategory().name() : "전체")
 						.paymentPrice(payment.getPrice())
 						.paymentType(payment.getPaymentType().name())
 						.paymentTime(payment.getPaymentTime())
@@ -139,9 +148,13 @@ public class PaymentService {
 
 		List<PaymentDetail> paymentDetails = paymentDetailRepository.findByPaymentId(paymentId);
 		List<PaymentDetailDto> paymentDetailDtos = paymentDetails.stream().map(paymentDetail -> {
-			CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProduct(
-				String.valueOf(paymentDetail.getProductId()));
-			return PaymentDetailMapper.toDto(paymentDetail, crawlingProductDto);
+			if(paymentDetail.getProductId() != null){
+				CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProduct(
+					String.valueOf(paymentDetail.getProductId()));
+				return PaymentDetailMapper.toDto(paymentDetail, crawlingProductDto);
+			} else {
+				return PaymentDetailMapper.toDto(paymentDetail);
+			}
 		}).collect(Collectors.toList());
 
 		return PaymentMapper.toPaymentDto(payment, paymentDetailDtos);
