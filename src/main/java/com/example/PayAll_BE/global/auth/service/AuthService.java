@@ -46,10 +46,10 @@ public class AuthService {
 
 	public AuthResponseDto login(AuthRequestDto request) throws Exception {
 		User user = userRepository.findByAuthId(request.getAuthId())
-			.orElseThrow(() -> new NotFoundException("로그인 : Id에 맞는 유저를 찾을 수 없습니다."));
+			.orElseThrow(() -> new NotFoundException("아이디/이메일 또는 비밀번호를 잘못 입력하셨습니다."));
 
 		if (!CryptoUtil.decrypt(user.getPassword()).equals(request.getPassword())) {
-			throw new UnauthorizedException("로그인 : 잘못된 비밀번호 입니다.");
+			throw new UnauthorizedException("아이디/이메일 또는 비밀번호를 잘못 입력하셨습니다.");
 		}
 
 		// permission = false
