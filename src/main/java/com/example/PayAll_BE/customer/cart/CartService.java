@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 import com.example.PayAll_BE.customer.cart.dto.CartMapper;
 import com.example.PayAll_BE.customer.cart.dto.CartRequestDto;
 import com.example.PayAll_BE.customer.cart.dto.CartResponseDto;
-import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductDto;
 import com.example.PayAll_BE.customer.user.User;
+import com.example.PayAll_BE.customer.user.UserRepository;
+import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductApiClient;
+import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductDto;
 import com.example.PayAll_BE.global.exception.BadRequestException;
 import com.example.PayAll_BE.global.exception.ForbiddenException;
 import com.example.PayAll_BE.global.exception.NotFoundException;
 import com.example.PayAll_BE.global.exception.UnauthorizedException;
-import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductApiClient;
-import com.example.PayAll_BE.customer.user.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,27 +31,22 @@ public class CartService {
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
 
-		CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProduct(String.valueOf(cartRequestDto.getProductId()));
-
 		// 장바구니에 같은 상품 있으면 수량 +1
-		Cart existingCart = cartRepository.findByUserIdAndProductId(user.getId(),
-			cartRequestDto.getProductId());
+		Cart existingCart = cartRepository.findByUserIdAndProductIdAndProductPriceAndStoreName(user.getId(),
+			cartRequestDto.getProductId(), cartRequestDto.getPrice(), cartRequestDto.getShopName()).orElse(null);
 		if (existingCart != null) {
 			existingCart.setQuantity(existingCart.getQuantity() + cartRequestDto.getQuantity());
 			return CartMapper.toDto(cartRepository.save(existingCart));
 		}
 
-		Cart cart = Cart.builder()
-			.user(user)
-			.productId(cartRequestDto.getProductId())
-			.productName(crawlingProductDto.getProductName())
-			.productPrice(crawlingProductDto.getPrice())
-			.quantity(cartRequestDto.getQuantity())
-			.link(crawlingProductDto.getShopUrl())
-			.image(crawlingProductDto.getProductImage())
-			.storeName(crawlingProductDto.getShopName())
-			.prevPrice(cartRequestDto.getPrevPrice())
-			.build();
+		Cart cart;
+		if (cartRequestDto.isSearch()) {
+			cart = CartMapper.toCart(user, cartRequestDto);
+		} else {
+			CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProduct(
+				String.valueOf(cartRequestDto.getProductId()));
+			cart = CartMapper.toCart(user, cartRequestDto, crawlingProductDto);
+		}
 
 		return CartMapper.toDto(cartRepository.save(cart));
 
