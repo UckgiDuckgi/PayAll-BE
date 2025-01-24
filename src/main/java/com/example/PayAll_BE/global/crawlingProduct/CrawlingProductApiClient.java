@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -54,11 +55,17 @@ public class CrawlingProductApiClient {
 		String searchApiUrl = String.format("%s/redis/search?page=%d&size=%d&query=%s", baseUrl, page, size,
 			URLEncoder.encode(query, StandardCharsets.UTF_8));
 
-		ResponseEntity<SearchProductDto[]> response = restTemplate.getForEntity(
-			searchApiUrl, SearchProductDto[].class);
+		try {
+			ResponseEntity<SearchProductDto[]> response = restTemplate.getForEntity(
+				searchApiUrl, SearchProductDto[].class);
 
-		if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-			return Arrays.asList(response.getBody());
+			if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+				return Arrays.asList(response.getBody());
+			}
+		} catch (RestClientException e) {
+			if (e.getCause() instanceof RuntimeException && e.getCause().getMessage().contains("세션이 만료되었습니다")) {
+				throw new NotFoundException("세션 만료로 검색이 불가합니다.");
+			}
 		}
 
 		return Collections.emptyList();
