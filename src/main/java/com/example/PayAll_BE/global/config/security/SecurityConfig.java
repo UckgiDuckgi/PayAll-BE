@@ -72,6 +72,7 @@ public class SecurityConfig {
 		// BE IP : 43.201.141.241
 		// Mock IP : 43.200.26.30
 		configuration.setAllowedOrigins(List.of(
+			"http://43.200.26.30:8080",
 			"https://payall.topician.com"," https://payall.topician.com:3000",
 			"http://127.0.0.1", "http://localhost:3000"));
 		configuration.addAllowedMethod("*");
