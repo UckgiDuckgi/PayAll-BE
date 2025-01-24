@@ -6,6 +6,7 @@ import java.util.List;
 import com.example.PayAll_BE.customer.benefit.Benefit;
 import com.example.PayAll_BE.customer.enums.Category;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -27,6 +28,7 @@ public class Store {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "store_id")
 	private Long id;
 
 	private String storeName;
