@@ -92,13 +92,13 @@ public class AuthService {
 				throw new BadRequestException("올바른 비밀번호를 입력해주세요.");
 			}
 
-			// 전화번호 형식 통일
+
 			String formattedPhone = request.getPhone().replaceAll("-", "");
+
 
 			Optional<User> existingUser = userRepository.findAll().stream()
 				.filter(user ->
-					user.getName().equals(request.getName()) &&
-						user.getPhone().replaceAll("-", "").equals(formattedPhone)
+					user.getAuthId().equals(request.getAuthId())
 				)
 				.findFirst();
 
