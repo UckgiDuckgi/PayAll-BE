@@ -148,7 +148,7 @@ public class PaymentService {
 
 		List<PaymentDetail> paymentDetails = paymentDetailRepository.findByPaymentId(paymentId);
 		List<PaymentDetailDto> paymentDetailDtos = paymentDetails.stream().map(paymentDetail -> {
-			if(paymentDetail.getProductId() != null){
+			if (paymentDetail.getProductId() != null) {
 				CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProduct(
 					String.valueOf(paymentDetail.getProductId()));
 				return PaymentDetailMapper.toDto(paymentDetail, crawlingProductDto);

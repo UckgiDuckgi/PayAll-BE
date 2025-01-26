@@ -137,7 +137,7 @@ public class MydataService {
 		LocalDateTime fromDateTime;
 		if ("0".equals(fromDate)) {
 			// 최초 조회인 경우 90일 전부터 조회
-			fromDateTime = LocalDateTime.now().minusDays(90);
+			fromDateTime = LocalDateTime.now().minusDays(120);
 		} else {
 			try {
 				fromDateTime = LocalDateTime.parse(fromDate,
