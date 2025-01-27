@@ -239,9 +239,10 @@ public class AuthService {
 		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
 			for (Cookie cookie : cookies) {
-				if (cookie.getName().equals(cookieName)) {
+				if (cookie.getName().trim().equals(cookieName.trim())) {
 					return cookie.getValue();
 				}
+
 			}
 		}
 		return null;
