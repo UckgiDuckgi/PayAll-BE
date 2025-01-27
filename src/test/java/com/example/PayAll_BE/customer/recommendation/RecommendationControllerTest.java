@@ -118,6 +118,15 @@ class RecommendationControllerTest {
 	}
 
 	@Test
+	@Order(2)
+	void recommendationWithoutAccessToken() throws Exception {
+		// 액세스 토큰이 없는 경우
+		mockMvc.perform(get("/api/recommendations"))
+			.andExpect(status().isForbidden())  // 응답 상태 코드가 401 Unauthorized
+			.andExpect(jsonPath("$.message").value("액세스 토큰이 없습니다"));  // 예외 메시지 확인
+	}
+
+	@Test
 	void getRecommendProducts() {
 	}
 }
