@@ -1,12 +1,13 @@
 package com.example.PayAll_BE.global.auth;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.customer.user.UserRepository;
 import com.example.PayAll_BE.global.auth.dto.AuthRequestDto;
+import com.example.PayAll_BE.global.auth.dto.PlatformRequestDto;
 import com.example.PayAll_BE.global.auth.dto.RegisterRequestDto;
 import com.example.PayAll_BE.global.auth.service.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,22 +47,38 @@ class AuthControllerTest {
 	private UserRepository userRepository;
 	@PersistenceContext
 	private EntityManager entityManager;
+	private User testUser1;
+	private User testUser2;
+	private String token1;
+	private String token2;
 	@Autowired
 	private JwtService jwtService;
 
-	@BeforeAll
+	@BeforeEach
 	public void setUp() {
 		entityManager.clear();
-		// 테스트용 사용자 생성 ( 기존 사용자 )
-		// testUser1 = User.builder()
-		// 	.name("규호랑이")
-		// 	.authId("gyuhoTiger")
-		// 	.email("testuser1@example.com")
-		// 	.password("12345678")
-		// 	.permission(true)
-		// 	.build();
-		// userRepository.save(testUser1);
+		// 테스트용 사용자 생성
+		testUser1 = User.builder()
+			.name("규호랑이")
+			.authId("gyuhoTiger")
+			.email("testuser1@example.com")
+			.password("12345678")
+			.permission(true)
+			.build();
+		userRepository.save(testUser1);
+		this.token1 = jwtService.generateAccessTestToken(testUser1.getAuthId(), testUser1.getId());
+
+		testUser2 = User.builder()
+			.name("규호랑이2")
+			.authId("gyuhoTiger2")
+			.email("testuser1@example.com")
+			.password("12345678")
+			.build();
+		userRepository.save(testUser2);
+		this.token2 = jwtService.generateAccessTestToken(testUser2.getAuthId(), testUser2.getId());
+
 	}
+
 	@Test
 	@Order(1)
 	void registerSuccess() throws Exception {
@@ -101,7 +119,7 @@ class AuthControllerTest {
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.status").value("BAD_REQUEST"))
 			.andExpect(jsonPath("$.message").value("올바른 비밀번호를 입력해주세요."));
-		// System.out.println("userRepository = " + userRepository.findAll());
+		System.out.println("userRepository = " + userRepository.findAll());
 	}
 
 	@Test
@@ -137,6 +155,7 @@ class AuthControllerTest {
 			.andExpect(jsonPath("$.status").value("NOT_FOUND"))
 			.andExpect(jsonPath("$.message").value("아이디/이메일 또는 비밀번호를 잘못 입력하셨습니다."));
 	}
+
 	@Test
 	@Order(5)
 	void loginFail_InvalidPassword() throws Exception {
@@ -170,11 +189,57 @@ class AuthControllerTest {
 	}
 
 	@Test
-	void setPlatform() {
+	@Order(7)
+	void setPlatform() throws Exception {
+
+		PlatformRequestDto requestDto = PlatformRequestDto.builder()
+			.platformName("Coupang")
+			.id("hanaro@hanaro.com")
+			.password("hanaro").build();
+
+		mockMvc.perform(post("/api/auth/platform")
+				.cookie(new Cookie("accessToken", token1))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(requestDto)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("OK"))
+			.andExpect(jsonPath("$.message").value("플랫폼 계정 등록 성공"))
+			.andDo(print());
+
 	}
 
 	@Test
-	void getPlatform() {
+	@Order(8)
+	void setPlatformWithInvalidPlatform() throws Exception {
+
+		PlatformRequestDto requestDto = PlatformRequestDto.builder()
+			.platformName("NAVVER")
+			.id("hanaro@navver.com")
+			.password("hanaro").build();
+
+		mockMvc.perform(post("/api/auth/platform")
+				.cookie(new Cookie("accessToken", token1))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(requestDto)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+			.andExpect(jsonPath("$.message").value("유효하지 않은 플랫폼입니다: NAVVER"))
+			.andDo(print());
+
+	}
+
+	@Test
+	@Order(9)
+	void getPlatform() throws Exception {
+
+		mockMvc.perform(get("/api/auth/platform")
+				.cookie(new Cookie("accessToken", token2)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("OK"))
+			.andExpect(jsonPath("$.message").value("플랫폼 계정 조회 성공"))
+			.andExpect(jsonPath("$.data.platformInfos[0].platformName").value("11ST"))
+			.andDo(print());
+
 	}
 
 	@AfterAll
