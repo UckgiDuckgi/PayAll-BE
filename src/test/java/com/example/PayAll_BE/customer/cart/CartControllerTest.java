@@ -5,7 +5,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -88,7 +87,6 @@ public class CartControllerTest {
 	}
 
 	@Test
-	@DisplayName("장바구니 추가 테스트")
 	void addCartTest() throws Exception {
 		CartRequestDto requestDto = CartRequestDto.builder()
 			.productId(1026291L)
@@ -117,7 +115,6 @@ public class CartControllerTest {
 	}
 
 	@Test
-	@DisplayName("장바구니 조회 테스트")
 	void getCartsTest() throws Exception {
 		mockMvc.perform(get("/api/cart")
 				.cookie(new Cookie("accessToken", token))
@@ -132,10 +129,10 @@ public class CartControllerTest {
 	}
 
 	@Test
-	@DisplayName("장바구니 수량 변경 테스트")
 	void updateQuantityTest() throws Exception {
 		Long cartId = testCart.getCartId();
-		UpdateQuantityRequestDto requestDto = UpdateQuantityRequestDto.builder().quantity(4).build();
+		int quantity = 4;
+		UpdateQuantityRequestDto requestDto = UpdateQuantityRequestDto.builder().quantity(quantity).build();
 
 		String requestBody = objectMapper.writeValueAsString(requestDto);
 
@@ -151,7 +148,44 @@ public class CartControllerTest {
 	}
 
 	@Test
-	@DisplayName("장바구니 삭제 테스트")
+	void updateQuantityBadRequestTest() throws Exception {
+		Long cartId = testCart.getCartId();
+		int quantity = -2;
+		UpdateQuantityRequestDto requestDto = UpdateQuantityRequestDto.builder().quantity(quantity).build();
+
+		String requestBody = objectMapper.writeValueAsString(requestDto);
+
+		mockMvc.perform(patch("/api/cart/" + cartId)
+				.cookie(new Cookie("accessToken", token))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestBody))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+			.andExpect(jsonPath("$.message").value("수량은 1 이상이어야 합니다."))
+			.andDo(print());
+
+	}
+
+	@Test
+	void updateQuantityNotFoundTest() throws Exception {
+		Long cartId = 9999L;
+		int quantity = 2;
+		UpdateQuantityRequestDto requestDto = UpdateQuantityRequestDto.builder().quantity(quantity).build();
+
+		String requestBody = objectMapper.writeValueAsString(requestDto);
+
+		mockMvc.perform(patch("/api/cart/" + cartId)
+				.cookie(new Cookie("accessToken", token))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestBody))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.status").value("NOT_FOUND"))
+			.andExpect(jsonPath("$.message").value("해당 장바구니 항목을 찾을 수 없습니다."))
+			.andDo(print());
+
+	}
+
+	@Test
 	void deleteCartTest() throws Exception {
 		Long cartId = testCart.getCartId();
 
@@ -162,5 +196,19 @@ public class CartControllerTest {
 			.andExpect(jsonPath("$.status").value("OK"))
 			.andExpect(jsonPath("$.message").value("상품이 장바구니에서 삭제되었습니다."))
 			.andDo(print());
+	}
+
+	@Test
+	void deleteCartNotFoundTest() throws Exception {
+		Long cartId = 9999L;
+
+		mockMvc.perform(delete("/api/cart/" + cartId)
+				.cookie(new Cookie("accessToken", token))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.status").value("NOT_FOUND"))
+			.andExpect(jsonPath("$.message").value("해당 장바구니 항목을 찾을 수 없습니다."))
+			.andDo(print());
+
 	}
 }
