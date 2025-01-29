@@ -46,8 +46,6 @@ public class CartController {
 		}
 		String authId = jwtService.extractAuthId(accessToken);
 
-		searchService.productInfoToRedis(cartRequestDto.getProductId());
-
 		return ResponseEntity.ok(
 			new ApiResult(200, "OK", "장바구니 추가 성공", cartService.addCart(authId, cartRequestDto)));
 	}
