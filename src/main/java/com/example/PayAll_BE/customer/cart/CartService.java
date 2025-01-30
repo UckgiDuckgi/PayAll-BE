@@ -105,21 +105,4 @@ public class CartService {
 		cartRepository.delete(cart);
 	}
 
-	public void deleteCarts(List<Long> cartIds, String authId) {
-		User user = userRepository.findByAuthId(authId)
-			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
-
-		List<Cart> carts = cartRepository.findAllById(cartIds);
-
-		carts.forEach(
-			cart -> {
-				if (!cart.getUser().getId().equals(user.getId())) {
-					throw new ForbiddenException("장바구니를 삭제할 수 없습니다.");
-				}
-			}
-		);
-
-		cartRepository.deleteAllById(cartIds);
-	}
-
 }

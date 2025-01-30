@@ -128,5 +128,9 @@ public class PurchaseControllerTest {
 			.andExpect(jsonPath("$.message").value("구매 성공"))
 			.andDo(print());
 
+		verify(searchService).productInfoToRedis(requestDto.getPurchaseList().get(0).getProductId());
+		verify(mydataService).syncPurchaseData(token, requestDto);
+		verify(mydataService).syncMydataInfo(token);
+
 	}
 }

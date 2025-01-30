@@ -100,9 +100,12 @@ public class SearchControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value("OK"))
 			.andExpect(jsonPath("$.message").value("상품 검색 성공"))
-			.andExpect(jsonPath("$.data").isNotEmpty())
+			.andExpect(jsonPath("$.data[0].pcode").value(4060647L))
+			.andExpect(jsonPath("$.data[0].productName").value("삼다수 2L (24개)"))
+			.andExpect(jsonPath("$.data[0].storeList").isNotEmpty())
 			.andDo(print());
 
+		verify(searchService).getSearchProducts(query, 1, 5);
 	}
 
 	@Test
@@ -121,6 +124,9 @@ public class SearchControllerTest {
 			.andExpect(jsonPath("$.status").value("OK"))
 			.andExpect(jsonPath("$.message").value("검색 결과가 없습니다."))
 			.andDo(print());
+
+		verify(searchService).getSearchProducts(query, 1, 5);
+
 	}
 
 }

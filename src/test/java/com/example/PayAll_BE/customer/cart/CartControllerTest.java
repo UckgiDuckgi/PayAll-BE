@@ -1,5 +1,6 @@
 package com.example.PayAll_BE.customer.cart;
 
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.PayAll_BE.customer.cart.dto.CartRequestDto;
@@ -21,6 +23,8 @@ import com.example.PayAll_BE.customer.cart.dto.UpdateQuantityRequestDto;
 import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.customer.user.UserRepository;
 import com.example.PayAll_BE.global.auth.service.JwtService;
+import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductApiClient;
+import com.example.PayAll_BE.global.crawlingProduct.CrawlingProductDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
@@ -57,6 +61,9 @@ public class CartControllerTest {
 	@Autowired
 	private JwtService jwtService;
 
+	@MockitoBean
+	private CrawlingProductApiClient crawlingProductApiClient;
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		entityManager.clear();
@@ -87,7 +94,7 @@ public class CartControllerTest {
 	}
 
 	@Test
-	void addCartTest() throws Exception {
+	void addCartFromSearchTest() throws Exception {
 		CartRequestDto requestDto = CartRequestDto.builder()
 			.productId(1026291L)
 			.productName("신라면 (5개)")
@@ -112,6 +119,40 @@ public class CartControllerTest {
 			.andExpect(jsonPath("$.data.cartId").isNotEmpty())
 			.andDo(print());
 
+	}
+
+	@Test
+	void addCartFromPaymentDetailTest() throws Exception {
+		CrawlingProductDto productDto = CrawlingProductDto.builder()
+			.pCode(1026291L)
+			.productName("신라면 (5개)")
+			.productImage("https://img.danawa.com/prod_img/500000")
+			.shopName("Coupang")
+			.shopUrl("https://www.coupang.com/vp/products/7958974")
+			.price(3170L)
+			.build();
+		CartRequestDto requestDto = CartRequestDto.builder()
+			.productId(1026291L)
+			.quantity(1)
+			.prevPrice(3400L)
+			.search(false)
+			.build();
+
+		when(crawlingProductApiClient.fetchProduct(String.valueOf(requestDto.getProductId()))).thenReturn(productDto);
+
+		String requestBody = objectMapper.writeValueAsString(requestDto);
+
+		mockMvc.perform(post("/api/cart")
+				.cookie(new Cookie("accessToken", token))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestBody))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("OK"))
+			.andExpect(jsonPath("$.message").value("장바구니 추가 성공"))
+			.andExpect(jsonPath("$.data.cartId").isNotEmpty())
+			.andDo(print());
+
+		verify(crawlingProductApiClient).fetchProduct(String.valueOf(requestDto.getProductId()));
 	}
 
 	@Test

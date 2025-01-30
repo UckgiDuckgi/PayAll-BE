@@ -1,8 +1,10 @@
 package com.example.PayAll_BE.global.crawlingProduct;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class CrawlingProductDto {
 	private Long pCode;
 	private String productName;
