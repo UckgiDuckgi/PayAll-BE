@@ -1,6 +1,5 @@
 package com.example.PayAll_BE.customer.payment;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -43,14 +42,13 @@ public class PaymentController {
 	public ResponseEntity<ApiResult> getPayments(
 		HttpServletRequest request,
 		@RequestParam(required = false) Category category,
-		@RequestParam(required = false) Long accountId,
-		Pageable pageable
+		@RequestParam(required = false) Long accountId
 	) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
-		TotalPaymentResponseDto response = paymentService.getPayments(accessToken, accountId, category, pageable);
+		TotalPaymentResponseDto response = paymentService.getPayments(accessToken, accountId, category);
 		return ResponseEntity.ok(new ApiResult(200, "OK", "통합 계좌 거래 내역 조회 성공", response));
 	}
 

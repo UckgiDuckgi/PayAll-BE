@@ -48,30 +48,26 @@ public class PaymentService {
 	private final UserRepository userRepository;
 	private final AccountRepository accountRepository;
 
-	public TotalPaymentResponseDto getPayments(String token, Long accountId, Category category, Pageable pageable) {
+	public TotalPaymentResponseDto getPayments(String token, Long accountId, Category category) {
 		String authId = jwtService.extractAuthId(token);
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
 
-		Page<Payment> paymentPage;
+		List<Payment> payments;
 
 		if (accountId == null) {
 			// 통합 계좌: 모든 계좌의 Payment 조회
-			if (category == null) {
-				paymentPage = paymentRepository.findAllByUserId(user.getId(), pageable);
-			} else {
-				paymentPage = paymentRepository.findAllByUserIdAndCategory(user.getId(), category, pageable);
-			}
+			payments = (category == null)
+				? paymentRepository.findAllByUserId(user.getId())
+				: paymentRepository.findAllByUserIdAndCategory(user.getId(), category);
 		} else {
 			// 특정 계좌의 Payment 조회
-			if (category == null) {
-				paymentPage = paymentRepository.findAllByAccountId(accountId, pageable);
-			} else {
-				paymentPage = paymentRepository.findAllByAccountIdAndCategory(accountId, category, pageable);
-			}
+			payments = (category == null)
+				? paymentRepository.findAllByAccountId(accountId)
+				: paymentRepository.findAllByAccountIdAndCategory(accountId, category);
 		}
 
-		if (paymentPage.isEmpty()) {
+		if (payments.isEmpty()) {
 			return TotalPaymentResponseDto.builder()
 				.userName(user.getName())
 				.totalBalance(0L)
@@ -79,14 +75,12 @@ public class PaymentService {
 				.paymentList(List.of())
 				.bankName(accountId != null ? accountRepository.findById(accountId).get().getBankName() : null)
 				.accountName(accountId != null ? accountRepository.findById(accountId).get().getAccountName() : null)
-				.accountNumber(
-					accountId != null ? accountRepository.findById(accountId).get().getAccountNumber() : null)
+				.accountNumber(accountId != null ? accountRepository.findById(accountId).get().getAccountNumber() : null)
 				.paymentCount(0)
 				.category(category)
 				.build();
 		}
 
-		List<Payment> payments = paymentPage.getContent();
 		LocalDateTime startOfMonth = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay();
 		LocalDateTime endOfMonth = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()).atTime(23, 59, 59);
 
