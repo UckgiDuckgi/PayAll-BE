@@ -75,6 +75,10 @@ public class StatisticsController {
 		return ResponseEntity.ok(new ApiResult(200, "OK", "카테고리별 소비 분석 상세 조회 성공", details));
 	}
 
+	@Operation(
+		summary = "월간 소비금액 차이 조회",
+		description = "사용자의 월간 소비금액 차이 및 연간 누적할인 금액을 조회합니다."
+	)
 	@GetMapping("/diff")
 	public ResponseEntity<ApiResult> getStatisticsDiff(HttpServletRequest request) {
 		String token = authService.getCookieValue(request, "accessToken");
