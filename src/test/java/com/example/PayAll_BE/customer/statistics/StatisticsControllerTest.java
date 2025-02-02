@@ -1,4 +1,4 @@
-package com.example.PayAll_BE.customer.user;
+package com.example.PayAll_BE.customer.statistics;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -15,8 +15,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.PayAll_BE.customer.user.User;
+import com.example.PayAll_BE.customer.user.UserRepository;
 import com.example.PayAll_BE.global.auth.service.JwtService;
-import com.example.PayAll_BE.customer.user.dto.UserResponseDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -29,22 +31,22 @@ import jakarta.transaction.Transactional;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
-class UserControllerTest {
+class StatisticsControllerTest {
+
+	@Autowired
+	private UserRepository userRepository;
+
+	@Autowired
+	private StatisticsService statisticsService;
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Autowired
 	private JwtService jwtService;
-
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private UserService userService;
-
-	@PersistenceContext
-	private EntityManager entityManager;
 
 	private User testUser;
 	private String token;
@@ -53,7 +55,6 @@ class UserControllerTest {
 	public void setUp() {
 		entityManager.clear();
 
-		// 테스트용 사용자 생성
 		testUser = User.builder()
 			.name("테스트 유저")
 			.authId("testUser")
@@ -62,25 +63,38 @@ class UserControllerTest {
 			.build();
 		userRepository.save(testUser);
 
-		// JWT 토큰 생성
 		this.token = jwtService.generateAccessTestToken(testUser.getAuthId(), testUser.getId());
 	}
 
 	@Test
-	void getUserInfo() throws Exception {
-		mockMvc.perform(get("/api/user")
+	void getStatistics() throws Exception {
+		mockMvc.perform(get("/api/statistics")
+				.cookie(new Cookie("accessToken", token))
+				.param("date", "2024-01")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("OK"))
+			.andExpect(jsonPath("$.message").value("소비분석 조회 성공"));
+	}
+
+	@Test
+	void getStatisticsDetails() throws Exception {
+		mockMvc.perform(get("/api/statistics/SHOPPING") // 카테고리 예시) SHOPPING
+				.cookie(new Cookie("accessToken", token))
+				.param("date", "2024-01")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("OK"))
+			.andExpect(jsonPath("$.message").value("카테고리별 소비 분석 상세 조회 성공"));
+	}
+
+	@Test
+	void getStatisticsDiff() throws Exception {
+		mockMvc.perform(get("/api/statistics/diff")
 				.cookie(new Cookie("accessToken", token))
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value("OK"))
-			.andExpect(jsonPath("$.message").value("사용자 정보 조회 성공"))
-			.andExpect(jsonPath("$.data.name").value(testUser.getName()));
-	}
-
-	@Test
-	void getUserInfo_Unauthorized() throws Exception {
-		mockMvc.perform(get("/api/user")
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isForbidden());
+			.andExpect(jsonPath("$.message").value("금액 차이 조회 성공"));
 	}
 }
