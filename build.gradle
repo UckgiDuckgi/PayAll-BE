@@ -69,7 +69,21 @@ tasks.jacocoTestReport {
 				files(
 						classDirectories.files.collect {
 							fileTree(it) {
-								include("com/example/PayAll_BE/**/controller/**") // 패키지 구조 반영
+								include(
+										"com/example/PayAll_BE/customer/**/AccountController.class",
+										"com/example/PayAll_BE/customer/**/CartController.class",
+										"com/example/PayAll_BE/customer/**/LimitController.class",
+										"com/example/PayAll_BE/customer/**/PaymentController.class",
+										"com/example/PayAll_BE/customer/**/ProductController.class",
+										"com/example/PayAll_BE/customer/**/PurchaseController.class",
+										"com/example/PayAll_BE/customer/**/ReceiptController.class",
+										"com/example/PayAll_BE/customer/**/RecommendationController.class",
+										"com/example/PayAll_BE/customer/**/SearchController.class",
+										"com/example/PayAll_BE/customer/**/StatisticsController.class",
+										"com/example/PayAll_BE/customer/**/UserController.class",
+										"com/example/PayAll_BE/global/auth/controller/AuthController.class",
+										"com/example/PayAll_BE/global/mydata/controller/MydataController.class"
+								)
 							}
 						}
 				)
