@@ -1,6 +1,5 @@
-package com.example.PayAll_BE.customer.recommendation;
+package com.example.PayAll_BE.customer.product;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -15,15 +14,21 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.PayAll_BE.customer.account.Account;
 import com.example.PayAll_BE.customer.account.AccountRepository;
+import com.example.PayAll_BE.customer.benefit.Benefit;
+import com.example.PayAll_BE.customer.benefit.BenefitRepository;
 import com.example.PayAll_BE.customer.enums.Category;
+import com.example.PayAll_BE.customer.enums.PaymentType;
 import com.example.PayAll_BE.customer.enums.ProductType;
-import com.example.PayAll_BE.customer.product.Product;
-import com.example.PayAll_BE.customer.product.ProductRepository;
+import com.example.PayAll_BE.customer.payment.Payment;
+import com.example.PayAll_BE.customer.payment.PaymentRepository;
+import com.example.PayAll_BE.customer.store.Store;
+import com.example.PayAll_BE.customer.store.StoreRepository;
 import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.customer.user.UserRepository;
 import com.example.PayAll_BE.global.auth.service.JwtService;
@@ -39,28 +44,33 @@ import jakarta.transaction.Transactional;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
-class RecommendationControllerTest {
+public class ProductControllerTest {
 
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private AccountRepository accountRepository;
 	@Autowired
 	private ProductRepository productRepository;
+
 	@Autowired
-	private RecommendationRepository recommendationRepository;
+	private StoreRepository storeRepository;
+
+	@Autowired
+	private BenefitRepository benefitRepository;
+
+	@Autowired
+	private PaymentRepository paymentRepository;
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private AccountRepository accountRepository;
 	@PersistenceContext
 	private EntityManager entityManager;
-
 	@Autowired
 	private MockMvc mockMvc;
 	@Autowired
 	private JwtService jwtService;
-
 	private User testUser1;
 	private Account testAccount1;
 	private String token;
+	private  Long productId;
 
 	@BeforeEach
 	public void setUp() {
@@ -83,38 +93,50 @@ class RecommendationControllerTest {
 			.balance(100000L)
 			.build();
 		accountRepository.save(testAccount1);
-
-		Product testProduct = Product.builder()
-			.productName("테스트상품")
-			.productType(ProductType.CARD)
-			.productDescription("테스트 상품 설명")
-			.build();
-
-		productRepository.save(testProduct);
-
-		Recommendation testRecommendation = Recommendation.builder()
-			.user(testUser1)
-			.storeName("테스트스토어")
-			.visitCount(10L)
-			.discountAmount(500L)
-			.category(Category.LIVING)
-			.dateTime(LocalDateTime.now())
-			.product(testProduct)
-			.productType(ProductType.CARD)
-			.build();
-
-		recommendationRepository.save(testRecommendation);
 		this.token = jwtService.generateAccessTestToken(testUser1.getAuthId(), testUser1.getId());
+
+		Store store = Store.builder()
+			.storeName("Test Store")
+			.category(Category.CAFE)
+			.build();
+		storeRepository.save(store);
+
+		Product product = Product.builder()
+			.productName("Test Product")
+			.productDescription("Description of the test product")
+			.benefitDescription("Test product benefit")
+			.productType(ProductType.CARD)
+			.build();
+		productRepository.save(product);
+
+		productId = product.getId();
+
+		Benefit benefit = Benefit.builder()
+			.product(product)
+			.store(store)
+			.benefitValue(10L)
+			.build();
+		benefitRepository.save(benefit);
+
+		Payment payment = Payment.builder()
+			.account(testAccount1)
+			.paymentPlace("Test Store")
+			.price(100000L)
+			.paymentTime(LocalDateTime.now())
+			.paymentType(PaymentType.OFFLINE)
+			.category(Category.CAFE)
+			.build();
+		paymentRepository.save(payment);
 	}
 
 	@Test
 	@Order(1)
-	void recommendation() throws Exception {
-		mockMvc.perform(get("/api/recommendations")
-				.cookie(new Cookie("accessToken", token)))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value("OK"))
-			.andExpect(jsonPath("$.message").value("추천 데이터 응답 성공"));
+	void calculateBenefitWithValidAccessToken() throws Exception {
+		mockMvc.perform(get("/api/product/{productId}", productId)
+				.cookie(new Cookie("accessToken", token))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())  // HTTP 상태 코드가 200 OK인지 확인
+			.andExpect(jsonPath("$.status").value("OK"))  // 응답 JSON의 status 필드가 "OK"인지 확인
+			.andExpect(jsonPath("$.message").value("추천 데이터 응답 성공"));  // 응답 메시지 확인
 	}
-
 }
