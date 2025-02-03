@@ -175,7 +175,7 @@ public class PaymentControllerTest {
 						PaymentListRequestDto.PaymentDetailInfoRequestDto.PurchaseProductRequestDto.builder()
 							.productName("신라면 (5개)")
 							.price(3170L)
-							.amount(1)
+							.quantity(1)
 							.build()
 					))
 					.build()
