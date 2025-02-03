@@ -166,7 +166,17 @@ public class PaymentService {
 				throw new NotFoundException("결제 정보를 찾을 수 없습니다.");
 			}
 
-			List<PaymentDetail> paymentDetails = paymentDetail.getPurchaseProductList().stream()
+			List<PaymentDetail> existingPaymentDetails = paymentDetailRepository.findByPayment(payment);
+
+			List<PaymentDetail> newPaymentDetails = paymentDetail.getPurchaseProductList().stream()
+				.filter(product -> {
+					return existingPaymentDetails.stream()
+						.noneMatch(existingDetail ->
+							existingDetail.getProductName().equals(product.getProductName()) &&
+								existingDetail.getProductPrice().equals(product.getPrice()) &&
+								existingDetail.getQuantity() == product.getAmount()
+						);
+				})
 				.map(product -> {
 					CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProductByName(
 						product.getProductName());
@@ -175,9 +185,12 @@ public class PaymentService {
 				})
 				.collect(Collectors.toList());
 
-			paymentDetailRepository.saveAll(paymentDetails);
+			if (!newPaymentDetails.isEmpty()) {
+				paymentDetailRepository.saveAll(newPaymentDetails);
+			}
 		}
 	}
+
 
 	@Transactional
 	public void updatePaymentPlaces(List<PaymentUpdateRequestDto> paymentList) {
