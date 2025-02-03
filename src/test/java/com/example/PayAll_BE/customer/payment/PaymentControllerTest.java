@@ -3,6 +3,7 @@ package com.example.PayAll_BE.customer.payment;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestTemplate;
 
@@ -59,6 +61,9 @@ public class PaymentControllerTest {
 	private AccountRepository accountRepository;
 
 	@Autowired
+	private ObjectMapper objectMapper;
+
+	@Autowired
 	private PaymentRepository paymentRepository;
 
 	@Autowired
@@ -77,6 +82,9 @@ public class PaymentControllerTest {
 	private User testUser;
 	private Account testAccount;
 	private Payment testPayment;
+
+	@MockitoBean
+	private CrawlingProductApiClient crawlingProductApiClient;
 
 	@BeforeEach
 	public void setUp() {
@@ -103,24 +111,14 @@ public class PaymentControllerTest {
 
 		testPayment = paymentRepository.save(Payment.builder()
 			.account(testAccount)
-			.paymentPlace("스타벅스")
-			.price(15000L)
+			.paymentPlace("Coupang")
+			.price(3170L)
 			.paymentTime(fixedPaymentTime)
-			.paymentType(PaymentType.OFFLINE)
-			.category(Category.CAFE)
+			.paymentType(PaymentType.ONLINE)
+			.category(Category.SHOPPING)
 			.build());
 
 		this.token = jwtService.generateAccessTestToken(testUser.getAuthId(), testUser.getId());
-
-		RestTemplate restTemplateStub = mock(RestTemplate.class);
-
-		when(restTemplateStub.getForEntity(contains("/redis/product/by-name/아메리카노"), eq(CrawlingProductDto.class)))
-			.thenReturn(new ResponseEntity<>(new CrawlingProductDto(1L, "아메리카노", "image_url", 4500L, "shop", "shop_url"), HttpStatus.OK));
-
-		when(restTemplateStub.getForEntity(contains("/redis/product/by-name/카페라떼"), eq(CrawlingProductDto.class)))
-			.thenReturn(new ResponseEntity<>(new CrawlingProductDto(2L, "카페라떼", "image_url", 5000L, "shop", "shop_url"), HttpStatus.OK));
-
-		CrawlingProductApiClient crawlingProductApiClient = new CrawlingProductApiClient(restTemplateStub);
 	}
 	@Test
 	void getPayments_Success() throws Exception {
@@ -131,7 +129,7 @@ public class PaymentControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value("OK"))
 			.andExpect(jsonPath("$.message").value("통합 계좌 거래 내역 조회 성공"))
-			.andExpect(jsonPath("$.data.paymentList[*].paymentDetail[*].paymentPlace", hasItem("스타벅스")));
+			.andExpect(jsonPath("$.data.paymentList[*].paymentDetail[*].paymentPlace", hasItem("Coupang")));
 	}
 
 	@Test
@@ -142,7 +140,7 @@ public class PaymentControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value("OK"))
 			.andExpect(jsonPath("$.message").value("결제 상세 조회 성공"))
-			.andExpect(jsonPath("$.data.paymentPlace").value("스타벅스"));
+			.andExpect(jsonPath("$.data.paymentPlace").value("Coupang"));
 	}
 
 	@Test
@@ -154,4 +152,51 @@ public class PaymentControllerTest {
 			.andExpect(jsonPath("$.status").value("NOT_FOUND"))
 			.andExpect(jsonPath("$.message").value("결제 내역을 찾을 수 없습니다."));
 	}
+
+	@Test
+	void uploadPaymentDetail_Success() throws Exception {
+		CrawlingProductDto productDto = CrawlingProductDto.builder()
+			.pCode(1026291L)
+			.productName("신라면 (5개)")
+			.productImage("https://img.danawa.com/prod_img/500000")
+			.shopName("Coupang")
+			.shopUrl("https://www.coupang.com/vp/products/7958974")
+			.price(3170L)
+			.build();
+
+		long fixedPaymentTimeMillis = testPayment.getPaymentTime().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+		PaymentListRequestDto requestDto = PaymentListRequestDto.builder()
+			.paymentList(List.of(
+				PaymentListRequestDto.PaymentDetailInfoRequestDto.builder()
+					.paymentTime(fixedPaymentTimeMillis)
+					.paymentPlace("Coupang")
+					.purchaseProductList(List.of(
+						PaymentListRequestDto.PaymentDetailInfoRequestDto.PurchaseProductRequestDto.builder()
+							.productName("신라면 (5개)")
+							.price(3170L)
+							.amount(1)
+							.build()
+					))
+					.build()
+			))
+			.build();
+
+		when(crawlingProductApiClient.fetchProductByName("신라면 (5개)")).thenReturn(productDto);
+
+		String requestBody = objectMapper.writeValueAsString(requestDto);
+
+		mockMvc.perform(post("/api/accounts/payments/details")
+				.cookie(new Cookie("accessToken", token))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestBody))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("OK"))
+			.andExpect(jsonPath("$.message").value("결제 내역 상세 업로드 성공"))
+			.andDo(print());
+
+		verify(crawlingProductApiClient).fetchProductByName("신라면 (5개)");
+	}
+
+
 }
