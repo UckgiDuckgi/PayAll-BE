@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class UpdateTransactionRequestDto {
-	private String shopName;
+	private String storeName;
 	private Long price;
 }
