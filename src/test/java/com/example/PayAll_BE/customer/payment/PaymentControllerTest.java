@@ -154,43 +154,4 @@ public class PaymentControllerTest {
 			.andExpect(jsonPath("$.status").value("NOT_FOUND"))
 			.andExpect(jsonPath("$.message").value("결제 내역을 찾을 수 없습니다."));
 	}
-
-	// @Test
-	// void uploadPaymentDetail_Success() throws Exception {
-	// 	ObjectMapper objectMapper = new ObjectMapper();
-	// 	objectMapper.registerModule(new JavaTimeModule());
-	//
-	// 	LocalDateTime fixedPaymentTime = testPayment.getPaymentTime().withNano(0);
-	//
-	// 	PaymentListRequestDto requestDto = PaymentListRequestDto.builder()
-	// 		.paymentList(List.of(
-	// 			PaymentListRequestDto.PaymentDetailInfoRequestDto.builder()
-	// 				.paymentTime(fixedPaymentTime)
-	// 				.paymentPlace("스타벅스")
-	// 				.purchaseProductList(List.of(
-	// 					PaymentListRequestDto.PaymentDetailInfoRequestDto.PurchaseProductRequestDto.builder()
-	// 						.productName("아메리카노")
-	// 						.price(4500L)
-	// 						.amount(1)
-	// 						.build(),
-	// 					PaymentListRequestDto.PaymentDetailInfoRequestDto.PurchaseProductRequestDto.builder()
-	// 						.productName("카페라떼")
-	// 						.price(5000L)
-	// 						.amount(1)
-	// 						.build()
-	// 				))
-	// 				.build()
-	// 		))
-	// 		.build();
-	//
-	// 	String requestBody = objectMapper.writeValueAsString(requestDto);
-	//
-	// 	mockMvc.perform(post("/api/accounts/payments/details")
-	// 			.cookie(new Cookie("accessToken", token))
-	// 			.contentType(MediaType.APPLICATION_JSON)
-	// 			.content(requestBody))
-	// 		.andExpect(status().isOk())
-	// 		.andExpect(jsonPath("$.status").value("OK"))
-	// 		.andExpect(jsonPath("$.message").value("결제 내역 상세 업로드 성공"));
-	// }
 }
