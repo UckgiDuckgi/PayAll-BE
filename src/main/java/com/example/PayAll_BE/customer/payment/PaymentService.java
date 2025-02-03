@@ -1,11 +1,15 @@
 package com.example.PayAll_BE.customer.payment;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -158,9 +162,27 @@ public class PaymentService {
 			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
 
 		for (PaymentListRequestDto.PaymentDetailInfoRequestDto paymentDetail : requestDto.getPaymentList()) {
-			Payment payment = paymentRepository.findByAccount_User_IdAndPaymentTimeAndPaymentPlace(
-				user.getId(), paymentDetail.getPaymentTime(), paymentDetail.getPaymentPlace()
-			);
+			LocalDateTime requestPaymentTime = Instant.ofEpochMilli(paymentDetail.getPaymentTime())
+				.atZone(ZoneId.systemDefault())
+				.toLocalDateTime();
+
+			Payment payment; // ✅ 미리 초기화
+
+			if ("11번가".equals(paymentDetail.getPaymentPlace())) {
+				LocalDate requestDate = requestPaymentTime.toLocalDate();
+				LocalDateTime startOfDay = requestDate.atStartOfDay();
+				LocalDateTime endOfDay = requestDate.atTime(LocalTime.MAX);
+
+				Optional<Payment> optionalPayment = paymentRepository.findFirstByAccount_User_IdAndPaymentTimeBetween(
+					user.getId(), startOfDay, endOfDay
+				);
+
+				payment = optionalPayment.orElse(null);
+			} else {
+				payment = paymentRepository.findByAccount_User_IdAndPaymentTimeAndPaymentPlace(
+					user.getId(), requestPaymentTime, paymentDetail.getPaymentPlace()
+				);
+			}
 
 			if (payment == null) {
 				throw new NotFoundException("결제 정보를 찾을 수 없습니다.");
@@ -169,17 +191,15 @@ public class PaymentService {
 			List<PaymentDetail> existingPaymentDetails = paymentDetailRepository.findByPayment(payment);
 
 			List<PaymentDetail> newPaymentDetails = paymentDetail.getPurchaseProductList().stream()
-				.filter(product -> {
-					return existingPaymentDetails.stream()
-						.noneMatch(existingDetail ->
-							existingDetail.getProductName().equals(product.getProductName()) &&
-								existingDetail.getProductPrice().equals(product.getPrice()) &&
-								existingDetail.getQuantity() == product.getAmount()
-						);
-				})
+				.filter(product -> existingPaymentDetails.stream()
+					.noneMatch(existingDetail ->
+						existingDetail.getProductName().equals(product.getProductName()) &&
+							existingDetail.getProductPrice().equals(product.getPrice()) &&
+							existingDetail.getQuantity() == product.getAmount()
+					)
+				)
 				.map(product -> {
-					CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProductByName(
-						product.getProductName());
+					CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProductByName(product.getProductName());
 					Long productId = crawlingProductDto.getPCode();
 					return PaymentMapper.toPaymentDetailEntity(payment, product, productId);
 				})

@@ -1,5 +1,6 @@
 package com.example.PayAll_BE.customer.payment;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -203,4 +204,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	@Query("SELECT p FROM Payment p WHERE p.account.id = :accountId " +
 		"ORDER BY p.paymentTime DESC")
 	List<Payment> findAllByAccountId(@Param("accountId") Long accountId);
+
+	Optional<Payment> findFirstByAccount_User_IdAndPaymentTimeBetween(Long userId, LocalDateTime start, LocalDateTime end);
 }
