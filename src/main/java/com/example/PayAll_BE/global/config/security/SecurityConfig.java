@@ -50,6 +50,8 @@ public class SecurityConfig {
 					"/swagger-resources/**",
 					"/swagger-ui/index.html"
 				).permitAll()
+				.requestMatchers("/actuator/health", "/actuator/info", "/actuator").permitAll() // 인증이 필요하지 않은 Actuator 엔드포인트, 그러나 상세 정보를 보려면 인증 필요
+				.requestMatchers("/actuator/**").authenticated() // 인증이 필요한 Actuator 엔드포인트
 				.requestMatchers(
 					"/",
 					"/api/auth/sign-in",

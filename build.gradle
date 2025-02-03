@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.1'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
 }
 
 group = 'com.example'
@@ -47,8 +48,45 @@ dependencies {
 
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+
+	// Actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
-tasks.named('test') {
+// jacoco
+tasks.named("test") {
 	useJUnitPlatform()
+	finalizedBy("jacocoTestReport")
+}
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+	}
+	afterEvaluate {
+		classDirectories.setFrom(
+				files(
+						classDirectories.files.collect {
+							fileTree(it) {
+								include(
+										"com/example/PayAll_BE/customer/**/AccountController.class",
+										"com/example/PayAll_BE/customer/**/CartController.class",
+										"com/example/PayAll_BE/customer/**/LimitController.class",
+										"com/example/PayAll_BE/customer/**/PaymentController.class",
+										"com/example/PayAll_BE/customer/**/ProductController.class",
+										"com/example/PayAll_BE/customer/**/PurchaseController.class",
+										"com/example/PayAll_BE/customer/**/ReceiptController.class",
+										"com/example/PayAll_BE/customer/**/RecommendationController.class",
+										"com/example/PayAll_BE/customer/**/SearchController.class",
+										"com/example/PayAll_BE/customer/**/StatisticsController.class",
+										"com/example/PayAll_BE/customer/**/UserController.class",
+										"com/example/PayAll_BE/global/auth/controller/AuthController.class",
+										"com/example/PayAll_BE/global/mydata/controller/MydataController.class"
+								)
+							}
+						}
+				)
+		)
+	}
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.example.PayAll_BE.customer.payment.Payment;
 import com.example.PayAll_BE.customer.paymentDetails.PaymentDetail;
 
 @Repository
@@ -23,4 +24,5 @@ public interface PaymentDetailRepository extends JpaRepository<PaymentDetail, Lo
 		"ORDER BY p.paymentTime DESC")
 	List<PaymentDetail> findRecentPaymentsByUserId(@Param("userId") Long userId, Pageable pageable);
 
+	List<PaymentDetail> findByPayment(Payment payment);
 }

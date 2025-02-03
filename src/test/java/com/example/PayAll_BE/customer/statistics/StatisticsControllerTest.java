@@ -1,14 +1,12 @@
-package com.example.PayAll_BE.customer.limit;
+package com.example.PayAll_BE.customer.statistics;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.time.LocalDateTime;
-
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.example.PayAll_BE.customer.limit.dto.LimitRegisterRequestDto;
 import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.customer.user.UserRepository;
 import com.example.PayAll_BE.global.auth.service.JwtService;
@@ -34,10 +31,13 @@ import jakarta.transaction.Transactional;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
-public class LimitControllerTest {
+class StatisticsControllerTest {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private StatisticsService statisticsService;
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -48,11 +48,8 @@ public class LimitControllerTest {
 	@Autowired
 	private JwtService jwtService;
 
-	@Autowired
-	private LimitRepository limitRepository;
-
-	private String token;
 	private User testUser;
+	private String token;
 
 	@BeforeEach
 	public void setUp() {
@@ -70,52 +67,34 @@ public class LimitControllerTest {
 	}
 
 	@Test
-	void registerLimit_Success() throws Exception {
-		LimitRegisterRequestDto requestDto = LimitRegisterRequestDto.builder()
-			.limitPrice(500000L)
-			.build();
-
-		String requestBody = new ObjectMapper().writeValueAsString(requestDto);
-
-		mockMvc.perform(post("/api/limit")
+	void getStatistics() throws Exception {
+		mockMvc.perform(get("/api/statistics")
 				.cookie(new Cookie("accessToken", token))
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(requestBody))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value("OK"))
-			.andExpect(jsonPath("$.message").value("소비 목표 등록 성공"));
-	}
-
-	@Test
-	void registerLimit_Fail_AlreadyRegistered() throws Exception {
-		limitRepository.save(Limits.builder()
-			.user(testUser)
-			.limitPrice(400000L)
-			.limitDate(LocalDateTime.now())
-			.build());
-
-		LimitRegisterRequestDto requestDto = LimitRegisterRequestDto.builder()
-			.limitPrice(500000L)
-			.build();
-
-		String requestBody = new ObjectMapper().writeValueAsString(requestDto);
-
-		mockMvc.perform(post("/api/limit")
-				.cookie(new Cookie("accessToken", token))
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(requestBody))
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.message").value("이미 이번 달에 소비 목표가 등록되었습니다."));
-	}
-
-	@Test
-	void getLimit_Success() throws Exception {
-		mockMvc.perform(get("/api/limit")
-				.cookie(new Cookie("accessToken", token))
-				.param("yearMonth", "2025-02")
+				.param("date", "2024-01")
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value("OK"))
-			.andExpect(jsonPath("$.message").value("소비 목표 조회 성공"));
+			.andExpect(jsonPath("$.message").value("소비분석 조회 성공"));
+	}
+
+	@Test
+	void getStatisticsDetails() throws Exception {
+		mockMvc.perform(get("/api/statistics/SHOPPING") // 카테고리 예시) SHOPPING
+				.cookie(new Cookie("accessToken", token))
+				.param("date", "2024-01")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("OK"))
+			.andExpect(jsonPath("$.message").value("카테고리별 소비 분석 상세 조회 성공"));
+	}
+
+	@Test
+	void getStatisticsDiff() throws Exception {
+		mockMvc.perform(get("/api/statistics/diff")
+				.cookie(new Cookie("accessToken", token))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("OK"))
+			.andExpect(jsonPath("$.message").value("금액 차이 조회 성공"));
 	}
 }

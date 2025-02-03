@@ -1,5 +1,6 @@
 package com.example.PayAll_BE.customer.payment;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,14 +24,12 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	@Query("SELECT p FROM Payment p WHERE p.account.user.id = :userId " +
 		"AND (:category IS NULL OR p.category = :category) " +
 		"ORDER BY p.paymentTime DESC")
-	Page<Payment> findAllByUserIdAndCategory(@Param("userId") Long userId, @Param("category") Category category,
-		Pageable pageable);
+	List<Payment> findAllByUserIdAndCategory(@Param("userId") Long userId, @Param("category") Category category);
 
 	@Query("SELECT p FROM Payment p WHERE p.account.id = :accountId " +
 		"AND (:category IS NULL OR p.category = :category) " +
 		"ORDER BY p.paymentTime DESC")
-	Page<Payment> findAllByAccountIdAndCategory(@Param("accountId") Long accountId,
-		@Param("category") Category category, Pageable pageable);
+	List<Payment> findAllByAccountIdAndCategory(@Param("accountId") Long accountId, @Param("category") Category category);
 
 	// 최근 결제 상품 중 조회
 	@Query("SELECT p FROM Payment p " +
@@ -200,9 +199,11 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
 	@Query("SELECT p FROM Payment p WHERE p.account.user.id = :userId " +
 		"ORDER BY p.paymentTime DESC")
-	Page<Payment> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
+	List<Payment> findAllByUserId(@Param("userId") Long userId);
 
 	@Query("SELECT p FROM Payment p WHERE p.account.id = :accountId " +
 		"ORDER BY p.paymentTime DESC")
-	Page<Payment> findAllByAccountId(@Param("accountId") Long accountId, Pageable pageable);
+	List<Payment> findAllByAccountId(@Param("accountId") Long accountId);
+
+	Optional<Payment> findFirstByAccount_User_IdAndPaymentTimeBetween(Long userId, LocalDateTime start, LocalDateTime end);
 }
