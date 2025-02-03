@@ -20,7 +20,7 @@ public class PaymentListRequestDto{
 	@NoArgsConstructor
 	@Builder
 	public static class PaymentDetailInfoRequestDto {
-		private LocalDateTime paymentTime;
+		private Long paymentTime;
 		private String paymentPlace;
 		private List<PurchaseProductRequestDto> purchaseProductList;
 

@@ -1,6 +1,5 @@
 package com.example.PayAll_BE.customer.payment;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -43,14 +42,13 @@ public class PaymentController {
 	public ResponseEntity<ApiResult> getPayments(
 		HttpServletRequest request,
 		@RequestParam(required = false) Category category,
-		@RequestParam(required = false) Long accountId,
-		Pageable pageable
+		@RequestParam(required = false) Long accountId
 	) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
 		if(accessToken == null){
 			throw new UnauthorizedException("액세스 토큰이 없습니다");
 		}
-		TotalPaymentResponseDto response = paymentService.getPayments(accessToken, accountId, category, pageable);
+		TotalPaymentResponseDto response = paymentService.getPayments(accessToken, accountId, category);
 		return ResponseEntity.ok(new ApiResult(200, "OK", "통합 계좌 거래 내역 조회 성공", response));
 	}
 
@@ -87,26 +85,26 @@ public class PaymentController {
 		return ResponseEntity.ok(new ApiResult(200,"OK", "결제 내역 상세 업로드 성공", null));
 	}
 
-	@Operation(
-		summary = "결제처 정보 업데이트",
-		description = "사용자가 등록한 결제 내역의 결제처 정보를 업데이트합니다."
-	)
-	@PatchMapping
-	public ResponseEntity<ApiResult> uploadPayments(
-		HttpServletRequest request,
-		@RequestBody PaymentUpdateRequest paymentRequest
-	) {
-		String accessToken = authService.getCookieValue(request, "accessToken");
-		if(accessToken == null){
-			throw new UnauthorizedException("액세스 토큰이 없습니다");
-		}
-		try {
-			paymentService.updatePaymentPlaces(paymentRequest.getPaymentList());
-			return ResponseEntity.ok(new ApiResult(200, "OK", "결제처 업데이트가 완료되었습니다."));
-		} catch (NotFoundException e) {
-			return ResponseEntity.status(404).body(new ApiResult(404, "NOT_FOUND", e.getMessage()));
-		} catch (Exception e) {
-			return ResponseEntity.status(500).body(new ApiResult(500, "ERROR", "결제처 업데이트 중 오류가 발생했습니다."));
-		}
-	}
+	// @Operation(
+	// 	summary = "결제처 정보 업데이트",
+	// 	description = "사용자가 등록한 결제 내역의 결제처 정보를 업데이트합니다."
+	// )
+	// @PatchMapping
+	// public ResponseEntity<ApiResult> uploadPayments(
+	// 	HttpServletRequest request,
+	// 	@RequestBody PaymentUpdateRequest paymentRequest
+	// ) {
+	// 	String accessToken = authService.getCookieValue(request, "accessToken");
+	// 	if(accessToken == null){
+	// 		throw new UnauthorizedException("액세스 토큰이 없습니다");
+	// 	}
+	// 	try {
+	// 		paymentService.updatePaymentPlaces(paymentRequest.getPaymentList());
+	// 		return ResponseEntity.ok(new ApiResult(200, "OK", "결제처 업데이트가 완료되었습니다."));
+	// 	} catch (NotFoundException e) {
+	// 		return ResponseEntity.status(404).body(new ApiResult(404, "NOT_FOUND", e.getMessage()));
+	// 	} catch (Exception e) {
+	// 		return ResponseEntity.status(500).body(new ApiResult(500, "ERROR", "결제처 업데이트 중 오류가 발생했습니다."));
+	// 	}
+	// }
 }

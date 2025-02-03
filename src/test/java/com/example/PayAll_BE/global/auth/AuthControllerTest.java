@@ -18,6 +18,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.PayAll_BE.customer.account.AccountRepository;
+import com.example.PayAll_BE.customer.cart.CartRepository;
+import com.example.PayAll_BE.customer.limit.LimitRepository;
+import com.example.PayAll_BE.customer.payment.PaymentRepository;
+import com.example.PayAll_BE.customer.paymentDetails.PaymentDetailRepository;
+import com.example.PayAll_BE.customer.recommendation.RecommendationRepository;
+import com.example.PayAll_BE.customer.statistics.StatisticsRepository;
 import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.customer.user.UserRepository;
 import com.example.PayAll_BE.global.auth.dto.AuthRequestDto;
@@ -30,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.Cookie;
+import jakarta.transaction.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,6 +52,18 @@ class AuthControllerTest {
 	private ObjectMapper objectMapper;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private StatisticsRepository statisticsRepository;
+	@Autowired
+	private PaymentRepository paymentRepository;
+	@Autowired
+	PaymentDetailRepository paymentDetailRepository;
+	@Autowired
+	CartRepository cartRepository;
+	@Autowired
+	RecommendationRepository recommendationRepository;
+	@Autowired
+	LimitRepository limitRepository;
 	@PersistenceContext
 	private EntityManager entityManager;
 	private User testUser1;
@@ -52,6 +72,8 @@ class AuthControllerTest {
 	private String token2;
 	@Autowired
 	private JwtService jwtService;
+	@Autowired
+	private AccountRepository accountRepository;
 
 	@BeforeEach
 	public void setUp() {
@@ -255,6 +277,13 @@ class AuthControllerTest {
 
 	@AfterAll
 	public void AfterAll() {
+		paymentDetailRepository.deleteAll();
+		paymentRepository.deleteAll();
+		recommendationRepository.deleteAll();
+		cartRepository.deleteAll();
+		statisticsRepository.deleteAll();
+		limitRepository.deleteAll();
+		accountRepository.deleteAll();
 		userRepository.deleteAll();
 	}
 }
