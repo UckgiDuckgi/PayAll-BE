@@ -50,6 +50,7 @@ public class PaymentService {
 	private final UserRepository userRepository;
 	private final AccountRepository accountRepository;
 
+
 	public TotalPaymentResponseDto getPayments(String token, Long accountId, Category category) {
 		String authId = jwtService.extractAuthId(token);
 		User user = userRepository.findByAuthId(authId)
@@ -166,7 +167,7 @@ public class PaymentService {
 				.atZone(ZoneId.systemDefault())
 				.toLocalDateTime();
 
-			Payment payment; // ✅ 미리 초기화
+			Payment payment;
 
 			if ("11번가".equals(paymentDetail.getPaymentPlace())) {
 				LocalDate requestDate = requestPaymentTime.toLocalDate();
@@ -195,7 +196,7 @@ public class PaymentService {
 					.noneMatch(existingDetail ->
 						existingDetail.getProductName().equals(product.getProductName()) &&
 							existingDetail.getProductPrice().equals(product.getPrice()) &&
-							existingDetail.getQuantity() == product.getAmount()
+							existingDetail.getQuantity() == product.getQuantity()
 					)
 				)
 				.map(product -> {

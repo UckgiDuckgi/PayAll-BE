@@ -69,7 +69,7 @@ public class PaymentMapper {
 			.productName(requestDto.getProductName())
 			.productId(productId)
 			.productPrice(requestDto.getPrice())
-			.quantity(requestDto.getAmount())
+			.quantity(requestDto.getQuantity())
 			.build();
 	}
 }

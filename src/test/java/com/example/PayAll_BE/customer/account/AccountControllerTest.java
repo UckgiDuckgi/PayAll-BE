@@ -88,6 +88,13 @@ class AccountControllerTest {
 			.andExpect(jsonPath("$.data.accountList[0].accountId").value(testAccount1.getId()));
 	}
 
+	// @Test
+	// void getAccounts_Unauthorized() throws Exception {
+	// 	mockMvc.perform(get("/api/accounts")
+	// 			.contentType(MediaType.APPLICATION_JSON))
+	// 		.andExpect(status().isForbidden());
+	// }
+
 
 	@AfterAll
 	public void AfterAll() {
