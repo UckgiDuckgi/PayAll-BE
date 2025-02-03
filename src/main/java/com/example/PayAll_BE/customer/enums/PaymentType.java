@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum PaymentType {
 	ONLINE("온라인"),
-	OFFLINE("오프라인");
+	OFFLINE("오프라인"),
+	PAYALL("PayAll");
 	private final String paymentType;
 }
