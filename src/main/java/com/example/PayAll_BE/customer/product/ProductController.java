@@ -41,9 +41,6 @@ public class ProductController {
 	@GetMapping("{productId}")
 	public ResponseEntity<?> calculateBenefit(HttpServletRequest request,@PathVariable("productId") Long productId){
 		String accessToken = authService.getCookieValue(request, "accessToken");
-		if(accessToken == null){
-			throw new UnauthorizedException("액세스 토큰이 없습니다");
-		}
 		String authId = jwtService.extractAuthId(accessToken);
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));

@@ -1,6 +1,7 @@
 package com.example.PayAll_BE.customer.recommendation;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,12 +39,8 @@ public class RecommendationController {
 	@GetMapping
 	public ResponseEntity<?> recommendation(HttpServletRequest request) {
 		String accessToken = authService.getCookieValue(request, "accessToken");
-		if(accessToken == null){
-			throw new UnauthorizedException("액세스 토큰이 없습니다");
-		}
 		String authId = jwtService.extractAuthId(accessToken);
-		User user = userRepository.findByAuthId(authId)
-			.orElseThrow(() -> new UnauthorizedException("유효하지 않은 사용자입니다."));
+		Optional<User> user = userRepository.findByAuthId(authId);
 
 		List<RecommendationResponseDto> recommendations = recommendationService.getRecommendation(user);
 

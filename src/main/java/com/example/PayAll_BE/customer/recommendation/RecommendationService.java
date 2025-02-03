@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -98,7 +99,7 @@ public class RecommendationService {
 		logger.info("데이터 적재 성공");
 	}
 
-	public List<RecommendationResponseDto> getRecommendation(User user) {
+	public List<RecommendationResponseDto> getRecommendation(Optional<User> user) {
 		List<Recommendation> recommendations = recommendationRepository.findByUser(user);
 
 		List<RecommendationResponseDto> recommendationDtos = recommendations.stream()
