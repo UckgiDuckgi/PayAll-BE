@@ -13,6 +13,7 @@ public class PurchaseRequestDto {
 	private Long totalDiscountPrice;
 
 	@Data
+	@Builder
 	public static class PurchaseProductDto {
 		private Long cartId;
 		private Long productId;

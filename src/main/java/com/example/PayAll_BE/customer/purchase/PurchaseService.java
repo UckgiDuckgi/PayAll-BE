@@ -11,6 +11,7 @@ import com.example.PayAll_BE.customer.cart.CartRepository;
 import com.example.PayAll_BE.customer.cart.CartService;
 import com.example.PayAll_BE.customer.enums.Category;
 import com.example.PayAll_BE.customer.payment.PaymentService;
+import com.example.PayAll_BE.customer.search.SearchService;
 import com.example.PayAll_BE.customer.statistics.Statistics;
 import com.example.PayAll_BE.customer.statistics.StatisticsRepository;
 import com.example.PayAll_BE.customer.user.User;
@@ -34,6 +35,7 @@ public class PurchaseService {
 	private final StatisticsRepository statisticsRepository;
 	private final UserRepository userRepository;
 	private final CartRepository cartRepository;
+	private final SearchService searchService;
 
 	@Value("${server1.base-url}")
 	private String baseUrl;
@@ -50,6 +52,10 @@ public class PurchaseService {
 			if (!cart.getUser().getId().equals(userId)) {
 				throw new ForbiddenException("유효하지 않은 장바구니 접근입니다.");
 			}
+
+			// 구매한 상품 pcode redis에 저장
+			searchService.productInfoToRedis(product.getProductId());
+
 		});
 
 		// 1. 마이데이터에 구매 내역 반영

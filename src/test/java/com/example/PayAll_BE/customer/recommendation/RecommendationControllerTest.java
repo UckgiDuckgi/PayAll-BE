@@ -1,7 +1,7 @@
 package com.example.PayAll_BE.customer.recommendation;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDateTime;
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,6 +28,7 @@ import com.example.PayAll_BE.customer.product.ProductRepository;
 import com.example.PayAll_BE.customer.user.User;
 import com.example.PayAll_BE.customer.user.UserRepository;
 import com.example.PayAll_BE.global.auth.service.JwtService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -45,16 +47,23 @@ class RecommendationControllerTest {
 	private UserRepository userRepository;
 
 	@Autowired
+	private MockMvc mockMvc;
+
+	@Autowired
 	private AccountRepository accountRepository;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	@Autowired
 	private ProductRepository productRepository;
+
 	@Autowired
 	private RecommendationRepository recommendationRepository;
+	
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	@Autowired
-	private MockMvc mockMvc;
 	@Autowired
 	private JwtService jwtService;
 
@@ -71,6 +80,7 @@ class RecommendationControllerTest {
 			.authId("gyuhoTiger")
 			.email("testuser1@example.com")
 			.password("12345678")
+			.permission(true)
 			.build();
 		userRepository.save(testUser1);
 
@@ -115,6 +125,20 @@ class RecommendationControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value("OK"))
 			.andExpect(jsonPath("$.message").value("추천 데이터 응답 성공"));
+	}
+
+	@Test
+	void getRecommendProductsTest() throws Exception {
+
+		mockMvc.perform(get("/api/recommendations/products")
+				.cookie(new Cookie("accessToken", token))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("OK"))
+			.andExpect(jsonPath("$.message").value("최근 지출 품목 최저가 추천 성공"))
+			.andExpect(jsonPath("$.data").isArray())
+			.andDo(print());
+
 	}
 
 }
