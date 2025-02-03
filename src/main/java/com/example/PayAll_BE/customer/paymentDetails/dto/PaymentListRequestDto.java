@@ -31,7 +31,7 @@ public class PaymentListRequestDto{
 		public static class PurchaseProductRequestDto {
 			private String productName;
 			private Long price;
-			private int amount;
+			private int quantity;
 		}
 	}
 }
