@@ -186,7 +186,8 @@ public class PaymentService {
 			}
 
 			if (payment == null) {
-				throw new NotFoundException("결제 정보를 찾을 수 없습니다.");
+				System.out.println("해당 결제 내역을 찾을 수 없습니다.");
+				continue;
 			}
 
 			List<PaymentDetail> existingPaymentDetails = paymentDetailRepository.findByPayment(payment);

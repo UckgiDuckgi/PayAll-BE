@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -78,9 +79,12 @@ class UserControllerTest {
 	}
 
 	@Test
+	@WithMockUser
 	void getUserInfo_Unauthorized() throws Exception {
 		mockMvc.perform(get("/api/user")
 				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isForbidden());
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
+			.andExpect(jsonPath("$.message").value("액세스 토큰이 없습니다"));
 	}
 }
