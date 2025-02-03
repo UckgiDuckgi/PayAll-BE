@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -52,16 +53,19 @@ public class MydataService {
 	private String baseUrl;
 
 	public String syncPurchaseData(String token, PurchaseRequestDto purchaseRequestDto) {
-		UpdateTransactionRequestDto transactionRequestDto = UpdateTransactionRequestDto.builder()
-			.price(purchaseRequestDto.getTotalPrice())
-			.build();
+		List<UpdateTransactionRequestDto> transactionRequestDtos = purchaseRequestDto.getPurchaseList().stream()
+			.map(product -> UpdateTransactionRequestDto.builder()
+				.shopName(product.getShopName())
+				.price(product.getProductPrice() * product.getQuantity())
+				.build())
+			.toList();
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", token);
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		HttpEntity<UpdateTransactionRequestDto> entity = new HttpEntity<>(
-			transactionRequestDto, headers);
+		HttpEntity<List<UpdateTransactionRequestDto>> entity = new HttpEntity<>(
+			transactionRequestDtos, headers);
 
 		String url = baseUrl + "/api/accounts/purchase";
 
@@ -216,7 +220,7 @@ public class MydataService {
 		return switch (transType) {
 			case "301" -> Category.INCOME;
 			case "401" -> switch (prodCode) {
-				case "ONLINE" -> Category.SHOPPING;
+				case "ONLINE", "PAYALL" -> Category.SHOPPING;
 				case "OFFLINE" -> categoryService.getCategory(prodName);
 				default -> Category.OTHERS;
 			};
