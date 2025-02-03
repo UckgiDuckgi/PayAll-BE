@@ -19,7 +19,7 @@ public class PurchaseRequestDto {
 		private Long productId;
 		private String productName;
 		private Long productPrice;
-		private String shopName;
+		private String storeName;
 		private int quantity;
 	}
 }

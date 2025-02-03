@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -52,10 +53,15 @@ public class MydataService {
 	@Value("${server1.base-url}")
 	private String baseUrl;
 
+	private static final Map<String, String> STORE = Map.of(
+		"Coupang", "쿠팡",
+		"11st", "11번가"
+	);
+
 	public String syncPurchaseData(String token, PurchaseRequestDto purchaseRequestDto) {
 		List<UpdateTransactionRequestDto> transactionRequestDtos = purchaseRequestDto.getPurchaseList().stream()
 			.map(product -> UpdateTransactionRequestDto.builder()
-				.shopName(product.getShopName())
+				.storeName(STORE.getOrDefault(product.getStoreName(), product.getStoreName()))
 				.price(product.getProductPrice() * product.getQuantity())
 				.build())
 			.toList();
