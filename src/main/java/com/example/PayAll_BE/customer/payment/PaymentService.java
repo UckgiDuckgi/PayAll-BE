@@ -9,6 +9,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -215,6 +216,7 @@ public class PaymentService {
 					Long productId = crawlingProductDto.getPCode();
 					return PaymentMapper.toPaymentDetailEntity(payment, product, productId);
 				})
+				.filter(Objects::nonNull)  // null 제거
 				.collect(Collectors.toList());
 
 			if (!newPaymentDetails.isEmpty()) {
