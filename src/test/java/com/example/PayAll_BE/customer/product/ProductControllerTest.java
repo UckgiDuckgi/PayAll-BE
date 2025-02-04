@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -178,6 +179,28 @@ public class ProductControllerTest {
 			.andExpect(jsonPath("$.message").value("전체 구독 조회 성공"))
 			.andExpect(jsonPath("$.data[*].productName", hasItem("테스트구독")));
 		}
+
+	@Test
+	@WithMockUser
+	@Order(4)
+	void getCards_Unauthorized() throws Exception {
+		mockMvc.perform(get("/api/product/cards")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
+			.andExpect(jsonPath("$.message").value("액세스 토큰이 없습니다"));
+	}
+
+	@Test
+	@WithMockUser
+	@Order(5)
+	void getSubscribes_Unauthorized() throws Exception {
+		mockMvc.perform(get("/api/product/subscribes")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
+			.andExpect(jsonPath("$.message").value("액세스 토큰이 없습니다"));
+	}
 
 	@Test
 	@Order(1)

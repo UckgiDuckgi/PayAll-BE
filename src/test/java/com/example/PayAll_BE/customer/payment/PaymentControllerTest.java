@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -130,6 +131,16 @@ public class PaymentControllerTest {
 			.andExpect(jsonPath("$.status").value("OK"))
 			.andExpect(jsonPath("$.message").value("통합 계좌 거래 내역 조회 성공"))
 			.andExpect(jsonPath("$.data.paymentList[*].paymentDetail[*].paymentPlace", hasItem("Coupang")));
+	}
+
+	@Test
+	@WithMockUser
+	void getPayments_Unauthorized() throws Exception {
+		mockMvc.perform(get("/api/accounts/payments")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
+			.andExpect(jsonPath("$.message").value("액세스 토큰이 없습니다"));
 	}
 
 	@Test
