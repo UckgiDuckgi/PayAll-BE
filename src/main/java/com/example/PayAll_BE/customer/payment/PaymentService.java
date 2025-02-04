@@ -162,6 +162,7 @@ public class PaymentService {
 		return PaymentMapper.toPaymentDto(payment, paymentDetailDtos);
 	}
 
+	@Transactional
 	public void uploadPaymentDetails(String token, PaymentListRequestDto requestDto) {
 		String authId = jwtService.extractAuthId(token);
 		User user = userRepository.findByAuthId(authId)
@@ -178,21 +179,16 @@ public class PaymentService {
 			System.out.println("requestPaymentTime = " + requestPaymentTime);
 			Payment payment;
 
-			if ("11번가".equals(paymentDetail.getPaymentPlace())) {
-				LocalDate requestDate = requestPaymentTime.toLocalDate();
-				LocalDateTime startOfDay = requestDate.atStartOfDay();
-				LocalDateTime endOfDay = requestDate.atTime(LocalTime.MAX);
+			LocalDate requestDate = requestPaymentTime.toLocalDate();
+			LocalDateTime startOfDay = requestDate.atStartOfDay();
+			LocalDateTime endOfDay = requestDate.atTime(LocalTime.MAX);
 
-				Optional<Payment> optionalPayment = paymentRepository.findFirstByAccount_User_IdAndPaymentTimeBetween(
-					user.getId(), startOfDay, endOfDay
-				);
+			Optional<Payment> optionalPayment = paymentRepository.findFirstByAccount_User_IdAndPaymentTimeBetweenAndPaymentPlace(
+				user.getId(), startOfDay, endOfDay, paymentDetail.getPaymentPlace()
+			);
 
-				payment = optionalPayment.orElse(null);
-			} else {
-				payment = paymentRepository.findByAccount_User_IdAndPaymentTimeAndPaymentPlace(
-					user.getId(), requestPaymentTime, paymentDetail.getPaymentPlace()
-				);
-			}
+			payment = optionalPayment.orElse(null);
+
 
 			if (payment == null) {
 				System.out.println("해당 결제 내역을 찾을 수 없습니다.");

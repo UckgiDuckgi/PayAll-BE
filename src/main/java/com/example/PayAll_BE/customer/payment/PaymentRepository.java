@@ -207,4 +207,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
 	Optional<Payment> findFirstByAccount_User_IdAndPaymentTimeBetween(Long userId, LocalDateTime start,
 		LocalDateTime end);
+
+	Optional<Payment> findFirstByAccount_User_IdAndPaymentTimeBetweenAndPaymentPlace(
+		Long userId, LocalDateTime start, LocalDateTime end, String paymentPlace);
 }
