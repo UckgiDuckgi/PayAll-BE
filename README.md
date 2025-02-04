@@ -8,7 +8,7 @@
 
 ![Image](https://github.com/user-attachments/assets/b3b7da3e-f451-4135-ac76-995abb5f5d2b)
 
-## 주요 기능
+## 🔥 주요 기능
 
 1. 최저가 상품 __추천__ 및 __검색__
 2. __통합 장바구니__ 결제
@@ -66,7 +66,7 @@
 
 ---
 
-## 배경 및 기능 설명
+## 📖 배경 및 기능 설명
 
 ![Image](https://github.com/user-attachments/assets/4bde038f-d5e8-409a-a86d-7af0632a70c8)
 
@@ -102,6 +102,6 @@
 
 ![Image](https://github.com/user-attachments/assets/3f15f508-ddb2-44c6-8336-1ae1fd528dc1)
 
-## 서비스 구성도
+## ⚙️ 서비스 구성도
 
 ![Image](https://github.com/user-attachments/assets/4905a024-a942-46f5-8c7b-0aec10128373)
