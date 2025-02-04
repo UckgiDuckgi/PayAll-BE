@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -31,6 +32,7 @@ import com.example.PayAll_BE.global.auth.dto.AuthRequestDto;
 import com.example.PayAll_BE.global.auth.dto.PlatformRequestDto;
 import com.example.PayAll_BE.global.auth.dto.RegisterRequestDto;
 import com.example.PayAll_BE.global.auth.service.JwtService;
+import com.example.PayAll_BE.global.auth.service.RedisService;
 import com.example.PayAll_BE.global.config.security.CryptoUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -64,6 +66,8 @@ class AuthControllerTest {
 	RecommendationRepository recommendationRepository;
 	@Autowired
 	LimitRepository limitRepository;
+	@Autowired
+	RedisService redisService;
 	@PersistenceContext
 	private EntityManager entityManager;
 	private User testUser1;
@@ -274,6 +278,34 @@ class AuthControllerTest {
 			.andDo(print());
 
 	}
+
+	@Test
+	@Order(6)
+	@WithMockUser
+	void refreshTokenSuccess() throws Exception {
+		User testUser1 = User.builder()
+			.name("규호랑이")
+			.authId("gyuhoLion")
+			.email("testuser@example.com")
+			.password(CryptoUtil.encrypt("password123"))
+			.permission(true)
+			.build();
+		userRepository.save(testUser1);
+
+		String refreshToken = jwtService.generateRefreshTestToken(testUser1.getAuthId(), testUser1.getId());
+
+		redisService.saveRefreshToken(testUser1.getAuthId(), refreshToken, 3600L);
+
+		mockMvc.perform(post("/api/auth/refresh")
+				.cookie(new Cookie("refreshToken", refreshToken)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("OK"))
+			.andExpect(jsonPath("$.message").value("토큰 갱신 성공"))
+			.andExpect(cookie().exists("refreshToken"))
+			.andExpect(cookie().exists("accessToken"))
+			.andDo(print());
+	}
+
 
 	@AfterAll
 	public void AfterAll() {
