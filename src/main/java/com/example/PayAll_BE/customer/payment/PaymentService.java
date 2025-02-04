@@ -167,11 +167,15 @@ public class PaymentService {
 		User user = userRepository.findByAuthId(authId)
 			.orElseThrow(() -> new NotFoundException("해당 사용자를 찾을 수 없습니다."));
 
+		System.out.println("user = " + user);
+		System.out.println("requestDto = " + requestDto);
+
 		for (PaymentListRequestDto.PaymentDetailInfoRequestDto paymentDetail : requestDto.getPaymentList()) {
 			LocalDateTime requestPaymentTime = Instant.ofEpochMilli(paymentDetail.getPaymentTime())
 				.atZone(ZoneId.systemDefault())
 				.toLocalDateTime();
 
+			System.out.println("requestPaymentTime = " + requestPaymentTime);
 			Payment payment;
 
 			if ("11번가".equals(paymentDetail.getPaymentPlace())) {
@@ -216,6 +220,8 @@ public class PaymentService {
 			if (!newPaymentDetails.isEmpty()) {
 				paymentDetailRepository.saveAll(newPaymentDetails);
 			}
+
+			System.out.println("성공????");
 		}
 	}
 
