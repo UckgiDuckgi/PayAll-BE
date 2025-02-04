@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -86,6 +87,16 @@ class AccountControllerTest {
 			.andExpect(jsonPath("$.status").value("OK"))  // 응답 JSON의 status 필드가 "OK"인지 확인
 			.andExpect(jsonPath("$.message").value("사용자 계좌 목록 조회 성공"))  // 응답 메시지 확인
 			.andExpect(jsonPath("$.data.accountList[0].accountId").value(testAccount1.getId()));
+	}
+
+	@Test
+	@WithMockUser
+	void getAccounts_Unauthorized() throws Exception {
+		mockMvc.perform(get("/api/accounts")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
+			.andExpect(jsonPath("$.message").value("액세스 토큰이 없습니다"));
 	}
 
 

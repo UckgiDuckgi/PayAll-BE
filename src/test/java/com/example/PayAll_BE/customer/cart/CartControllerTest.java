@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -166,7 +168,16 @@ public class CartControllerTest {
 			.andExpect(jsonPath("$.data[0].productName").value("삼다수 2L (24개)"))
 			.andExpect(jsonPath("$.data[0].productPrice").value(21890L))
 			.andDo(print());
+	}
 
+	@Test
+	@WithMockUser
+	void getCarts_Unauthorized() throws Exception {
+		mockMvc.perform(get("/api/cart")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.status").value("UNAUTHORIZED"))
+			.andExpect(jsonPath("$.message").value("액세스 토큰이 없습니다"));
 	}
 
 	@Test

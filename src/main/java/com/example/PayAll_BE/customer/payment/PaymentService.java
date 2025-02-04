@@ -42,13 +42,17 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
-
 	private final PaymentRepository paymentRepository;
 	private final PaymentDetailRepository paymentDetailRepository;
 	private final CrawlingProductApiClient crawlingProductApiClient;
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
 	private final AccountRepository accountRepository;
+
+	private static final Map<String, String> STORE = Map.of(
+		"Coupang", "쿠팡",
+		"11st", "11번가"
+	);
 
 	public TotalPaymentResponseDto getPayments(String token, Long accountId, Category category) {
 		String authId = jwtService.extractAuthId(token);
@@ -77,7 +81,8 @@ public class PaymentService {
 				.paymentList(List.of())
 				.bankName(accountId != null ? accountRepository.findById(accountId).get().getBankName() : null)
 				.accountName(accountId != null ? accountRepository.findById(accountId).get().getAccountName() : null)
-				.accountNumber(accountId != null ? accountRepository.findById(accountId).get().getAccountNumber() : null)
+				.accountNumber(
+					accountId != null ? accountRepository.findById(accountId).get().getAccountNumber() : null)
 				.paymentCount(0)
 				.category(category)
 				.build();
@@ -115,7 +120,8 @@ public class PaymentService {
 						.paymentTime(payment.getPaymentTime())
 						.bankName(payment.getAccount().getBankName())
 						.accountName(payment.getAccount().getAccountName())
-						.shootNeed(payment.getPaymentDetails().isEmpty())
+						.shootNeed(
+							payment.getPaymentType().name().equals("OFFLINE") && (payment.getPaymentDetails().isEmpty()))
 						.build())
 					.collect(Collectors.toList()))
 				.build())
@@ -166,7 +172,7 @@ public class PaymentService {
 				.atZone(ZoneId.systemDefault())
 				.toLocalDateTime();
 
-			Payment payment; // ✅ 미리 초기화
+			Payment payment;
 
 			if ("11번가".equals(paymentDetail.getPaymentPlace())) {
 				LocalDate requestDate = requestPaymentTime.toLocalDate();
@@ -185,7 +191,8 @@ public class PaymentService {
 			}
 
 			if (payment == null) {
-				throw new NotFoundException("결제 정보를 찾을 수 없습니다.");
+				System.out.println("해당 결제 내역을 찾을 수 없습니다.");
+				continue;
 			}
 
 			List<PaymentDetail> existingPaymentDetails = paymentDetailRepository.findByPayment(payment);
@@ -195,11 +202,12 @@ public class PaymentService {
 					.noneMatch(existingDetail ->
 						existingDetail.getProductName().equals(product.getProductName()) &&
 							existingDetail.getProductPrice().equals(product.getPrice()) &&
-							existingDetail.getQuantity() == product.getAmount()
+							existingDetail.getQuantity() == product.getQuantity()
 					)
 				)
 				.map(product -> {
-					CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProductByName(product.getProductName());
+					CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProductByName(
+						product.getProductName());
 					Long productId = crawlingProductDto.getPCode();
 					return PaymentMapper.toPaymentDetailEntity(payment, product, productId);
 				})
@@ -210,7 +218,6 @@ public class PaymentService {
 			}
 		}
 	}
-
 
 	@Transactional
 	public void updatePaymentPlaces(List<PaymentUpdateRequestDto> paymentList) {
@@ -238,10 +245,11 @@ public class PaymentService {
 		List<PurchaseRequestDto.PurchaseProductDto> products) {
 		Account account = accountRepository.findByUserIdAndAccountNumber(userId, accountNum)
 			.orElseThrow(() -> new NotFoundException("account not found"));
-		Payment payment = paymentRepository.findFirstByAccountIdOrderByPaymentTimeDesc(account.getId())
-			.orElseThrow(() -> new NotFoundException("payment not found"));
 
 		products.forEach(product -> {
+			Payment payment = paymentRepository.findFirstByAccountIdAndPaymentPlaceOrderByPaymentTimeDesc(
+					account.getId(), STORE.getOrDefault(product.getStoreName(), product.getStoreName()))
+				.orElseThrow(() -> new NotFoundException("payment not found"));
 			PaymentDetail detail = PaymentDetail.builder()
 				.payment(payment)
 				.productId(product.getProductId())

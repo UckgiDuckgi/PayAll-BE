@@ -1,11 +1,9 @@
 package com.example.PayAll_BE.customer.payment;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,9 +12,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.PayAll_BE.customer.enums.Category;
 import com.example.PayAll_BE.customer.statistics.dto.StoreStatisticsDto;
 import com.example.PayAll_BE.customer.user.User;
-import com.example.PayAll_BE.customer.enums.Category;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
@@ -29,7 +27,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	@Query("SELECT p FROM Payment p WHERE p.account.id = :accountId " +
 		"AND (:category IS NULL OR p.category = :category) " +
 		"ORDER BY p.paymentTime DESC")
-	List<Payment> findAllByAccountIdAndCategory(@Param("accountId") Long accountId, @Param("category") Category category);
+	List<Payment> findAllByAccountIdAndCategory(@Param("accountId") Long accountId,
+		@Param("category") Category category);
 
 	// 최근 결제 상품 중 조회
 	@Query("SELECT p FROM Payment p " +
@@ -53,7 +52,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
 	List<Payment> findByAccountId(Long accountId);
 
-	Optional<Payment> findFirstByAccountIdOrderByPaymentTimeDesc(Long accountId);
+	Optional<Payment> findFirstByAccountIdAndPaymentPlaceOrderByPaymentTimeDesc(Long accountId, String paymentPlace);
 
 	// @Query(value = "SELECT " +
 	// 	"p.category as category, " +
@@ -195,7 +194,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		@Param("twoMonthsAgoEnd") LocalDateTime twoMonthsAgoEnd);
 
 	// 특정 계정 ID와 날짜 범위로 Payment 조회
-	List<Payment> findByAccount_IdInAndPaymentTimeBetween(List<Long> accountIds, LocalDateTime startDate, LocalDateTime endDate);
+	List<Payment> findByAccount_IdInAndPaymentTimeBetween(List<Long> accountIds, LocalDateTime startDate,
+		LocalDateTime endDate);
 
 	@Query("SELECT p FROM Payment p WHERE p.account.user.id = :userId " +
 		"ORDER BY p.paymentTime DESC")
@@ -205,5 +205,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 		"ORDER BY p.paymentTime DESC")
 	List<Payment> findAllByAccountId(@Param("accountId") Long accountId);
 
-	Optional<Payment> findFirstByAccount_User_IdAndPaymentTimeBetween(Long userId, LocalDateTime start, LocalDateTime end);
+	Optional<Payment> findFirstByAccount_User_IdAndPaymentTimeBetween(Long userId, LocalDateTime start,
+		LocalDateTime end);
 }
