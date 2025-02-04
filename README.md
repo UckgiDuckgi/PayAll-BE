@@ -1,6 +1,6 @@
-## 팀 UckgiDuckgi-BE
+# 팀 UckgiDuckgi-BE
 디지털 하나로 4기 - 비대면 금융 서비스 개발 프로젝트
-# 페이올(PayAll) - 최저가 상품 추천, 통합 장바구니 결제, 소비 분석을 통한 효과적이고 편리한 결제서비스
+## 페이올(PayAll) - 최저가 상품 추천, 통합 장바구니 결제, 소비 분석을 통한 효과적이고 편리한 결제서비스
 ![Image](https://github.com/user-attachments/assets/b3b7da3e-f451-4135-ac76-995abb5f5d2b)
 
 ![Image](https://github.com/user-attachments/assets/4bde038f-d5e8-409a-a86d-7af0632a70c8)
@@ -39,5 +39,5 @@
 
 ![Image](https://github.com/user-attachments/assets/9c2ef935-a79d-47b1-a55b-9e55574596e9)
 
-![Image](https://github.com/user-attachments/assets/7ca4de48-1444-432c-8fa2-0b8f7c35bbf9)
-
+# 서비스 구성도
+![Image](https://github.com/user-attachments/assets/4905a024-a942-46f5-8c7b-0aec10128373)
