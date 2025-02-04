@@ -189,7 +189,6 @@ public class PaymentService {
 
 			payment = optionalPayment.orElse(null);
 
-
 			if (payment == null) {
 				System.out.println("해당 결제 내역을 찾을 수 없습니다.");
 				continue;
@@ -208,6 +207,11 @@ public class PaymentService {
 				.map(product -> {
 					CrawlingProductDto crawlingProductDto = crawlingProductApiClient.fetchProductByName(
 						product.getProductName());
+
+					if (crawlingProductDto == null) {
+						return null;
+					}
+
 					Long productId = crawlingProductDto.getPCode();
 					return PaymentMapper.toPaymentDetailEntity(payment, product, productId);
 				})

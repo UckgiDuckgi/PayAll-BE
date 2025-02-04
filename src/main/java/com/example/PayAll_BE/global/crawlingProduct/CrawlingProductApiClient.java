@@ -43,10 +43,6 @@ public class CrawlingProductApiClient {
 		String url = baseUrl + "redis/product/by-name/" + productName;
 		ResponseEntity<CrawlingProductDto> response = restTemplate.getForEntity(url, CrawlingProductDto.class);
 
-		if (response.getBody() == null) {
-			throw new NotFoundException("해당 상품 이름을 가진 상품이 없습니다.");
-		}
-
 		return response.getBody();
 	}
 

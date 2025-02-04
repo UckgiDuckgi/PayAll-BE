@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.PayAll_BE.customer.payment.Payment;
-import com.example.PayAll_BE.customer.paymentDetails.PaymentDetail;
 
 @Repository
 public interface PaymentDetailRepository extends JpaRepository<PaymentDetail, Long> {
@@ -19,7 +18,7 @@ public interface PaymentDetailRepository extends JpaRepository<PaymentDetail, Lo
 	@Query("SELECT pd FROM PaymentDetail pd " +
 		"JOIN pd.payment p " +
 		"JOIN p.account a " +
-		"WHERE p.category = 'SHOPPING' AND p.paymentType = 'ONLINE' " +
+		"WHERE p.category = 'SHOPPING' AND NOT p.paymentType = 'OFFLINE' " +
 		"AND a.user.id = :userId " +
 		"ORDER BY p.paymentTime DESC")
 	List<PaymentDetail> findRecentPaymentsByUserId(@Param("userId") Long userId, Pageable pageable);
