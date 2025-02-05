@@ -44,7 +44,7 @@ public class MydataController {
 		description = "Mydata를 통해 사용자의 계좌 목록을 불러옵니다."
 	)
 	@GetMapping("/load")
-	public ResponseEntity<AccountListResponseDto> loadMydataAccountList(@RequestHeader("Authorization") String token) {
+	public ResponseEntity<AccountListResponseDto> loadMydataAccountList(String token) {
 		String url = server1BaseUrl + "api/accounts";
 
 		HttpHeaders headers = new HttpHeaders();
