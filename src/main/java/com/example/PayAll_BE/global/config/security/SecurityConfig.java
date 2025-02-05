@@ -49,8 +49,10 @@ public class SecurityConfig {
 					"/swagger-ui.html",
 					"/swagger-resources/**",
 					"/swagger-ui/index.html"
-				).permitAll()
-				.requestMatchers("/actuator/**", "/actuator").permitAll() // 인증이 필요하지 않은 Actuator 엔드포인트, 그러나 상세 정보를 보려면 인증 필요
+				)
+				.permitAll()
+				.requestMatchers("/actuator/**", "/actuator")
+				.permitAll() // 인증이 필요하지 않은 Actuator 엔드포인트, 그러나 상세 정보를 보려면 인증 필요
 				// .requestMatchers("/actuator/**").authenticated() // 인증이 필요한 Actuator 엔드포인트
 				.requestMatchers(
 					"/",
@@ -59,8 +61,10 @@ public class SecurityConfig {
 					"/api/cert/**",
 					"/ws/**",           // WebSocket 엔드포인트 추가
 					"/ws"              // WebSocket 기본 경로 추가
-				).permitAll()
-				.anyRequest().authenticated()
+				)
+				.permitAll()
+				.anyRequest()
+				.authenticated()
 			)
 			.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
@@ -72,10 +76,10 @@ public class SecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 		// "*" 대신 구체적인 출처 지정
 		// BE IP : 43.201.141.241
-		// Mock IP : 43.200.26.30
+		// Mock IP : 43.200.79.16
 		configuration.setAllowedOrigins(List.of(
-			"http://43.200.26.30:8080","http://52.78.98.130","http://52.78.98.130:3000",
-			"https://payall.topician.com"," https://payall.topician.com:3000",
+			"http://43.200.79.16:8080", "http://52.78.98.130", "http://52.78.98.130:3000",
+			"https://payall.topician.com", " https://payall.topician.com:3000",
 			"http://127.0.0.1", "http://localhost:3000"));
 		configuration.addAllowedMethod("*");
 		configuration.addAllowedHeader("*");
